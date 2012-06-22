@@ -64,7 +64,11 @@
 
 %opening
 \title{R Package: TBSSurvival}
-\author{A. Polpo\footnote{{\it polpo@ufscar.br}, Department of Statistics -- UFSCar and FSU} ~and D. Sinha\footnote{{\it sinhad@stat.fsu.edu}, Department of Statistics -- FSU}}
+
+%\author{A. Polpo\footnote{{\it polpo@ufscar.br}, Department of
+%   Statistics -- UFSCar and FSU}, C. P. de Campos\footnote{{\it
+%      cassio@idsia.ch}, Dalle Molle Institute}, D. Sinha\footnote{{\it sinhad@stat.fsu.edu}, Department of Statistics -- FSU}}
+\author{Adriano Polpo \and Casio de Campos \and Debajyoti Sinha \and Stuart Lipsitz \and Jianchang Lin}
 
 \begin{document}
 

@@ -34,16 +34,13 @@
 ##  \item{b}{parameter that difine the end of uniforme part.}
 ## \value{ `dunif.exp' gives the density. }
 .dunif.exp <- function(x,a=0,b,p) {
-  xb <- 1*(x <= b)
-  out <- xb*p*dunif(x,a,b) + (1-xb)*dexp(x[i],-log(1-p)/b)
-
-#  out <- rep(0,length(x))
-#  for (i in 1:length(x)) {
-#    if (x[i] <= b)
-#      out[i] <- (x[i] <= b) p*dunif(x[i],a,b)
-#    else
-#      out[i] <- dexp(x[i],-log(1-p)/b)
-#  }
+  out <- rep(0,length(x))
+  for (i in 1:length(x)) {
+    if (x[i] <= b)
+      out[i] <- p*dunif(x[i],a,b)
+    else
+      out[i] <- dexp(x[i],-log(1-p)/b)
+  }
   return(out)
 }
 
