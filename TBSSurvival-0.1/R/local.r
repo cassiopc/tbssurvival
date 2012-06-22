@@ -162,20 +162,22 @@
       ## try to run the solver, using parallel computing if available
       if(require("multicore",quietly=TRUE)) {
         if(verbose) cat('RSOLNP-multicore: ')
-        ans = try(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
+        ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
           LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-          distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="multicore",core=4), rseed = runif(n=1,min=1,max=1000000), n = nparam))
+          distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="multicore",core=4),
+          rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
       } else {
         if(require("snowfall",quietly=TRUE)) {
           if(verbose) cat('RSOLNP-snowfall: ')
-          ans = try(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
+          ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
             LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="snowfall",core=4), rseed = runif(n=1,min=1,max=1000000), n = nparam))
+            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="snowfall",core=4),
+            rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
         } else {
           if(verbose) cat('RSOLNP: ')
-          ans = try(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
+          ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
             LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, rseed = runif(n=1,min=1,max=1000000), n = nparam))
+            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
         }
       }
       if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
