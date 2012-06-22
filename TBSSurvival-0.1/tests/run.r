@@ -13,7 +13,7 @@ for (i.d in 1:length(dist)) {
     for (i.c in 1:length(cens)) {
       for (i.p in 1:length(par[,1])) {
         metodo <- paste("sim.weib(gen=list(n=",n[i.n],",cens=",cens[i.c],",scale=",par[i.p,1],",shape=",par[i.p,2],
-                      "),est=list(dist=\"",dist[i.d],"\"),n.copies=1,method=\"Rsolnp\")",sep="")
+                      "),est=list(dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\")",sep="")
         text <- paste(text,"cat(",nn,",'",metodo," '); ",metodo,"\n",sep="")
         nn <- nn +1
       }
@@ -46,7 +46,7 @@ for (i.d in 1:length(dist)) {
     for (i.c in 1:length(cens)) {
       for (i.p in 1:length(par[,1])) {
         metodo <- paste("sim.tbs(gen=list(n=",n[i.n],",cens=",cens[i.c],",lambda=",par[i.p,1],",xi=",par[i.p,2],
-                        ",beta=",par[i.p,3],",dist=\"",dist[i.d],"\"),n.copies=1,method=\"Rsolnp\")",sep="")
+                        ",beta=",par[i.p,3],",dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\")",sep="")
         text <- paste(text,"cat(",nn,",'",metodo," '); ",metodo,"\n",sep="")
         nn=nn+1
       }
