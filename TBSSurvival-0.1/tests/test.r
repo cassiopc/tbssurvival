@@ -15,11 +15,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## This code is used for testing purposes. The TBSSurvival library does not
+## depend on it for any of its functionalities
 w <- options("warn")
 options("warn" = -1)
 if(require("TBSSurvival",quietly=TRUE)==FALSE) {
   require("survival")
-  require("R.utils")
   require("mcmc")
   require("normalp")
   require("eha")
@@ -32,39 +33,13 @@ if(require("TBSSurvival",quietly=TRUE)==FALSE) {
 }
 options("warn" = w[[1]])
 
-####################
-## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
-library(ipred)
-data(GBSG2)
-s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,dist="norm",method="Rsolnp",verbose=TRUE)
-s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,dist="norm",method="BFGS",verbose=TRUE)
-
-
-####################
-## test with the colon data set from the survival package
-library(survival)
-data(colon)
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="Rsolnp",verbose=TRUE)
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="BFGS",verbose=TRUE)
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="Nelder-Mead",verbose=TRUE)
-
-## with covariate
-colon$age60=as.numeric(colon$age>60) #from medical paper
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="Rsolnp",verbose=TRUE)
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="BFGS",verbose=TRUE)
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="Nelder-Mead",verbose=TRUE)
-
-
-
-
-
 ######################
 # simulation: function used to generate data from Weibull distribution and
 #             then compare the Weibull model with TBSmodel.
 #             Also, this function is used to analyse if TBSmodel MLE is 
 #             working well.
-sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),
-                     est=list(dist="norm"),n.copies=1,initial.seed=1234,method="Rsonlp") {
+sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"),
+                     n.copies=1,initial.seed=1234,method="Rsolnp",verbose=TRUE) {
   # gen: is a list with the parameters to generate from a Weibull distribution
   #          n: sample size
   #       cens: censor rate
@@ -81,7 +56,7 @@ sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),
   for (i in 1:n.copies) {
     # Generating data
     initial.time <- .gettime()
-    seed <- initial.seed+5*i-1
+    seed <- initial.seed+i-1
     set.seed(seed)
     d <- NULL
     d$time  <- rweibull(gen$n,shape=1/gen$shape,scale=exp(gen$scale))
@@ -99,7 +74,7 @@ sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),
                                               scale=exp(weib.fit$coefficients))
 
     # Tbs fit
-    tbs.fit  <- tbs.survreg.mle(Surv(d$time,d$delta) ~ 1,dist=est$dist,method=method)
+    tbs.fit  <- tbs.survreg.mle(Surv(d$time,d$delta) ~ 1,dist=est$dist,method=method,verbose=verbose)
 
     # Result matrix
     if (tbs.fit$convergence) {
@@ -139,22 +114,17 @@ sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),
                           "orig.median","data.median","tbs.median","tbs.sqe",
                           "weib.median","weib.sqe","run.time")
 
-  return(result.2)
+  out <- data.frame(result.1,result.2)
+  name <- paste("Sim_Weib-",est$dist,"_",gen$n,"_",gen$cens,"_",gen$shape,"_",gen$scale,".csv",sep="")
+  write.csv(out,file=name)
+#  return(out)
 }
 
-
-#aux <- sim.weib(gen=list(n=100,cens=0,scale=2,shape=3),est=list(dist="logistic"),
-#                n.copies=100,initial.seed=1235,method="BFGS")
-
-#apply(aux[,c(19,21)],2,mean); apply(aux[,c(19,21)],2,sd); apply(aux[,c(20,22)],2,mean)
-
-
-
 ######################
-# test: function used to generate data from TBS model and 
-#       then check if the method is estimatin right!  
+# sim.tbs: function used to generate data from TBS model and 
+#          then check the estimation procedure.  
 sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
-                    n.copies=1,initial.seed=1234,method="Rsonlp",verbose=FALSE) {
+                    n.copies=1,initial.seed=1234,method="Rsolnp",verbose=TRUE) {
   # gen: is a list with the parameters to generate from a TBS model
   #          n: sample size
   #       cens: censor rate
@@ -200,7 +170,6 @@ sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
                         median(d$time),rep(NA,3),run.time)
     }
     rm(d)
-    print(i)
   }
   
   colnames(result.1) <- "dist"
@@ -208,40 +177,16 @@ sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
                           "tbs.lambda","tbs.xi","tbs.beta","lambda.sqe","xi.sqe","beta.sqe",
                           "tbs.Max.AE","tbs.Mean.AE","orig.median","data.median",
                           "tbs.median","tbs.sqe","run.time")
+  out <- data.frame(result.1,result.2)
 
-  return(result.2)
+  name <- paste("Sim_TBS-",gen$dist,"_",gen$n,"_",gen$cens,"_",gen$lambda,
+                "_",gen$xi,"_",gen$beta,".csv",sep="")
+  write.csv(out,file=name)
+#  return(out)
 }
 
 
 
-aux <- sim.tbs(gen=list(n=100,cens=0,lambda=3,xi=2,beta=13,dist="logistic"),
-                n.copies=100,initial.seed=1235,method="Rsonlp",verbose=TRUE)
-
-print(apply(aux[,7:12],2,mean))
-print(apply(aux[,7:12],2,sd))
-
-if (FALSE) {
-# test das funcoes tbs
-dist   <- "logistic"
-lambda <- 3
-xi     <- 3
-beta   <- 2
-
-time <- rtbs(10000,lambda,xi,beta,NULL,dist)
-time <- sort(time)
-print(summary(time))
-emp <- ecdf(time)
-plot(emp)
-y <- ptbs(time,lambda,xi,beta,NULL,dist)
-lines(time,y,type="l",col=2)
-q <- qtbs(y,lambda,xi,beta,NULL,dist)
-lines(q,y,type="l",col=3,lty=2)
-
-print(summary(abs(emp(time)-y)))
-print(summary(abs(time-q)))
-
-hist(time,freq=FALSE)
-lines(time,dtbs(time,lambda,xi,beta,NULL,dist),col=2,type="l")
 
 
-}
+

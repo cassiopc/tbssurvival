@@ -146,7 +146,7 @@
   }
 
   if(method=="Rsolnp") {
-    if(library("Rsolnp",quietly=TRUE,logical.return=TRUE)==FALSE) {
+    if(require("Rsolnp",quietly=TRUE)==FALSE) {
       out$method <- "Rsolnp: not installed"
       out$convergence <- FALSE
       return(out)
@@ -178,7 +178,7 @@
             distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, rseed = runif(n=1,min=1,max=1000000), n = nparam))
         }
       }
-      if (class(ans) != "try-error") {
+      if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
         ## get parameters
         out$par <- ans$pars
@@ -198,7 +198,7 @@
         out$AICc <- 2*nparam-2*out$log.lik + 2*nparam*(nparam+1)/(length(time)-nparam-1)
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
         out$method <- method
-        out$convergence <- ans$convergence==0
+        out$convergence <- TRUE
         out$run.time <- .gettime() - initial.time
         return(out)
       } else {
