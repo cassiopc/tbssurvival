@@ -17,28 +17,15 @@
 
 ## This code is used for testing purposes. The TBSSurvival library does not
 ## depend on it for any of its functionalities
-w <- options("warn")
-options("warn" = -1)
-if(require("TBSSurvival",quietly=TRUE)==FALSE) {
-  library("survival")
-  library("mcmc")
-  library("normalp")
-  library("eha")
-  library("e1071")
-  library("coda")
-  source("../R/tbs.survreg.bayes.r")
-  source("../R/tbs.r")
-  source("../R/tbs.survreg.mle.r")
-  source("../R/local.r")
-}
-options("warn" = w[[1]])
+source('loadlibs.r')
+loadlibs()
 
 ######################
 # simulation: function used to generate data from Weibull distribution and
 #             then compare the Weibull model with TBSmodel.
 #             Also, this function is used to analyse if TBSmodel MLE is 
 #             working well.
-sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"),
+sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"),prefix="",
                      n.copies=1,initial.seed=1234,method="Rsolnp",verbose=TRUE) {
   # gen: is a list with the parameters to generate from a Weibull distribution
   #          n: sample size
@@ -115,7 +102,7 @@ sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"
                           "weib.median","weib.sqe","run.time")
 
   out <- data.frame(result.1,result.2)
-  name <- paste("Sim_Weib-",est$dist,"_",gen$n,"_",gen$cens,"_",gen$shape,"_",gen$scale,".csv",sep="")
+  name <- paste(prefix,"Sim_Weib-",est$dist,"_",gen$n,"_",gen$cens,"_",gen$shape,"_",gen$scale,".csv",sep="")
   write.csv(out,file=name)
 #  return(out)
 }
@@ -123,7 +110,7 @@ sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"
 ######################
 # sim.tbs: function used to generate data from TBS model and 
 #          then check the estimation procedure.  
-sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
+sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),prefix="",
                     n.copies=1,initial.seed=1234,method="Rsolnp",verbose=TRUE) {
   # gen: is a list with the parameters to generate from a TBS model
   #          n: sample size
@@ -179,7 +166,7 @@ sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
                           "tbs.median","tbs.sqe","run.time")
   out <- data.frame(result.1,result.2)
 
-  name <- paste("Sim_TBS-",gen$dist,"_",gen$n,"_",gen$cens,"_",gen$lambda,
+  name <- paste(prefix,"Sim_TBS-",gen$dist,"_",gen$n,"_",gen$cens,"_",gen$lambda,
                 "_",gen$xi,"_",gen$beta,".csv",sep="")
   write.csv(out,file=name)
 #  return(out)

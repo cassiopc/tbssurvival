@@ -1,0 +1,11 @@
+loc="/project/s221/cassio/Rlibs"
+options(repos="http://stat.ethz.ch/CRAN/")
+install.packages("mcmc",lib=loc)
+install.packages("Rsolnp",lib=loc)
+install.packages("normalp",lib=loc)
+install.packages("eha",lib=loc)
+install.packages("e1071",lib=loc)
+install.packages("coda",lib=loc)
+install.packages("truncnorm",lib=loc)
+install.packages("R.utils",lib=loc)
+q()

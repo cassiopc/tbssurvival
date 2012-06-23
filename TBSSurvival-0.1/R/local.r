@@ -108,7 +108,7 @@
 ## ncore is the number of cores to use with Rsolnp in case multicore/snowfall packages are installed
 ## method has to be one of the available in the function optim or "Rsolnp"
 ## dist has to be one of those available in the .choice function (currently "norm", "t", "cauchy", "doubexp", "logistic")
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=4) {
+.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=1) {
   initial.time <- .gettime()
   require("survival")
 

@@ -7,13 +7,14 @@ par[2,] <- c(2,1)
 par[3,] <- c(1,2)
 par[4,] <- c(2,2)
 nn = 1
-text <- "initial.time <- proc.time()[3]/60\ncat('starting at ',initial.time)\n"
+text <- ""
+##text <- "initial.time <- proc.time()[3]/60\ncat('starting at ',initial.time,'\\n')\n"
 for (i.d in 1:length(dist)) {
   for (i.n in 1:length(n)) {
     for (i.c in 1:length(cens)) {
       for (i.p in 1:length(par[,1])) {
         metodo <- paste("sim.weib(gen=list(n=",n[i.n],",cens=",cens[i.c],",scale=",par[i.p,1],",shape=",par[i.p,2],
-                      "),est=list(dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\")",sep="")
+                      "),est=list(dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\",prefix=\"/project/s221/cassio/tbs/oe/\")",sep="")
         text <- paste(text,"cat(",nn,",'",metodo," '); ",metodo,"\n",sep="")
         nn <- nn +1
       }
@@ -46,7 +47,7 @@ for (i.d in 1:length(dist)) {
     for (i.c in 1:length(cens)) {
       for (i.p in 1:length(par[,1])) {
         metodo <- paste("sim.tbs(gen=list(n=",n[i.n],",cens=",cens[i.c],",lambda=",par[i.p,1],",xi=",par[i.p,2],
-                        ",beta=",par[i.p,3],",dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\")",sep="")
+                        ",beta=",par[i.p,3],",dist=\"",dist[i.d],"\"),n.copies=1000,method=\"Rsolnp\",prefix=\"/project/s221/cassio/tbs/oe/\")",sep="")
         text <- paste(text,"cat(",nn,",'",metodo," '); ",metodo,"\n",sep="")
         nn=nn+1
       }
@@ -54,6 +55,6 @@ for (i.d in 1:length(dist)) {
   }
 }
 
-text <- paste(text,"run.time <- proc.time()[3]/60-initial.time\ncat('end at ',run.time)\n",sep="")
+##text <- paste(text,"run.time <- proc.time()[3]/60-initial.time\ncat('end at ',run.time,'\\n')\n",sep="")
 
 cat(text,file="run-all.r",append=FALSE,sep="")
