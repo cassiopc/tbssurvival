@@ -37,6 +37,8 @@ loadlibs <- function(libdir=NULL) {
     source("../R/tbs.r")
     source("../R/tbs.survreg.mle.r")
     source("../R/local.r")
+  } else {
+    library("TBSSurvival")
   }
   options("warn" = w[[1]])
 }
