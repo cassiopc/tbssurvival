@@ -103,7 +103,7 @@
   return(out)
 }
 
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=4,verbose=FALSE) {
+.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=4,verbose=FALSE,max.time=1,ncore=4) {
   initial.time <- .gettime()
   require("survival")
 
@@ -151,6 +151,7 @@
       out$convergence <- FALSE
       return(out)
     } else {
+      library(Rsolnp)
       ## Rsolnp needs some bounds for the unknowns. We arbitrarily define them to be between -100 and 100.
       LB = rep(-20,nparam)
       UB = rep(20,nparam)
@@ -160,24 +161,26 @@
       ## upper bound for xi is not very clear, but 1000 should be enough
       UB[2] = 1000
       ## try to run the solver, using parallel computing if available
-      if(require("multicore",quietly=TRUE)) {
+      if(ncore > 1 && require("multicore",quietly=TRUE)) {
+        library(multicore)
         if(verbose) cat('RSOLNP-multicore: ')
         ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-          LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-          distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="multicore",core=4),
-          rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
+          LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+          distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, parallel=TRUE,parallel.control=list(pkg="multicore",core=ncore),
+          rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
       } else {
-        if(require("snowfall",quietly=TRUE)) {
+        if(ncore > 1 && require("snowfall",quietly=TRUE)) {
+          library(snowfall)
           if(verbose) cat('RSOLNP-snowfall: ')
           ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, parallel=TRUE,parallel.control=list(pkg="snowfall",core=4),
-            rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
+            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, parallel=TRUE,parallel.control=list(pkg="snowfall",core=ncore),
+            rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
         } else {
           if(verbose) cat('RSOLNP: ')
           ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4),
-            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 200, rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=30,onTimeout="error"))
+            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+            distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
         }
       }
       if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
@@ -215,7 +218,8 @@
   ii=1
   if(verbose) cat(method,': ',sep='')
   inimethod=method
-  repeat {
+  inilooptime=.gettime()
+  while(.gettime() < inilooptime + max.time) {
     valik=.lik.tbs(kick,time=time,delta=delta,x=x,dist=dist)
     if(!is.na(valik) && valik>-Inf) {
       aux <- try(optim(kick, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
@@ -247,7 +251,6 @@
         ii = ii + 1
       }
     } else {
-      if(verbose) cat('.')
       ii = ii + 1
     }
     ## betas can be anything, we sample uniformly from -10 to 10
@@ -259,11 +262,11 @@
     ## if enough starts have been tried, stop. Also stop if too many unsuccessfull tries have been made :(
     if(ii>100 && is.na(est)) {
       inimethod="SANN"
+      if(verbose) cat('$')
     }
     if(i>nstart || ii >500) {
       break
     }
-    next
   }
 
   out$method <- method
