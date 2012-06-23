@@ -103,7 +103,12 @@
   return(out)
 }
 
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=4,verbose=FALSE,max.time=1,ncore=4) {
+## nstart is the number of (feasible!) initial points to use. The method will try many guesses to find feasible points
+## max.time (in minutes) to run the optimization
+## ncore is the number of cores to use with Rsolnp in case multicore/snowfall packages are installed
+## method has to be one of the available in the function optim or "Rsolnp"
+## dist has to be one of those available in the .choice function (currently "norm", "t", "cauchy", "doubexp", "logistic")
+.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=4) {
   initial.time <- .gettime()
   require("survival")
 

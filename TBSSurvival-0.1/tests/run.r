@@ -7,7 +7,7 @@ par[2,] <- c(2,1)
 par[3,] <- c(1,2)
 par[4,] <- c(2,2)
 nn = 1
-text <- "initial.time <- proc.time()[3]/60\n"
+text <- "initial.time <- proc.time()[3]/60\ncat('starting at ',initial.time)\n"
 for (i.d in 1:length(dist)) {
   for (i.n in 1:length(n)) {
     for (i.c in 1:length(cens)) {
@@ -54,11 +54,6 @@ for (i.d in 1:length(dist)) {
   }
 }
 
-text <- paste(text,"run.time <- proc.time()[3]/60-initial.time\n",sep="")
+text <- paste(text,"run.time <- proc.time()[3]/60-initial.time\ncat('end at ',run.time)\n",sep="")
 
 cat(text,file="run-all.r",append=FALSE,sep="")
-
-
-
-
-
