@@ -172,7 +172,7 @@
         library(multicore)
         if(verbose) cat('RSOLNP-multicore: ')
         ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-          LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+          LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
           distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, parallel=TRUE,parallel.control=list(pkg="multicore",core=ncore),
           rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
       } else {
@@ -180,13 +180,13 @@
           library(snowfall)
           if(verbose) cat('RSOLNP-snowfall: ')
           ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+            LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
             distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, parallel=TRUE,parallel.control=list(pkg="snowfall",core=ncore),
             rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
         } else {
           if(verbose) cat('RSOLNP: ')
           ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL, fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
-            LB = LB, UB = UB, control = list(outer.iter = 100, trace = 0, tol=1e-4, delta=1e-6),
+            LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
             distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, rseed = runif(n=1,min=1,max=1000000), n = nparam),timeout=max.time*60,onTimeout="error"))
         }
       }
