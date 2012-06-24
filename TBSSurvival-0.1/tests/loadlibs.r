@@ -22,7 +22,7 @@ loadlibs <- function(libdir=NULL) {
   w <- options("warn")
   options("warn" = -1)
   if(require("TBSSurvival",quietly=TRUE)==FALSE) {
-    library("survival")
+    library("survival",lib.loc=libdir)
     library("R.methodsS3",lib.loc=libdir)
     library("R.oo",lib.loc=libdir)
     library("R.utils",lib.loc=libdir)

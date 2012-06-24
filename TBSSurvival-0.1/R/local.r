@@ -108,9 +108,11 @@
 ## ncore is the number of cores to use with Rsolnp in case multicore/snowfall packages are installed
 ## method has to be one of the available in the function optim or "Rsolnp"
 ## dist has to be one of those available in the .choice function (currently "norm", "t", "cauchy", "doubexp", "logistic")
+## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
+##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
+##         one has to install the CRAN version of R.utils
 .tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=1) {
   initial.time <- .gettime()
-  require("survival")
 
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
