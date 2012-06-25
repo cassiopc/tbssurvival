@@ -15,6 +15,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## TBS estimation using a Bayesian approach. The lack of a closed form
+## solution forces us to tackle the problem by MCMC.
 tbs.survreg.bayes <- function(formula,dist="norm",
                               kick.beta,kick.lambda,kick.xi,
                               burn=1000,jump=2,size=1000,scale=1,
@@ -23,9 +25,11 @@ tbs.survreg.bayes <- function(formula,dist="norm",
   require("coda")
   initial.time <- .gettime()
 
+  ## check the class of formula
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
 
+  ## record the call arguments
   Call  <- match.call()
   ## read the information from within the formula to populate the required variables
   mf <- model.frame(formula=formula)
@@ -45,6 +49,7 @@ tbs.survreg.bayes <- function(formula,dist="norm",
   out <- NULL
   out$call <- Call
 
+  ## perform a series of verifications for the given arguments of the function
   if (length(kick.lambda) != 1)
     stop("kick.lambda is not a scalar")
   if (kick.lambda <= 0)
@@ -102,6 +107,7 @@ tbs.survreg.bayes <- function(formula,dist="norm",
       stop("prior.sd must be a positive number")
   }
 
+  ## call the Metropolis algorithm for MCMC
   chain <- metrop(obj=.logpost,initial=kick,time=time,delta=delta,dist=dist,x=x,
                   mean=prior.mean,sd=prior.sd,
                   nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale)

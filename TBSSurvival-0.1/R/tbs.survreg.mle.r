@@ -15,13 +15,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Maximum likelihood estimation for TBS
 tbs.survreg.mle <- function(formula,dist="norm",method=c("Rsolnp","BFGS","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=1,ncore=1) {
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.
   initial.time <- .gettime()
   for(i in 1:length(method)) {
+    ## call the estimation function
     out <- .tbs.survreg(formula,dist=dist,method=method[i],verbose=verbose,ncore=ncore,max.time=max.time,nstart=nstart)
+    ## if converged, we are happy
     if(out$convergence)
       break
   }
@@ -29,9 +32,10 @@ tbs.survreg.mle <- function(formula,dist="norm",method=c("Rsolnp","BFGS","Nelder
     if(verbose) cat('No method achieved convergence\n')
     out$method <- NULL
   }
-  ## run.time is returned in minutes
+  ## record the call arguments and the formula
   out$call <- match.call()
   out$formula <- formula
+  ## run.time is returned in minutes
   out$run.time <- .gettime() - initial.time
   return(out)
 }
