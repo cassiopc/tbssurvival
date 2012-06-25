@@ -25,17 +25,20 @@ set.seed(1)
 ## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
 library(ipred)
 data(GBSG2)
+cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
 s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,dist="norm",verbose=TRUE) ## try all methods
 
 ####################
 ## test with the colon data set from the survival package
 library(survival)
 data(colon)
+cat('Running MLE on colon (from survival package) without covariates\n')
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="Rsolnp",verbose=TRUE)
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="BFGS",verbose=TRUE)
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method="Nelder-Mead",verbose=TRUE)
 
 ## with covariate
+cat('Running MLE on colon (from survival package) with covariate=age60\n')
 colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="Rsolnp",verbose=TRUE)
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="BFGS",verbose=TRUE)
