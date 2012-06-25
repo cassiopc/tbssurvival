@@ -229,12 +229,12 @@
   while(.gettime() < inilooptime + max.time) {
     valik=.lik.tbs(kick,time=time,delta=delta,x=x,dist=dist)
     if(!is.na(valik) && valik>-Inf) {
-      aux <- try(optim(kick, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
-                       method=inimethod, control=list(fnscale=-1), hessian=TRUE),silent=TRUE)
+      aux <- try(evalWithTimeout(optim(kick, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
+                       method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
         repeat {
-          aux1 <- try(optim(aux$par, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
-                           method=method, control=list(fnscale=-1), hessian=TRUE),silent=TRUE)
+          aux1 <- try(evalWithTimeout(optim(aux$par, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
+                           method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
           if (class(aux1) != "try-error") {
             if (aux1$value < aux$value + 0.0001) {
               ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...
