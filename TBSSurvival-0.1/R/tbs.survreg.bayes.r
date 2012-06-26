@@ -18,7 +18,7 @@
 ## TBS estimation using a Bayesian approach. The lack of a closed form
 ## solution forces us to tackle the problem by MCMC.
 tbs.survreg.bayes <- function(formula,dist="norm",
-                              kick.beta,kick.lambda,kick.xi,
+                              guess.beta,guess.lambda,guess.xi,
                               burn=1000,jump=2,size=1000,scale=1,
                               prior.mean=NULL,prior.sd=NULL) {
   require("mcmc")
@@ -50,17 +50,17 @@ tbs.survreg.bayes <- function(formula,dist="norm",
   out$call <- Call
 
   ## perform a series of verifications for the given arguments of the function
-  if (length(kick.lambda) != 1)
-    stop("kick.lambda is not a scalar")
-  if (kick.lambda <= 0)
-    stop("kick.lambda must be a positive number")
-  if (length(kick.xi) != 1)
-    stop("kick.xi is not a scalar")
-  if (kick.xi <= 0)
-    stop("kick.xi must be a positive number")
-  if (length(kick.beta) != x.k)
-    stop("kick.beta length is not conform with the model specification")
-  kick <- c(kick.lambda,kick.xi,kick.beta)
+  if (length(guess.lambda) != 1)
+    stop("guess.lambda is not a scalar")
+  if (guess.lambda <= 0)
+    stop("guess.lambda must be a positive number")
+  if (length(guess.xi) != 1)
+    stop("guess.xi is not a scalar")
+  if (guess.xi <= 0)
+    stop("guess.xi must be a positive number")
+  if (length(guess.beta) != x.k)
+    stop("guess.beta length is not conform with the model specification")
+  guess <- c(guess.lambda,guess.xi,guess.beta)
 
   if ((!is.integer(burn)) && (burn <= 0)) 
     stop("burn must be a integer positive number")
@@ -91,8 +91,8 @@ tbs.survreg.bayes <- function(formula,dist="norm",
   } else {
     if (!is.vector(prior.mean))
       stop("mean is not a vector/scalar")
-    if ((length(prior.mean) != 1) || (length(prior.mean) != length(kick[3:length(kick)]))) {
-      stop(paste("length mean is different of 1 or ",length(kick[3:length(kick)]),sep=""))
+    if ((length(prior.mean) != 1) || (length(prior.mean) != length(guess[3:length(guess)]))) {
+      stop(paste("length mean is different of 1 or ",length(guess[3:length(guess)]),sep=""))
     }
   }
   if (is.null(prior.sd)) {
@@ -100,15 +100,15 @@ tbs.survreg.bayes <- function(formula,dist="norm",
   } else {
     if (!is.vector(prior.sd))
       stop("sd is not a vector/scalar")
-    if ((length(prior.sd) != 1) || (length(prior.sd) != length(kick[3:length(kick)]))) {
-      stop(paste("length sd is different of 1 or ",length(par[3:length(kick)]),sep=""))
+    if ((length(prior.sd) != 1) || (length(prior.sd) != length(guess[3:length(guess)]))) {
+      stop(paste("length sd is different of 1 or ",length(par[3:length(guess)]),sep=""))
     }
     if (prior.sd <= 0)
       stop("prior.sd must be a positive number")
   }
 
   ## call the Metropolis algorithm for MCMC
-  chain <- metrop(obj=.logpost,initial=kick,time=time,delta=delta,dist=dist,x=x,
+  chain <- metrop(obj=.logpost,initial=guess,time=time,delta=delta,dist=dist,x=x,
                   mean=prior.mean,sd=prior.sd,
                   nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale)
   

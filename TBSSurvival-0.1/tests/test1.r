@@ -44,4 +44,5 @@ s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",met
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="BFGS",verbose=TRUE)
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method="Nelder-Mead",verbose=TRUE)
 
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$node4,dist="norm",method="BFGS",verbose=TRUE)
 

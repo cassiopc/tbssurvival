@@ -111,7 +111,7 @@
 ## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",kick=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=1) {
+.tbs.survreg <- function(formula,dist="norm",method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=1) {
   initial.time <- .gettime()
 
   if (attributes(formula)$class != "formula")
@@ -135,7 +135,7 @@
   out <- NULL
 
   ## check if starting point was given or not, and build one in case
-  if (is.null(kick)) {
+  if (is.null(guess)) {
     nparam <- 2
     if (!is.null(x)) {
       if (is.matrix(x))
@@ -144,12 +144,12 @@
         nparam <- nparam+1
     }
     ## betas can be anything, we sample uniformly from -10 to 10
-    kick <- 20*runif(nparam)-10
+    guess <- 20*runif(nparam)-10
     ## lambda and xi have to be positive, and "desirable" values are not very high...
-    kick[1] <- 5*runif(1)+0.0001 ## lambda
-    kick[2] <- 10*runif(1)+0.0001 ## xi
+    guess[1] <- 5*runif(1)+0.0001 ## lambda
+    guess[2] <- 10*runif(1)+0.0001 ## xi
   } else {
-    nparam <- length(kick)
+    nparam <- length(guess)
   }
 
   if(method=="Rsolnp") {
@@ -227,9 +227,9 @@
   inimethod=method
   inilooptime=.gettime()
   while(.gettime() < inilooptime + max.time) {
-    valik=.lik.tbs(kick,time=time,delta=delta,x=x,dist=dist)
+    valik=.lik.tbs(guess,time=time,delta=delta,x=x,dist=dist)
     if(!is.na(valik) && valik>-Inf) {
-      aux <- try(evalWithTimeout(optim(kick, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
+      aux <- try(evalWithTimeout(optim(guess, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
                        method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
         repeat {
@@ -261,10 +261,10 @@
       ii = ii + 1
     }
     ## betas can be anything, we sample uniformly from -10 to 10
-    kick <- 20*runif(nparam)-10
+    guess <- 20*runif(nparam)-10
     ## lambda and xi have to be positive, and "desirable" values are not very high...
-    kick[1] <- 5*runif(1)+0.0001 ## lambda
-    kick[2] <- 10*runif(1)+0.0001 ## xi
+    guess[1] <- 5*runif(1)+0.0001 ## lambda
+    guess[2] <- 10*runif(1)+0.0001 ## xi
 
     ## if enough starts have been tried, stop. Also stop if too many unsuccessfull tries have been made :(
     if(ii>100 && is.na(est)) {
