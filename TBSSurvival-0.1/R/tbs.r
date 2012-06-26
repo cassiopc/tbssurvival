@@ -64,7 +64,8 @@ rtbs <- function(n,lambda=1,xi=1,beta=1,x=NULL,dist="norm") {
  aux2 <- c(aux$x%*%aux$beta)
  erro <- .choice(n,xi,dist,"r")
  out  <- exp(.g.lambda.inv(.g.lambda(aux2,lambda) + erro,lambda))
- out  <- ifelse(out == 0,10^(-100),out)
+ ## just to avoid time zero:
+ out  <- ifelse(out == 0,10e-100,out)
 
  return(out)
 }

@@ -21,7 +21,6 @@ w <- options("warn")
 options("warn" = -1)
 if(require("TBSSurvival",quietly=TRUE)==FALSE) {
   require("survival")
-  require("R.utils")
   require("normalp")
   require("mcmc")
   require("eha")
