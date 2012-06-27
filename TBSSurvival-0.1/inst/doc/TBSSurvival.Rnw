@@ -312,8 +312,8 @@ It is important say that for Bayesian estimation we need to be concerned about t
 
 <<be>>=
 tbs.be <- tbs.survreg.bayes(formula,dist="norm",
-                            kick.lambda=2,kick.xi=4,
-                            kick.beta=1.5,burn=1000,
+                            guess.lambda=2,guess.xi=4,
+                            guess.beta=1.5,burn=1000,
                             jump=10,size=1000,scale=0.06)
 @
                                 
