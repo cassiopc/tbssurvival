@@ -22,7 +22,7 @@
 ##   points to use, dist has to be one of the available distributions, currently
 ##   one of "norm", "t", "cauchy", "doubexp", "logistic"
 ## formula is a R formula with a Surv object on the left side
-tbs.survreg.mle <- function(formula,dist="norm",method=c("Rsolnp","BFGS","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=1,ncore=1) {
+tbs.survreg.mle <- function(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=1,ncore=1) {
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.
@@ -38,6 +38,7 @@ tbs.survreg.mle <- function(formula,dist="norm",method=c("Rsolnp","BFGS","Nelder
       }
     }
   }
+  ## check if at least one method found a solution...
   if (is.null(bestout)) {
     if(verbose) cat('No method achieved convergence\n')
     bestout$method <- NULL
