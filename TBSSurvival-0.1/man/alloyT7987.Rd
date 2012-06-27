@@ -24,6 +24,6 @@ Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
 \code{\link{tbs.survreg.mle}}
 }
 \examples{
-See \link{tbs.survreg.bayes}.
+## See \link{tbs.survreg.bayes}.
 }
 \keyword{TBS}
