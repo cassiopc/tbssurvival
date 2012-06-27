@@ -20,16 +20,19 @@
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
   \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
-  \item{method}{a vector of numerical methods to be used in the optimization. The function try all methods until reach the
-                maximum with one of them or return `convergence = FALSE'.}
+  \item{method}{a vector of numerical methods to be used in the optimization. The function try all listed methods and returns the
+                solution with maximal likelihood among them.}
   \item{verbose}{Boolean to indicate the amount of output during the execution of the optimization.}
   \item{nstart}{Number of feasible initial points to guess when performing the optimization.}
   \item{max.time}{Maximum time (in minutes) to run the optimization.}
   \item{ncore}{If parallel computing is available, ncore tells the number of cores to use.}
 }
 \details{
-  This function was developed to the problem without co-variables. Some changes maybe are need to work
-  with co-variables (or maybe not).
+  This function calls numerical optimization methods to maximize the likelihood of the TBS model, according to the given error
+  distribution, method of optimization, and formula. The formula is supposed to have a Surv object and possibility co-variates,
+  just as the standard specification of R formulas. The optimizers are going to do their best to find high likelihood estimates,
+  but as in most estimation methods that need a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
+  global optimal solution, but instead is dependent on the initial points, and thus on the seed of the random number generation.}
 }
 \value{
   A list with components:
