@@ -32,7 +32,7 @@
   distribution, method of optimization, and formula. The formula is supposed to have a Surv object and possibility co-variates,
   just as the standard specification of R formulas. The optimizers are going to do their best to find high likelihood estimates,
   but as in most estimation methods that need a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
-  global optimal solution, but instead is dependent on the initial points, and thus on the seed of the random number generation.}
+  global optimal solution, but instead is dependent on the initial points, and thus on the seed of the random number generation.
 }
 \value{
   A list with components:
@@ -62,7 +62,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # MLE estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="logistic")
+tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="BFGS")
 
 # Kaplan-Meier estimation
 km <- survfit(formula)

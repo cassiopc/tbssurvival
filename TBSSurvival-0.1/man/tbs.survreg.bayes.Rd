@@ -17,16 +17,16 @@
   done by metroplois-hasting (using the function `metrop' availible at package `mcmc').
 }
 \usage{
-  tbs.survreg.bayes(formula, dist = "norm", kick.beta, kick.lambda,
-                    kick.xi, burn = 1000, jump = 2, size = 1000, scale = 1, 
+  tbs.survreg.bayes(formula, dist = "norm", guess.beta, guess.lambda,
+                    guess.xi, burn = 1000, jump = 2, size = 1000, scale = 1, 
 					prior.mean = NULL, prior.sd = NULL)
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
   \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
-  \item{kick.beta}{initial value of the Markov Chain for the vector `beta'.}
-  \item{kick.lambda}{initial value of the Markov Chain for the parameter `lambda'.}
-  \item{kick.xi}{initial value of the Markov Chain for the parameter `xi'.}
+  \item{guess.beta}{initial value of the Markov Chain for the vector `beta'.}
+  \item{guess.lambda}{initial value of the Markov Chain for the parameter `lambda'.}
+  \item{guess.xi}{initial value of the Markov Chain for the parameter `xi'.}
   \item{burn}{burn-in, number of firsts samples of posterior to not use.}
   \item{jump}{number of jump between each sample of posterior to avoid the problem of auto-correlation
               between the samples.}
@@ -77,7 +77,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # Bayesian estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.bayes <- tbs.survreg.bayes(formula,kick.lambda=1,kick.xi=1,kick.beta=5, dist="logistic",
+tbs.bayes <- tbs.survreg.bayes(formula,guess.lambda=1,guess.xi=1,guess.beta=5, dist="logistic",
                               burn=1000,jump=10,size=1000,scale=0.06)
 
 km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
