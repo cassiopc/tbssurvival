@@ -55,6 +55,13 @@
   \code{\link{tbs.survreg.bayes},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
+# The colon data set is available within the library survival
+data(colon)
+# Running MLE on colon without covariates
+colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,
+		  	 			     dist="norm",method=c("BFGS","Nelder-Mead"),
+                             verbose=TRUE)
+
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
 data(alloyT7987)
 alloyT7987$time <- as.double(alloyT7987$time)

@@ -18,6 +18,20 @@
 ## This code is used for testing purposes. The TBSSurvival library does not
 ## depend on it for any of its functionalities
 
+installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
+  ## set the repository to use
+  options(repos=repos)
+  ## install the packages
+  install.packages("mcmc",lib=loc)
+  install.packages("Rsolnp",lib=loc)
+  install.packages("normalp",lib=loc)
+  install.packages("eha",lib=loc)
+  install.packages("e1071",lib=loc)
+  install.packages("coda",lib=loc)
+  install.packages("truncnorm",lib=loc)
+  install.packages("R.utils",lib=loc)
+}
+
 loadlibs <- function(libdir=NULL) {
   w <- options("warn")
   options("warn" = -1)

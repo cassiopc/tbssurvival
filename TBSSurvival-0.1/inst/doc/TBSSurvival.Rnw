@@ -266,6 +266,49 @@ The most important part is the parameter estimation of the TBS model. There are 
 
 \subsection{MLE}
 
+First of all, we just show some simple tests with the MLE. These
+following examples are only to demonstrate the use of the estimation function.
+
+<<simple_mle>>=
+set.seed(1)
+
+####################
+## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
+library(ipred)
+data(GBSG2)
+cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
+s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,dist="norm",verbose=TRUE) ## try all methods
+
+####################
+## test with the colon data set from the survival package
+library(survival)
+data(colon)
+cat('Running MLE on colon (from survival package) without covariates\n')
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
+
+## with covariate
+cat('Running MLE on colon (from survival package) with covariate=age60\n')
+colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
+## now discriminated by number of affected lymph nodes > 4
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$node4,dist="norm",method="BFGS",verbose=TRUE)
+
+## simple test with the Alloy T7987 data set (available in TBSSurvival)
+data(alloyT7987)
+
+# MLE Estimation
+method <- c("Rsolnp","BFGS","Nelder-Mead","CG","SANN")
+for (j in 1:length(method)) {
+  for (i in 1:5) {
+    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",method=method[j])
+    cat("i: ",i,"  - method: ",method[j],"  - log.lik: ",tbs.mle.logistic$log.lik,"\n")
+  }
+}
+@
+
+Getting back to the analysis of before, we build a formula with time
+and censoring indication (delta) and then perform the estimation:
+
 <<mle>>=
 formula <- Surv(data[,1],data[,2]) ~ 1
 tbs.mle <- tbs.survreg.mle(formula,dist="norm")

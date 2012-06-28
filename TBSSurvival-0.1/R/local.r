@@ -270,7 +270,7 @@
         if(verbose) cat(' failed\n')
         out$run.time <- .gettime() - initial.time
         out$convergence <- FALSE
-        warning("It was not possible to find a feasible solution")
+        warning(paste(method,": It was not possible to find a feasible solution"))
       }
       return(out)
     }
@@ -376,7 +376,7 @@
     if(verbose) cat(' failed\n')
     out$convergence <- FALSE
     out$run.time <- .gettime() - initial.time
-    warning("It was not possible to find a feasible solution")
+    warning(paste(method,": It was not possible to find a feasible solution"))
   }
   return(out)
 }
