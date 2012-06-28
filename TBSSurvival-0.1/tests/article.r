@@ -1,4 +1,5 @@
 library("TBSSurvival")
+source('weib.r')
 
 # To perform convergence analysis of BE set flag.convergence "TRUE".
 flag.convergence <- FALSE
