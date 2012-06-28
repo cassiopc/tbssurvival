@@ -30,6 +30,8 @@ installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
   install.packages("coda",lib=loc)
   install.packages("truncnorm",lib=loc)
   install.packages("R.utils",lib=loc)
+
+  ##  install.packages('./TBSSurvival_0.1.tar.gz',repos=NULL,type="source")
 }
 
 loadlibs <- function(libdir=NULL) {

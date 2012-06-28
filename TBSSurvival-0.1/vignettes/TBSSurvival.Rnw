@@ -269,7 +269,7 @@ The most important part is the parameter estimation of the TBS model. There are 
 First of all, we just show some simple tests with the MLE. These
 following examples are only to demonstrate the use of the estimation function.
 
-<<simple_mle>>=
+<<simple_mle,eval=FALSE>>=
 set.seed(1)
 
 ####################
