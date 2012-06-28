@@ -1,4 +1,4 @@
-library("GPTmodel")
+library("TBSSurvival")
 
 # To perform convergence analysis of BE set flag.convergence "TRUE".
 flag.convergence <- FALSE
@@ -310,7 +310,7 @@ weib.model <- NULL
 mle.weib             <- weibreg(Surv(d$time,d$delta)~1)
 weib.model$par       <- c(exp(mle.weib$coefficients[1]),exp(mle.weib$coefficients[2]))
 names(weib.model$par) <- NULL
-weib.model$std.error <- diag(sqrt(solve(-hessian(lik.weib,weib.model$par,time=d$time,delta=d$delta))))
+weib.model$std.error <- diag(sqrt(solve(-hessian(lweib,weib.model$par,time=d$time,delta=d$delta))))
 weib.model$log.lik   <- mle.weib$loglik[2]
 weib.model$nparam    <- 2
 weib.model$AIC       <- 2*weib.model$nparam-2*weib.model$log.lik
@@ -457,20 +457,20 @@ rm(text)
 
 
 #Bayesian Estimation
-gpt.bayes.norm     <- estimation.bayes(    kick=gpt.mle.norm$par,time=d$time,delta=d$delta,dist="norm",
+gpt.bayes.norm     <- estimation.bayes(    guess=gpt.mle.norm$par,time=d$time,delta=d$delta,dist="norm",
                                        burn=500000,jump=2000,size=1000,scale=0.07)
-gpt.bayes.t        <- estimation.bayes(       kick=gpt.mle.t$par,time=d$time,delta=d$delta,dist="t",
+gpt.bayes.t        <- estimation.bayes(       guess=gpt.mle.t$par,time=d$time,delta=d$delta,dist="t",
                                        burn=500000,jump=2000,size=1000,scale=0.1)
-gpt.bayes.cauchy   <- estimation.bayes(  kick=gpt.mle.cauchy$par,time=d$time,delta=d$delta,dist="cauchy",
+gpt.bayes.cauchy   <- estimation.bayes(  guess=gpt.mle.cauchy$par,time=d$time,delta=d$delta,dist="cauchy",
                                        burn=500000,jump=2000,size=1000,scale=0.1)
-gpt.bayes.doubexp  <- estimation.bayes( kick=gpt.mle.doubexp$par,time=d$time,delta=d$delta,dist="doubexp",
+gpt.bayes.doubexp  <- estimation.bayes( guess=gpt.mle.doubexp$par,time=d$time,delta=d$delta,dist="doubexp",
                                        burn=500000,jump=2000,size=1000,scale=0.1)
-gpt.bayes.logistic <- estimation.bayes(kick=gpt.mle.logistic$par,time=d$time,delta=d$delta,dist="logistic",
+gpt.bayes.logistic <- estimation.bayes(guess=gpt.mle.logistic$par,time=d$time,delta=d$delta,dist="logistic",
                                        burn=500000,jump=2000,size=1000,scale=0.06)
 
-#bayes.weib.model <- metrop(lik.weib,weib.model$par,time=d$time,delta=d$delta,nbatch=200000,scale=1)
-bayes.weib.model <- bayes.weib.est(kick=weib.model$par,time=d$time,delta=d$delta,
-                                   burn=20000,jump=180,size=1000,scale=1)
+#bayes.weib.model <- metrop(lweib,weib.model$par,time=d$time,delta=d$delta,nbatch=200000,scale=1)
+bayes.weib.model <- bweib(guess=weib.model$par,time=d$time,delta=d$delta,
+                          burn=20000,jump=180,size=1000,scale=1)
 
 # Building the Table of Example (Bayes)
 text <- paste("\\begin{center}\n",

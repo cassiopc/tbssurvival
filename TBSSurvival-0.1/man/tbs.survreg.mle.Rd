@@ -52,7 +52,7 @@
   Meeker, W. and Escobar, L. (1998) \emph{Statistical Methods for Reliability Data}. Willey, ISBN 0-471-14328-6.
 }
 \seealso{
-  \code{\link{tbs.survreg.bayes},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
+  \code{\link{tbs.survreg.be},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
 # The colon data set is available within the library survival

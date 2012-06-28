@@ -351,13 +351,20 @@ The result is presented in the Figure \ref{figtbsmle}.
 
 \subsection{BE}
 
-It is important say that for Bayesian estimation we need to be concerned about the choose of the prior and the convergence of MCMC method. Because that, probably will be necessary some modifications in the code to adapt to your data. In the cases that we tested the simple change in \verb=scale= parameter of the \verb=tbs.survreg.bayes= was enough to use the Bayesian procedure. We are using a prior that reflect our knowledge about the parameter of the model. More details about that see Polpo and Sinha (XXXXXX). 
+It is important say that for Bayesian estimation we need to be
+concerned about the choose of the prior and the convergence of MCMC
+method. Because that, probably will be necessary some modifications in
+the code to adapt to your data. In the cases that we tested the simple
+change in \verb=scale= parameter of the \verb=tbs.survreg.be= was
+enough to use the Bayesian procedure. We are using a prior that
+reflect our knowledge about the parameter of the model. More details
+about that see Polpo et al. 2012.
 
 <<be>>=
-tbs.be <- tbs.survreg.bayes(formula,dist="norm",
-                            guess.lambda=2,guess.xi=4,
-                            guess.beta=1.5,burn=1000,
-                            jump=10,size=1000,scale=0.06)
+tbs.be <- tbs.survreg.be(formula,dist="norm",
+                         guess.lambda=2,guess.xi=4,
+                         guess.beta=1.5,burn=1000,
+                         jump=10,size=1000,scale=0.06)
 @
                                 
 Now we construct the graphic with the estimated reliability and the 95\% credal interval of High Posterior Density of the reliability function.
@@ -394,13 +401,19 @@ The result is presented in the Figure \ref{figtbsbe}.
 
 \section{Remarks}
 
-This ``manual'' content only the basics about the TBSSurvival, we suggest to the reader take a look on the help pages of the TBSSurvival package. More details about the TBSSurvival can be obtained in Polpo and Sinha (XXXXXX).
+This ``manual'' content only the basics about the TBSSurvival, we
+suggest to the reader take a look on the help pages of the TBSSurvival
+package. More details about the TBSSurvival can be obtained in Polpo
+et al. 2012.
 
 \newpage
 \appendix
 \section{Article code}
 
-The source code used to ``build'' the article from Polpo and Sinha (XXXXX) is available with this package in the file \verb=article.r=.
+The source code used to run all the experiments and analysis appearing
+in the article {\it Transform Both Sides: A Parametric Approach},
+Polpo et al. 2012, is available within this package in the file
+\verb=tests/article.r=.
 
 
 \end{document}
