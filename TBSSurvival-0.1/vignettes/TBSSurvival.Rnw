@@ -17,7 +17,7 @@
 
 % \documentclass[a4paper,12pt]{article}
 \documentclass[nogin,letterpaper,12pt]{article}
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{caption,subfig}
 \usepackage{bm}
@@ -411,7 +411,7 @@ et al. 2012.
 \section{Article code}
 
 The source code used to run all the experiments and analysis appearing
-in the article {\it Transform Both Sides: A Parametric Approach},
+in the article {\it Transform Both Sides Model: A Parametric Approach},
 Polpo et al. 2012, is available within this package in the file
 \verb=tests/article.r=.
 
