@@ -20,7 +20,7 @@
 ##################
 ########################
 ###########################################################################
-## This file contains auxiliar functions - NOT to be used directly by user.
+## This file contains auxiliar functions - NOT to be used directly by users
 ###########################################################################
 
 ## on attach, just print the version number of the package
@@ -482,31 +482,36 @@
 ## parameter of the distribution (the exact meaning varies according to it).
 .choice <- function(x, xi, dist, type) {
   switch(dist,
+         ## Normal distribution
          norm     = switch(type,
-           d = dnorm(x,mean=0,sd=sqrt(xi)),
-           p = pnorm(x,mean=0,sd=sqrt(xi)),
-           q = qnorm(x,mean=0,sd=sqrt(xi)),
-           r = rnorm(x,mean=0,sd=sqrt(xi))),
+           d = dnorm(x,mean=0,sd=sqrt(xi)), # density
+           p = pnorm(x,mean=0,sd=sqrt(xi)), # distr
+           q = qnorm(x,mean=0,sd=sqrt(xi)), # quantile
+           r = rnorm(x,mean=0,sd=sqrt(xi))), # generation
+         ## t-student distribution
          t        = switch(type,
-           d = dt(x,df=xi),
-           p = pt(x,df=xi),
-           q = qt(x,df=xi),
-           r = rt(x,df=xi)),
+           d = dt(x,df=xi), # density
+           p = pt(x,df=xi), # distr
+           q = qt(x,df=xi), # quantile
+           r = rt(x,df=xi)), # generation
+         ## Cauchy distribution
          cauchy   = switch(type,
-           d = dcauchy(x,location=0,scale=xi),
-           p = pcauchy(x,location=0,scale=xi),
-           q = qcauchy(x,location=0,scale=xi),
-           r = rcauchy(x,location=0,scale=xi)),
+           d = dcauchy(x,location=0,scale=xi), # density
+           p = pcauchy(x,location=0,scale=xi), # distr
+           q = qcauchy(x,location=0,scale=xi), # quantile
+           r = rcauchy(x,location=0,scale=xi)), # generation
+         ## Laplace/Double exponential distribution
          doubexp  = switch(type,
-           d = dnormp(x,sigmap=xi,mu=0,p=1),
-           p = pnormp(x,sigmap=xi,mu=0,p=1),
-           q = qnormp(x,sigmap=xi,mu=0,p=1),
-           r = rnormp(x,sigmap=xi,mu=0,p=1)),
+           d = dnormp(x,sigmap=xi,mu=0,p=1), # density
+           p = pnormp(x,sigmap=xi,mu=0,p=1), # distr
+           q = qnormp(x,sigmap=xi,mu=0,p=1), # quantile
+           r = rnormp(x,sigmap=xi,mu=0,p=1)), # generation
+         ## Logistic distribution
          logistic = switch(type,
-           d = dlogis(x,location=0,scale=xi),
-           p = plogis(x,location=0,scale=xi),
-           q = qlogis(x,location=0,scale=xi),
-           r = rlogis(x,location=0,scale=xi)))
+           d = dlogis(x,location=0,scale=xi), # density
+           p = plogis(x,location=0,scale=xi), # distr
+           q = qlogis(x,location=0,scale=xi), # quantile
+           r = rlogis(x,location=0,scale=xi))) # generation
 }
 
 

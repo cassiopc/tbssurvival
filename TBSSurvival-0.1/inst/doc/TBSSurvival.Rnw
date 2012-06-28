@@ -277,7 +277,7 @@ set.seed(1)
 library(ipred)
 data(GBSG2)
 cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
-s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,dist="norm",verbose=TRUE) ## try all methods
+s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1) ## as optim method not given, it tries all methods
 
 ####################
 ## test with the colon data set from the survival package
