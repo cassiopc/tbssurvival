@@ -58,6 +58,7 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
 
   out <- NULL
   out$call <- Call
+  out$x <- x
   out$time <- time
   out$delta <- delta
 

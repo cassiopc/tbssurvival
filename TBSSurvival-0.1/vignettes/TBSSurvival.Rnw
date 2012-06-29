@@ -351,7 +351,7 @@ The result is presented in the Figure \ref{figtbsbe}.
 aux.survival <- matrix(0,length(tbs.be$time),1000)
 for (j in 1:1000) {
   aux.survival[,j] <- c(1-ptbs(tbs.be$time,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
-                               beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=x,dist="norm"))
+                               beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=tbs.be$x,dist="norm"))
 }
 survival <- matrix(0,length(tbs.be$time),8)
 for (i in 1:length(tbs.be$time)) {
