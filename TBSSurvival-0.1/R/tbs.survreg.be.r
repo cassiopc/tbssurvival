@@ -37,9 +37,6 @@ tbs.survreg.be <- function(formula,dist="norm",
   y <- model.response(mf)
   time <- y[,1]
   delta <- y[,2]
-##  time  <- eval(attr(terms(formula),"variables"))[[1]][,1]
-##  delta <- eval(attr(terms(formula),"variables"))[[1]][,2]
-##  x     <- model.matrix(formula)
   x.k   <- dim(x)[2]
   n     <- dim(x)[1]
   if (any((delta != 0) & (delta != 1)))  {
@@ -114,89 +111,48 @@ tbs.survreg.be <- function(formula,dist="norm",
   
   out$post <- chain$batch[seq(burn,length(chain$batch[,1]),jump),]
 
-#  out$time     <- time[delta == 1]
-  out$time     <- time
-  aux.hazard   <- matrix(0,length(out$time),size)
-  aux.survival <- matrix(0,length(out$time),size)
-  aux.density  <- matrix(0,length(out$time),size)
-  aux.error    <- matrix(0,length(out$time),size)
-  for (j in 1:size) {
-      aux.hazard[,j]   <- c(htbs(out$time,lambda=out$post[j,1],xi=out$post[j,2],
-                                 beta=out$post[j,3:length(out$post[1,])],x=x,dist=dist))
-      aux.survival[,j] <-     c(1-ptbs(out$time,lambda=out$post[j,1],xi=out$post[j,2],
-                                       beta=out$post[j,3:length(out$post[1,])],x=x,dist=dist))
-      aux.density[,j]  <-       c(dtbs(out$time,lambda=out$post[j,1],xi=out$post[j,2],
-                                       beta=out$post[j,3:length(out$post[1,])],x=x,dist=dist))
-      if (x.k != 1) {
-        aux.error[,j]    <- (.g.lambda(log(out$time),out$post[j,1])-
-           .g.lambda(x%*%matrix(out$post[j,3:length(out$post[1,])],length(out$post[j,3:length(out$post[1,])]),1),out$post[j,1]))
-      } else {
-        aux.error[,j]    <- (.g.lambda(log(out$time),out$post[j,1])-
-                             .g.lambda(out$post[j,3]*x,out$post[j,1]))
-      }
-  }
-  hazard   <- matrix(0,length(out$time),8)
-  survival <- matrix(0,length(out$time),8)
-  density  <- matrix(0,length(out$time),8)
-  for (i in 1:length(out$time)) {
-    hazard[i,]   <- c(  summary(aux.hazard[i,]),HPDinterval(as.mcmc(  aux.hazard[i,]),0.95))
-    survival[i,] <- c(summary(aux.survival[i,]),HPDinterval(as.mcmc(aux.survival[i,]),0.95))
-    density[i,]  <- c( summary(aux.density[i,]),HPDinterval(as.mcmc( aux.density[i,]),0.95))
-  }
-  error <- rep(0,length(out$time))
-  for (i in 1:length(out$time))
-    error[i] <- median(aux.error[i,])
-
-  rm(aux.hazard,aux.survival,aux.density,aux.error)
-
-  aux.sum <- 0
-  aux <- time[delta == 1]
-  for (i in 1:length(aux))
-    aux.sum <- aux.sum + sum(log(density[out$time == aux[i],3]))
-  if (length(time[delta == 0]) != 0) {
-    aux <- time[delta == 0]
-    for (i in 1:length(aux))
-      aux.sum <- aux.sum + sum(log(survival[out$time == aux[i],3]))
-  }
-  aux.sum <- -2*aux.sum
-  rm(aux,density)
-
-  aux.loglik  <- rep(0,size)
-  for (j in 1:size)
-      aux.loglik[j] <- c(.lik.tbs(out$post[j,],time,delta,dist,x))
-  loglik <- mean(-2*aux.loglik)
-  rm(aux.loglik)
-
-  out$DIC <- 2*loglik-aux.sum
-  rm(aux.sum)
-
+  # evaluating the point estiamtes
   if (x.k != 1) {
-    out$par       <- c(median(out$post[,1]),median(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,median))
-    out$par.std.error <- c(sd(out$post[,1]),    sd(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,sd))
+    out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,mean))
+    out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,sd))
   } else { 
-    out$par       <- c(median(out$post[,1]),median(out$post[,2]),median(out$post[,3:length(out$post[1,])]))
-    out$par.std.error <- c(sd(out$post[,1]),    sd(out$post[,2]),    sd(out$post[,3:length(out$post[1,])]))
+    out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),mean(out$post[,3:length(out$post[1,])]))
+    out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),  sd(out$post[,3:length(out$post[1,])]))
   }
+  # evaluating the interval estiamtes
   out$par.HPD   <- cbind(c(HPDinterval(as.mcmc(out$post[,1]),0.95)),
                          c(HPDinterval(as.mcmc(out$post[,2]),0.95)))
   for (i in 3:length(out$post[1,])) {
     out$par.HPD <- cbind(out$par.HPD,
                          c(HPDinterval(as.mcmc(out$post[,i]),0.95)))
   }
-  out$par.DIC <- 2*loglik+2*.lik.tbs(out$par,time,delta,dist,x)
-  if (x.k != 1) {
-    out$par.error <- .g.lambda(log(out$time),out$par[1])-
-                     .g.lambda(x%*%matrix(out$par[3:length(out$par)],length(out$par[3:length(out$par)]),1),out$par[1])
-  } else {
-    out$par.error <- .g.lambda(log(out$time),out$par[1])-.g.lambda(out$par[3]*x,out$par[1])
+
+  # evaluating DIC
+  aux.loglik  <- rep(0,size)
+  for (j in 1:size)
+    aux.loglik[j] <- c(.lik.tbs(out$post[j,],time,delta,dist,x))
+  loglik <- mean(-2*aux.loglik)
+  rm(aux.loglik)
+  out$DIC <- 2*loglik+2*.lik.tbs(out$par,time,delta,dist,x)
+
+  # evaluating error of the model
+  aux.error    <- matrix(0,length(time),size)
+  for (j in 1:size) {
+      if (x.k != 1) {
+        aux.error[,j]    <- (.g.lambda(log(time),out$post[j,1])-
+           .g.lambda(x%*%matrix(out$post[j,3:length(out$post[1,])],length(out$post[j,3:length(out$post[1,])]),1),out$post[j,1]))
+      } else {
+        aux.error[,j]    <- (.g.lambda(log(time),out$post[j,1])-
+                             .g.lambda(out$post[j,3]*x,out$post[j,1]))
+      }
   }
+  error <- rep(0,length(time))
+  for (i in 1:length(time))
+    error[i] <- mean(aux.error[i,])
+  rm(aux.error)
+  out$error <- error
 
-#  out$t.median <- rep(0,10)
-#  out$t.median <- c(summary(exp(out$post[,3])),quantile(exp(out$post[,3]),c(0.025,0.975)),HPDinterval(as.mcmc(exp(out$post[,3])),0.95))
-
-  out$survival <- survival
-  out$hazard   <- hazard
-  out$error    <- error
+  # time spent to do BE
   out$run.time <- .gettime() - initial.time
   return(out)
 }
