@@ -1,7 +1,7 @@
 library("TBSSurvival")
 
 # To perform convergence analysis of BE set flag.convergence "TRUE".
-flag.convergence <- FALSE
+flag.convergence <- TRUE
 
 initial.time <- proc.time()
 # Seting initial seed to have the same results that we obtained.
@@ -520,6 +520,8 @@ rm(median.0,median.1,O)
 ##########################
 ## To run the simulation study change to TRUE below
 ## Note that the simulation is a time consuming procedure, may take a few days to run.
+## We have used a supercomputing centre, and still took quite some time, because there
+## are many many runs...
 if (FALSE) {
   source("article_simulation.r")
 }
