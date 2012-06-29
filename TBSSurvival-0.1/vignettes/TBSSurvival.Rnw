@@ -348,6 +348,17 @@ the 95\% credible interval of High Posterior Density of the reliability function
 The result is presented in the Figure \ref{figtbsbe}.
 
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
+aux.survival <- matrix(0,length(tbs.be$time),size)
+for (j in 1:size) {
+  aux.survival[,j] <-     c(1-ptbs(tbs.be$time,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
+                                   beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=x,dist=dist))
+}
+survival <- matrix(0,length(tbs.be$time),8)
+for (i in 1:length(tbs.be$time)) {
+  survival[i,] <- c(summary(aux.survival[i,]),HPDinterval(as.mcmc(aux.survival[i,]),0.95))
+}
+tbs.be$survival <- survival
+
 plot(km,ylab="R(t)", 
      xlab="t: number of cycles (in thousands)",
      main="Reliability function (BE)", conf.int=FALSE, 

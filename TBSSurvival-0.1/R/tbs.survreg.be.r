@@ -121,7 +121,7 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
   chain <- try(evalWithTimeout(metrop(obj=.logpost,initial=guess,time=time,delta=delta,dist=dist,x=x,
                                       mean=prior.mean,sd=prior.sd,
                                       nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale),
-                               timeout=max.time*60,onTimeout="error"))
+                               timeout=max.time*60,onTimeout="error"),silent=TRUE)
   if(class(chain) == "try-error") {
     stop("Time limit exceeded")
   }
