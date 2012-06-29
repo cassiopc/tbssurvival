@@ -1,4 +1,4 @@
-#library("TBSSurvival")
+library("TBSSurvival")
 
 # To perform convergence analysis of BE set flag.convergence "TRUE".
 flag.convergence <- FALSE
@@ -10,7 +10,6 @@ set.seed(1234)
 ##########################################
 ## Section 2. Transform-both-side model ##
 ##########################################
-
 
 i.fig <- 1 # counter figure number
 # Figure (a)
@@ -63,18 +62,9 @@ dev.off()
 # Failed Before 300 Thousand Cycles.                                                       #
 # Meeker & Escobar, pp. 130-131 (1998)                                                     #
 ############################################################################################
-time <- c( 94,  96,  99,  99, 104, 108, 112, 114, 117, 117, 118, 121, 121, 123, 129, 131, 133, 135, 136,
-          139, 139, 140, 141, 141, 143, 144, 149, 149, 152, 153, 159, 159, 159, 159, 162, 168, 168, 169,
-          170, 170, 171, 172, 173, 176, 177, 180, 180, 184, 187, 188, 189, 190, 196, 197, 203, 205, 211,
-          213, 224, 226, 227, 256, 257, 269, 271, 274, 291, 300, 300, 300, 300, 300)
-delta <- c( 1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-            1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-            1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-            1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0)
-
-#data(alloyT7987)
-#time  <- alloyT7987$time
-#delta <- alloyT7987$delta
+data(alloyT7987)
+time  <- alloyT7987$time
+delta <- alloyT7987$delta
 
 #Summary statistic of the failure time in thousand cycles for the Alloy T7987 data set.
 cat("Time AlloyT7987: Summary statistics\n")
@@ -412,16 +402,11 @@ if (flag.convergence) {
   cat("  beta: ",round(R[3],3),"\n")
 }
 
-
-if (FALSE) {
-
 ############################################################################################
 # Data                                                                                     #
 # Colon Cancer - library(survival)                                                         #
 ############################################################################################
-
 cat("\n"); cat("\n"); cat("Data - Colon\n")
-
 data <- colon
 
 ###########
@@ -429,7 +414,7 @@ data <- colon
 cat("\n"); cat("Maximum Likelihood Estimation:\n")
 
 # Estimating TBS model with normal error distribution
-fit.mle <- tbs.survreg.mle(Surv(data$time,data$status) ~ data$node4,dist="norm",method="BFGS")
+fit.mle <- tbs.survreg.mle(Surv(data$time,data$status) ~ data$node4,dist="norm")
 
 # Kaplan-Meier estimates
 km <- survfit(formula = Surv(data$time, data$status) ~ data$node4)
@@ -439,11 +424,9 @@ axis.x <- seq(0.01,3000,1)
 x0 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3]),dist="norm")
 x1 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3:4]),dist="norm")
 
-#Figure: estimated survival functions (MLE)
+# Figure: estimated survival functions (MLE)
 i.fig <- i.fig+1
-name <- paste("tbs_fig-conv_",i.fig,".eps",sep="")
-
-name <- paste("tbs_fig_ex-surv_mle-survival",".eps",sep="")
+name <- paste("tbs_fig-",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
 title(ylab="S(t)",xlab="time",main="Survival function (MLE)",cex.lab=1.2)
@@ -455,16 +438,20 @@ legend(100,0.22,c("TBS | X=0","TBS | X=1","Kaplan-Meier"),lty=c(2,1,1),lwd=c(3,3
        col=c("gray30","gray30",1),cex=0.7)
 dev.off()
 
-exp(fit.mle$par[3])
-c(exp(fit.mle$par[3]+qnorm(0.025,0,1)*fit.mle$std.error[3]),
-  exp(fit.mle$par[3]+qnorm(0.975,0,1)*fit.mle$std.error[3]))
-exp(sum(fit.mle$par[3:4]))
-c(exp(sum(fit.mle$par[3:4])+qnorm(0.025,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))),
-  exp(sum(fit.mle$par[3:4])+qnorm(0.975,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))))
+## Quantile Estimation
+cat("\n"); cat("Quatile estimates:\n")
+cat("Median time | X=0: ",round(exp(fit.mle$par[3]),2),"\n")
+cat("95% c.i.: (",round(exp(fit.mle$par[3]+qnorm(0.025,0,1)*fit.mle$std.error[3]),2),",",
+                  round(exp(fit.mle$par[3]+qnorm(0.975,0,1)*fit.mle$std.error[3]),2),")\n")
+cat("\n")
+cat("Median time | X=1: ",round(exp(sum(fit.mle$par[3:4])),2),"\n")
+cat("95% c.i.: (",round(exp(sum(fit.mle$par[3:4])+qnorm(0.025,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))),2),",",
+                  round(exp(sum(fit.mle$par[3:4])+qnorm(0.975,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))),2),")\n")
+cat("\n")
+cat("Odds Median: ",round(exp(fit.mle$par[4]),2),"\n")
+cat("95% c.i.: (",round(exp(fit.mle$par[4]+qnorm(0.025,0,1)*fit.mle$std.error[4]),2),",",
+                  round(exp(fit.mle$par[4]+qnorm(0.975,0,1)*fit.mle$std.error[4]),2),")\n")
 
-exp(fit.mle$par[4])
-c(exp(fit.mle$par[4]+qnorm(0.025,0,1)*fit.mle$std.error[4]),
-  exp(fit.mle$par[4]+qnorm(0.9755,0,1)*fit.mle$std.error[4]))
 
 ###########
 # Part BE
@@ -480,94 +467,65 @@ fit.be <- tbs.survreg.be(Surv(data$time,data$status) ~ data$node4,dist="norm",
                          size=1000,
                          scale=0.05)
 
-
-par(mfrow=c(2,4))
-plot(ts(fit.be$post[,1]),xlab="iteration",ylab=expression(lambda),main="",type="l")
-plot(ts(fit.be$post[,2]),xlab="iteration",ylab=expression(xi),main="",type="l")
-plot(ts(fit.be$post[,3]),xlab="iteration",ylab=expression(beta[0]),main="",type="l")
-plot(ts(fit.be$post[,4]),xlab="iteration",ylab=expression(beta[1]),main="",type="l")
-acf(fit.be$post[,1],main=expression(lambda),ci.col="gray40")
-acf(fit.be$post[,2],main=expression(xi),ci.col="gray40")
-acf(fit.be$post[,3],main=expression(beta[0]),ci.col="gray40")
-acf(fit.be$post[,4],main=expression(beta[1]),ci.col="gray40")
-par(mfrow=c(1,1))
-dev.off()
-
-
-# Figures
+# Estimating the survival function
 axis.x <- seq(0.01,3000,1)
 aux.x0 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
 aux.x1 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
-aux.x0.h <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
-aux.x1.h <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
 for (j in 1:length(fit.be$post[,1])) {
   aux.x0[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="norm")
   aux.x1[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,1],beta=sum(fit.be$post[j,3:4]),dist="norm")
-  aux.x0.h[,j] <- htbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="norm")
-  aux.x1.h[,j] <- htbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,1],beta=sum(fit.be$post[j,3:4]),dist="norm")
 }
-x0 <- matrix(NA,length(axis.x),6)
-x1 <- matrix(NA,length(axis.x),6)
+survival.x0 <- matrix(NA,length(axis.x),3)
+survival.x1 <- matrix(NA,length(axis.x),3)
 for (i in 1:length(axis.x)) {
-  x0[i,] <- c(mean(aux.x0[i,]),HPDinterval(as.mcmc(aux.x0[i,]),0.95),
-              mean(aux.x0.h[i,]),HPDinterval(as.mcmc(aux.x0.h[i,]),0.95))
-  x1[i,] <- c(mean(aux.x1[i,]),HPDinterval(as.mcmc(aux.x1[i,]),0.95),
-              mean(aux.x1.h[i,]),HPDinterval(as.mcmc(aux.x1.h[i,]),0.95))
+  survival.x0[i,] <- c(mean(aux.x0[i,]),HPDinterval(as.mcmc(aux.x0[i,]),0.95))
+  survival.x1[i,] <- c(mean(aux.x1[i,]),HPDinterval(as.mcmc(aux.x1[i,]),0.95))
 }
-rm(aux.x0,aux.x1,aux.x0.h,aux.x1.h,i,j)
+rm(aux.x0,aux.x1,i,j)
 
-# Example - Figure 3: Reliability functions / Boundary (Bayes)
-name <- paste("tbs_fig_ex-surv_be-survival",".eps",sep="")
+# Figure: estimated survival functions (BE)
+i.fig <- i.fig+1
+name <- paste("tbs_fig-",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
 title(ylab="S(t)",xlab="time",main="Survival function (BE)",cex.lab=1.2)
-lines(axis.x,x0[,1],type="l",lwd=3,col="gray30",lty=2)
-lines(axis.x,x0[,2],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x0[,3],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x1[,1],type="l",lwd=3,col="gray30",lty=1)
-lines(axis.x,x1[,2],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x1[,3],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,survival.x0[,1],type="l",lwd=3,col="gray30",lty=2)
+lines(axis.x,survival.x0[,2],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,survival.x0[,3],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,survival.x1[,1],type="l",lwd=3,col="gray30",lty=1)
+lines(axis.x,survival.x1[,2],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,survival.x1[,3],type="l",lwd=3,col="gray70",lty=3)
 axis(1,lwd=2,lwd.ticks=2,pos=0)
 axis(2,lwd=2,lwd.ticks=2,pos=0)
 legend(100,0.25,c("TBS | X=0","TBS | X=1","HPD CI 95%","Kaplan-Meier"),lty=c(2,1,3,1),lwd=c(3,3,3,1),
        col=c("gray30","gray30","gray70",1),cex=0.7)
 dev.off()
 
-# Example - Figure 2: Hazard functions (Bayes)
-name <- paste("tbs_fig_ex-surv_be-hazard",".eps",sep="")
-eps(name,width=5,height=5,paper="special",colormodel="gray")
-plot(axis.x,x0[,4],type="l",lwd=3,col="gray30",lty=2,xlim=c(0,3000),axes=FALSE,
-     xlab="",ylab="",ylim=c(0,0.002))
-title(ylab="h(t)",xlab="time",main="Hazard function (BE)",cex.lab=1.2)
-lines(axis.x,x0[,5],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x0[,6],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x1[,4],type="l",lwd=3,col="gray30",lty=1)
-lines(axis.x,x1[,5],type="l",lwd=3,col="gray70",lty=3)
-lines(axis.x,x1[,6],type="l",lwd=3,col="gray70",lty=3)
-axis(1,lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=0)
-legend(1900,0.0019,c("TBS | X=0","TBS | X=1","HPD CI 95%"),lty=c(2,1,3),lwd=c(3,3,3),
-       col=c("gray30","gray30","gray70"),cex=0.7)
-dev.off()
+## Quantile Estimation
+cat("\n"); cat("Quatile estimates:\n")
+median.0 <- mean(exp(fit.be$post[,3]))
+hpd <- HPDinterval(as.mcmc(exp(fit.be$post[,3])),0.95)
+cat("Median time | X=0: ",round(median.0,2),"\n")
+cat("95% HPD c.i.: (",round(hpd[1],2),",",round(hpd[2],2),")\n")
+median.1 <- mean(exp(apply(fit.be$post[,3:4],1,sum)))
+hpd <- HPDinterval(as.mcmc(exp(apply(fit.be$post[,3:4],1,sum))),0.95)
+cat("Median time | X=1: ",round(median.1,2),"\n")
+cat("95% HPD c.i.: (",round(hpd[1],2),",",round(hpd[2],2),")\n")
+O        <- mean(exp(fit.be$post[,4]))
+hpd <- HPDinterval(as.mcmc(exp(apply(fit.be$post[,3:4],1,sum))),0.95)
+cat("Odds Median: ",round(O,2),"\n")
+cat("95% HPD c.i.: (",round(hpd[1],2),",",round(hpd[2],2),")\n")
+rm(median.0,median.1,O)
 
-
-fit.be$par
-fit.be$par.std.error
-
-median.0 <- exp(fit.be$post[,3])
-median.1 <- exp(apply(fit.be$post[,3:4],1,sum))
-O        <- exp(fit.be$post[,4])
-c(mean(median.0),HPDinterval(as.mcmc(median.0),0.95))
-c(mean(median.1),HPDinterval(as.mcmc(median.1),0.95))
-c(mean(O),HPDinterval(as.mcmc(O),0.95))
-
-
+##########################
+## To run the simulation study change to TRUE below
+## Note that the simulation is a time consuming procedure, may take a few days to run.
+if (FALSE) {
+  source("article_simulation.r")
 }
 
-
-
-
-
+#####################
+# End
 
 
 run.time <- (proc.time()[3]-initial.time[3])/60
