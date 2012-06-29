@@ -137,9 +137,9 @@ g_\lambda(u) = \textnormal{sign}(u) |u|^\lambda,
 \noindent
 $\textnormal{sign}(u) = 1$ if $u \geq 0$ and $\textnormal{sign}(u) = -1$ if $u < 0$, $\lambda > 0$, $\theta(\mathbf{X})$ is a function of co-variables and the error has some distribution ($\varepsilon \sim F_\varepsilon$) with parameter $\xi$.
 The error distributions currently implemented in the TBSSurvival package are:
-normal (used with \verb=dist\=''norm''=), t-student (\verb=dist\=''t''=), Cauchy
-(\verb=dist\=''cauchy''=), double-exponential (\verb=dist\=''doubexp''=) and
-logistic (\verb=dist\=''logistic''=) distributions.
+normal (used with \verb=dist= = \verb="norm"=), t-student ( \verb=dist= = \verb="t"=), Cauchy
+( \verb=dist= = \verb="cauchy"=), double-exponential ( \verb=dist= = \verb="doubexp"=) and
+logistic ( \verb=dist= = \verb="logistic"=) distributions.
 
 In case you have not yet done so, the first thing to do before using the functions is to install and load the library.
 
