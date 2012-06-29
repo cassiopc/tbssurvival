@@ -92,7 +92,7 @@ text <- paste("\\begin{center}\n",
               "\\centering\n",
               "\\begin{tabular}{c|cc|ccc}\n",
               "\\hline\n",
-              "Error Distribution & AIC & BIC & $\\widehat{\\lambda$} & $\\widehat{\\beta_0}$ & $\\widehat{\\xi}$ \\\\ \n",
+              "Error Distribution & AIC & BIC & $\\widehat{\\lambda}$ & $\\widehat{\\beta_0}$ & $\\widehat{\\xi}$ \\\\ \n",
               "\\hline \n",
               "\\hline \n",
               "Normal        & ",round(tbs.mle.norm$AIC,2),       " & ",round(tbs.mle.norm$BIC,2),        " & ",
@@ -426,7 +426,7 @@ x1 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par
 
 # Figure: estimated survival functions (MLE)
 i.fig <- i.fig+1
-name <- paste("tbs_fig-",i.fig,".eps",sep="")
+name <- paste("tbs_fig_",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
 title(ylab="S(t)",xlab="time",main="Survival function (MLE)",cex.lab=1.2)
@@ -485,7 +485,7 @@ rm(aux.x0,aux.x1,i,j)
 
 # Figure: estimated survival functions (BE)
 i.fig <- i.fig+1
-name <- paste("tbs_fig-",i.fig,".eps",sep="")
+name <- paste("tbs_fig_",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
 title(ylab="S(t)",xlab="time",main="Survival function (BE)",cex.lab=1.2)
