@@ -17,12 +17,12 @@
 
 ## Maximum likelihood estimation for TBS
 ## By default, try all optimization methods listed below and keep the best solution
-## max.time is the time limit in minutes for each method, ncore the number of cores
+## max.time is the time limit in minutes for each method (<= 0 means no limit), ncore the number of cores
 ##   to use in case multicore is available, nstart the number of feasible starting
 ##   points to use, dist has to be one of the available distributions, currently
 ##   one of "norm", "t", "cauchy", "doubexp", "logistic"
 ## formula is a R formula with a Surv object on the left side
-tbs.survreg.mle <- function(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=1,ncore=1) {
+tbs.survreg.mle <- function(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=-1,ncore=1) {
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.
