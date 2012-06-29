@@ -93,6 +93,8 @@
   t <- proc.time()
   ## note that t[1]+t[2] are the process time, not the real computer time,
   ## so we still take proper values even if the machine is running other stuff
+  out <- (t[1]+t[2])/60
+  names(out) <- NULL
   return((t[1]+t[2])/60)
 }
 
