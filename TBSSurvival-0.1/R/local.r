@@ -149,8 +149,8 @@
       }
     }
   }
-  ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -10e10 suffices
-  if(notinf && out==-Inf) return(-10e10)
+  ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -1e10 suffices
+  if(notinf && out==-Inf) return(-1e10)
   return(out)
 }
 
@@ -162,9 +162,12 @@
 ## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=1,ncore=1) {
+.tbs.survreg <- function(formula,dist="norm",method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,ncore=1) {
   initial.time <- .gettime()
-
+  if(max.time <= 0) {
+    ## user didn't define a timeout, so we set to a large number
+    max.time <- 1e10
+  }
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
 
