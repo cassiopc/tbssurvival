@@ -3,7 +3,6 @@
 # To perform convergence analysis of BE set flag.convergence "TRUE".
 flag.convergence <- FALSE
 
-
 initial.time <- proc.time()
 # Seting initial seed to have the same results that we obtained.
 set.seed(1234)
@@ -84,13 +83,14 @@ print(summary(time))
 
 ###########
 # Part MLE
+cat("\n"); cat("Maximum Likelihood Estimation:\n")
 
 # MLE Estimation for each possible error distribution
-tbs.mle.norm     <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="norm"    ,method="BFGS")
-tbs.mle.doubexp  <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="doubexp" ,method="BFGS")
-tbs.mle.t        <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="t"       ,method="BFGS")
-tbs.mle.cauchy   <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="cauchy"  ,method="BFGS")
-tbs.mle.logistic <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="logistic",method="BFGS")
+tbs.mle.norm     <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="norm")
+tbs.mle.doubexp  <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="doubexp")
+tbs.mle.t        <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="t")
+tbs.mle.cauchy   <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="cauchy")
+tbs.mle.logistic <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="logistic")
 
 # Building the Table of Example (MLE)
 text <- paste("\\begin{center}\n",
@@ -177,38 +177,34 @@ cat("95% c.i.: (",round(exp(tbs.mle.norm$par[3]+qnorm(0.025,0,1)*tbs.mle.norm$st
 
 ###########
 # Part BE
+cat("\n"); cat("Bayesian Estimation:\n")
 
 #Bayesian Estimation
 tbs.bayes.norm     <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="norm",
                                      guess.beta=tbs.mle.norm$par[3],
                                      guess.lambda=tbs.mle.norm$par[1],
                                      guess.xi=tbs.mle.norm$par[2],
-                                     burn=5000,jump=20,size=1000,scale=0.07)
-#                                     burn=500000,jump=2000,size=1000,scale=0.07)
+                                     burn=500000,jump=2000,size=1000,scale=0.07)
 tbs.bayes.t        <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="t",
                                      guess.beta=tbs.mle.t$par[3],
                                      guess.lambda=tbs.mle.t$par[1],
                                      guess.xi=tbs.mle.t$par[2],
-                                     burn=5000,jump=20,size=1000,scale=0.07)
-#                                     burn=500000,jump=2000,size=1000,scale=0.07)
+                                     burn=500000,jump=2000,size=1000,scale=0.07)
 tbs.bayes.cauchy   <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="cauchy",
                                      guess.beta=tbs.mle.cauchy$par[3],
                                      guess.lambda=tbs.mle.cauchy$par[1],
                                      guess.xi=tbs.mle.cauchy$par[2],
-                                     burn=5000,jump=20,size=1000,scale=0.07)
-#                                     burn=500000,jump=2000,size=1000,scale=0.07)
+                                     burn=500000,jump=2000,size=1000,scale=0.07)
 tbs.bayes.doubexp  <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="doubexp",
                                      guess.beta=tbs.mle.doubexp$par[3],
                                      guess.lambda=tbs.mle.doubexp$par[1],
                                      guess.xi=tbs.mle.doubexp$par[2],
-                                     burn=5000,jump=20,size=1000,scale=0.07)
-#                                     burn=500000,jump=2000,size=1000,scale=0.07)
+                                     burn=500000,jump=2000,size=1000,scale=0.07)
 tbs.bayes.logistic <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
                                      guess.beta=tbs.mle.logistic$par[3],
                                      guess.lambda=tbs.mle.logistic$par[1],
                                      guess.xi=tbs.mle.logistic$par[2],
-                                     burn=5000,jump=20,size=1000,scale=0.07)
-#                                     burn=500000,jump=2000,size=1000,scale=0.07)
+                                     burn=500000,jump=2000,size=1000,scale=0.07)
 
 # Building the Table of Example (Bayes)
 text <- paste("\\begin{center}\n",
@@ -224,19 +220,19 @@ text <- paste("\\begin{center}\n",
               "\\hline \n",
               "Normal        & ",round(tbs.bayes.norm$DIC,2),       " & ",
                                  round(tbs.bayes.norm$par[1],4),    " & ",round(tbs.bayes.norm$par[3],4),     " & ",round(tbs.bayes.norm$par[2],4),     " \\\\ \n",
-              "& & & {\\footnotesize(",round(tbs.bayes.norm$par.std.error[1],4),")} & {\\footnotesize(",round(tbs.bayes.norm$par.std.error[3],4),")} & {\\footnotesize(",round(tbs.bayes.norm$par.std.error[2],5),")} \\\\ \n",
+              "& & & {\\footnotesize(",round(tbs.bayes.norm$par.sd[1],4),")} & {\\footnotesize(",round(tbs.bayes.norm$par.sd[3],4),")} & {\\footnotesize(",round(tbs.bayes.norm$par.sd[2],5),")} \\\\ \n",
               "DoubExp       & ",round(tbs.bayes.doubexp$DIC,2),    " & ",
                                  round(tbs.bayes.doubexp$par[1],4), " & ",round(tbs.bayes.doubexp$par[3],4),  " & ",round(tbs.bayes.doubexp$par[2],4),  " \\\\ \n",
-              "& & & {\\footnotesize(",round(tbs.bayes.doubexp$par.std.error[1],4),")} & {\\footnotesize(",round(tbs.bayes.doubexp$par.std.error[3],4),")} & {\\footnotesize(",round(tbs.bayes.doubexp$par.std.error[2],5),")} \\\\ \n",
+              "& & & {\\footnotesize(",round(tbs.bayes.doubexp$par.sd[1],4),")} & {\\footnotesize(",round(tbs.bayes.doubexp$par.sd[3],4),")} & {\\footnotesize(",round(tbs.bayes.doubexp$par.sd[2],5),")} \\\\ \n",
               "t-Student     & ",round(tbs.bayes.t$DIC,2),          " & ",
                                  round(tbs.bayes.t$par[1],4),       " & ",round(tbs.bayes.t$par[3],4),        " & ",round(tbs.bayes.t$par[2],4),        " \\\\ \n",
-              "& & & {\\footnotesize(",round(tbs.bayes.t$par.std.error[1],4),")} & {\\footnotesize(",round(tbs.bayes.t$par.std.error[3],4),")} & {\\footnotesize(",round(tbs.bayes.t$par.std.error[2],5),")} \\\\ \n",
+              "& & & {\\footnotesize(",round(tbs.bayes.t$par.sd[1],4),")} & {\\footnotesize(",round(tbs.bayes.t$par.sd[3],4),")} & {\\footnotesize(",round(tbs.bayes.t$par.sd[2],5),")} \\\\ \n",
               "Cauchy        & ",round(tbs.bayes.cauchy$DIC,2),     " & ",
                                  round(tbs.bayes.cauchy$par[1],4),  " & ",round(tbs.bayes.cauchy$par[3],4),   " & ",round(tbs.bayes.cauchy$par[2],4),   " \\\\ \n",
-              "& & & {\\footnotesize(",round(tbs.bayes.cauchy$par.std.error[1],4),")} & {\\footnotesize(",round(tbs.bayes.cauchy$par.std.error[3],4),")} & {\\footnotesize(",round(tbs.bayes.cauchy$par.std.error[2],5),")} \\\\ \n",
+              "& & & {\\footnotesize(",round(tbs.bayes.cauchy$par.sd[1],4),")} & {\\footnotesize(",round(tbs.bayes.cauchy$par.sd[3],4),")} & {\\footnotesize(",round(tbs.bayes.cauchy$par.sd[2],5),")} \\\\ \n",
               "Logistic      & ",round(tbs.bayes.logistic$DIC,2),   " & ",
                                  round(tbs.bayes.logistic$par[1],4)," & ",round(tbs.bayes.logistic$par[3],4), " & ",round(tbs.bayes.logistic$par[2],4), " \\\\ \n",
-              "& & & {\\footnotesize(",round(tbs.bayes.logistic$par.std.error[1],4),")} & {\\footnotesize(",round(tbs.bayes.logistic$par.std.error[3],4),")} & {\\footnotesize(",round(tbs.bayes.logistic$par.std.error[2],5),")} \\\\ \n",
+              "& & & {\\footnotesize(",round(tbs.bayes.logistic$par.sd[1],4),")} & {\\footnotesize(",round(tbs.bayes.logistic$par.sd[3],4),")} & {\\footnotesize(",round(tbs.bayes.logistic$par.sd[2],5),")} \\\\ \n",
               "\\hline\n",
               "\\end{tabular}\n",
               "\\end{table}\n",
@@ -249,7 +245,7 @@ rm(text)
 # Evaluating the Survival and Hazard functions
 aux.hazard   <- matrix(0,length(time),length(tbs.bayes.logistic$post[,1]))
 aux.survival <- matrix(0,length(time),length(tbs.bayes.logistic$post[,1]))
-for (j in 1:size) {
+for (j in 1:length(tbs.bayes.logistic$post[,1])) {
   aux.hazard[,j]   <- c(htbs(time, lambda=tbs.bayes.logistic$post[j,1], xi=tbs.bayes.logistic$post[j,2],
                              beta=tbs.bayes.logistic$post[j,3:length(tbs.bayes.logistic$post[1,])],
                              dist="logistic"))
@@ -293,11 +289,10 @@ legend(100,0.048,c(expression(textstyle(paste("TBS / ",sep="")) ~ epsilon ~ text
                    "95% HPD Interval"),
                    col=c("gray20","gray20"),lty=c(1,2),cex=1.1,lwd=2,bg="white")
 axis(1,at=c(80,100,150,200,250,300),lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=min(tbs.bayes.logistic$time))
+axis(2,lwd=2,lwd.ticks=2,pos=min(time))
 lines(time,be.hazard[,2],type="l",lwd=2,col="gray20",lty=2)
 lines(time,be.hazard[,3],type="l",lwd=2,col="gray20",lty=2)
 dev.off()
-
 
 
 #########################
@@ -305,40 +300,19 @@ dev.off()
 
 ## Quantile Estimation
 cat("\n"); cat("Quatile estimates:\n")
-cat("Median time: ",round(median(exp(tbs.bayes.logistic$post)),2),"\n")
+cat("Median time: ",round(median(exp(tbs.bayes.logistic$post[,3])),2),"\n")
 hpd <- HPDinterval(as.mcmc(exp(tbs.bayes.logistic$post[,3])),0.95)
 cat("95% HPD c.i.: (",round(hpd[1],2),",",round(hpd[2],2),")\n")
-
-
-
-# Building the Table of Example (Bayes)
-text <- paste("\\begin{center}\n",
-              "\\begin{table}\n",
-              "\\caption{Quantile estimation (BE)}\n",
-              "\\label{table_quantile-bayes}\n",
-              "\\centering\n",
-              "\\begin{tabular}{c|cc}\n",
-              "\\hline\n",
-              "Error Distribution & Median & HPD CI (95\\%) \\\\ \n",
-              "\\hline \n",
-              "\\hline \n",
-              "Logistic & ",round(median.time[3],2)," & (",round(median.time[9],2),",",round(median.time[10],2),") \\\\ \n",
-              "\\hline\n",
-              "\\end{tabular}\n",
-              "\\end{table}\n",
-              "\\end{center}\n",
-              sep="")
-cat(text, file="table_ex-bayes-quantile.tex")
-rm(text)
 
 ## Convergence analysis of the chain
 if (flag.convergence) {
   # To perform convergence analysis set "TRUE" in the if above.
   # See the first lines of this code.
   
-  name <- paste("tbs_fig_ex-bayes-converge-post",".eps",sep="")
+  i.conv <- 1
+  # Figure - ACF and Time series graphics
+  name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
-#  par(mfrow=c(3,3))
   par(mfrow=c(2,3))
   plot(ts(tbs.bayes.logistic$post[,1]),xlab="iteration",ylab=expression(lambda),main="",type="l")
   plot(ts(tbs.bayes.logistic$post[,2]),xlab="iteration",ylab=expression(beta[0]),main="",type="l")
@@ -346,15 +320,6 @@ if (flag.convergence) {
   acf(tbs.bayes.logistic$post[,1],main=expression(lambda),ci.col="gray40")
   acf(tbs.bayes.logistic$post[,2],main=expression(beta[0]),ci.col="gray40")
   acf(tbs.bayes.logistic$post[,3],main=expression(xi),ci.col="gray40")
-#  plot(seq(1,length(tbs.bayes.logistic$post[,1]),1),
-#       cumsum(tbs.bayes.logistic$post[,1])/seq(1,length(tbs.bayes.logistic$post[,1]),1),
-#       xlab="iteration",ylab=expression(lambda),main="",type="l")
-#  plot(seq(1,length(tbs.bayes.logistic$post[,2]),1),
-#       cumsum(tbs.bayes.logistic$post[,2])/seq(1,length(tbs.bayes.logistic$post[,2]),1),
-#       xlab="iteration",ylab=expression(beta[0]),main="",type="l")
-#  plot(seq(1,length(tbs.bayes.logistic$post[,3]),1),
-#       cumsum(tbs.bayes.logistic$post[,3])/seq(1,length(tbs.bayes.logistic$post[,3]),1),
-#       xlab="iteration",ylab=expression(xi),main="",type="l")
   par(mfrow=c(1,1))
   dev.off()
   
@@ -380,22 +345,26 @@ if (flag.convergence) {
                                     guess.xi=0.5,
                                     burn=1,jump=1,size=250000,scale=0.06)
   
-  #Figure: Ergodic Means
   n <- length(chain.logistic1$post[,1])
   aux <- seq(1,n,500) 
-  name <- paste("tbs_fig_ex-bayes-converge-chain_lambda",".eps",sep="")
+  #Figure: Ergodic Means - lambda
+  i.conv <- i.conv+1
+  name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
   aux.1 <- cumsum(chain.logistic1$post[,1])/seq(1,n,1)
   aux.2 <- cumsum(chain.logistic2$post[,1])/seq(1,n,1)
   aux.3 <- cumsum(chain.logistic3$post[,1])/seq(1,n,1)
   aux.4 <- cumsum(chain.logistic4$post[,1])/seq(1,n,1)
-   plot(aux,aux.1[aux],type="l",xlab="iteration",ylab=expression(lambda),main="",
-        ylim=c(min(aux.1,aux.2,aux.3,aux.4),max(aux.1,aux.2,aux.3,aux.4)))
+  plot(aux,aux.1[aux],type="l",xlab="iteration",ylab=expression(lambda),main="",
+       ylim=c(min(aux.1,aux.2,aux.3,aux.4),max(aux.1,aux.2,aux.3,aux.4)))
   lines(aux,aux.2[aux],type="l",col="gray30")
   lines(aux,aux.3[aux],type="l",col="gray20")
   lines(aux,aux.4[aux],type="l",col="gray10")
   dev.off()
-  name <- paste("tbs_fig_ex-bayes-converge-chain_xi",".eps",sep="")
+
+  #Figure: Ergodic Means - xi
+  i.conv <- i.conv+1
+  name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
   aux.1 <- cumsum(chain.logistic1$post[,2])/seq(1,n,1)
   aux.2 <- cumsum(chain.logistic2$post[,2])/seq(1,n,1)
@@ -407,7 +376,10 @@ if (flag.convergence) {
   lines(aux,aux.3[aux],type="l",col="gray20")
   lines(aux,aux.4[aux],type="l",col="gray10")
   dev.off()
-  name <- paste("tbs_fig_ex-bayes-converge-chain_beta0",".eps",sep="")
+
+  #Figure: Ergodic Means - beta
+  i.conv <- i.conv+1
+  name <- paste("tbs_fig-conv_",i.fig,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
   aux.1 <- cumsum(chain.logistic1$post[,3])/seq(1,n,1)
   aux.2 <- cumsum(chain.logistic2$post[,3])/seq(1,n,1)
@@ -433,26 +405,166 @@ if (flag.convergence) {
     B <- (n/3)*((mean.theta1-mean.theta)^2+(mean.theta2-mean.theta)^2+(mean.theta3-mean.theta)^2+(mean.theta4-mean.theta)^2)
     R[j] <- (((1-1/n)*W+B/n)/W)
   }
-  text <- paste("\\begin{center}\n",
-                "\\begin{table}\n",
-                "\\caption{Gelman-Rubin Statistics (BE)}\n",
-                "\\label{table_gelman}\n",
-                "\\centering\n",
-                "\\begin{tabular}{cccc}\n",
-                "\\hline\n",
-                " & $\\lambda$ & $\\xi$ & $\\beta_0$ \\\\ \n",
-                "\\hline \n",
-                "\\hline \n",
-                "Logistic  & ",round(R[1],5)," & ",round(R[2],5)," & ",round(R[3],5)," \\\\ \n",
-                "\\hline\n",
-                "\\end{tabular}\n",
-                "\\end{table}\n",
-                "\\end{center}\n",
-                sep="")
-  cat(text, file="table_ex-bayes-gelman.tex")
-  rm(text)
+
+  cat("\n"); cat("Gelman-Rubin Statistics:\n")
+  cat("lambda: ",round(R[1],3),"\n")
+  cat("    xi: ",round(R[2],3),"\n")
+  cat("  beta: ",round(R[3],3),"\n")
+}
+
+
+if (FALSE) {
+
+############################################################################################
+# Data                                                                                     #
+# Colon Cancer - library(survival)                                                         #
+############################################################################################
+
+cat("\n"); cat("\n"); cat("Data - Colon\n")
+
+data <- colon
+
+###########
+# Part MLE
+cat("\n"); cat("Maximum Likelihood Estimation:\n")
+
+# Estimating TBS model with normal error distribution
+fit.mle <- tbs.survreg.mle(Surv(data$time,data$status) ~ data$node4,dist="norm",method="BFGS")
+
+# Kaplan-Meier estimates
+km <- survfit(formula = Surv(data$time, data$status) ~ data$node4)
+
+# evaluating the estimated survival functions for both groups
+axis.x <- seq(0.01,3000,1)
+x0 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3]),dist="norm")
+x1 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3:4]),dist="norm")
+
+#Figure: estimated survival functions (MLE)
+i.fig <- i.fig+1
+name <- paste("tbs_fig-conv_",i.fig,".eps",sep="")
+
+name <- paste("tbs_fig_ex-surv_mle-survival",".eps",sep="")
+eps(name,width=5,height=5,paper="special",colormodel="gray")
+plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
+title(ylab="S(t)",xlab="time",main="Survival function (MLE)",cex.lab=1.2)
+lines(axis.x,x0,type="l",lwd=3,col="gray50",lty=2)
+lines(axis.x,x1,type="l",lwd=3,col="gray50",lty=1)
+axis(1,lwd=2,lwd.ticks=2,pos=0)
+axis(2,lwd=2,lwd.ticks=2,pos=0)
+legend(100,0.22,c("TBS | X=0","TBS | X=1","Kaplan-Meier"),lty=c(2,1,1),lwd=c(3,3,1),
+       col=c("gray30","gray30",1),cex=0.7)
+dev.off()
+
+exp(fit.mle$par[3])
+c(exp(fit.mle$par[3]+qnorm(0.025,0,1)*fit.mle$std.error[3]),
+  exp(fit.mle$par[3]+qnorm(0.975,0,1)*fit.mle$std.error[3]))
+exp(sum(fit.mle$par[3:4]))
+c(exp(sum(fit.mle$par[3:4])+qnorm(0.025,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))),
+  exp(sum(fit.mle$par[3:4])+qnorm(0.975,0,1)*sqrt(sum(fit.mle$std.error[3:4]^2))))
+
+exp(fit.mle$par[4])
+c(exp(fit.mle$par[4]+qnorm(0.025,0,1)*fit.mle$std.error[4]),
+  exp(fit.mle$par[4]+qnorm(0.9755,0,1)*fit.mle$std.error[4]))
+
+###########
+# Part BE
+cat("\n"); cat("Bayesian Estimation:\n")
+
+# Estimating TBS model with normal error distribution
+fit.be <- tbs.survreg.be(Surv(data$time,data$status) ~ data$node4,dist="norm",
+                         guess.lambda=fit.mle$par[1],
+                         guess.xi=fit.mle$par[2],
+                         guess.beta=fit.mle$par[3:4],
+                         burn=50000,
+                         jump=500,
+                         size=1000,
+                         scale=0.05)
+
+
+par(mfrow=c(2,4))
+plot(ts(fit.be$post[,1]),xlab="iteration",ylab=expression(lambda),main="",type="l")
+plot(ts(fit.be$post[,2]),xlab="iteration",ylab=expression(xi),main="",type="l")
+plot(ts(fit.be$post[,3]),xlab="iteration",ylab=expression(beta[0]),main="",type="l")
+plot(ts(fit.be$post[,4]),xlab="iteration",ylab=expression(beta[1]),main="",type="l")
+acf(fit.be$post[,1],main=expression(lambda),ci.col="gray40")
+acf(fit.be$post[,2],main=expression(xi),ci.col="gray40")
+acf(fit.be$post[,3],main=expression(beta[0]),ci.col="gray40")
+acf(fit.be$post[,4],main=expression(beta[1]),ci.col="gray40")
+par(mfrow=c(1,1))
+dev.off()
+
+
+# Figures
+axis.x <- seq(0.01,3000,1)
+aux.x0 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
+aux.x1 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
+aux.x0.h <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
+aux.x1.h <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
+for (j in 1:length(fit.be$post[,1])) {
+  aux.x0[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="norm")
+  aux.x1[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,1],beta=sum(fit.be$post[j,3:4]),dist="norm")
+  aux.x0.h[,j] <- htbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="norm")
+  aux.x1.h[,j] <- htbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,1],beta=sum(fit.be$post[j,3:4]),dist="norm")
+}
+x0 <- matrix(NA,length(axis.x),6)
+x1 <- matrix(NA,length(axis.x),6)
+for (i in 1:length(axis.x)) {
+  x0[i,] <- c(mean(aux.x0[i,]),HPDinterval(as.mcmc(aux.x0[i,]),0.95),
+              mean(aux.x0.h[i,]),HPDinterval(as.mcmc(aux.x0.h[i,]),0.95))
+  x1[i,] <- c(mean(aux.x1[i,]),HPDinterval(as.mcmc(aux.x1[i,]),0.95),
+              mean(aux.x1.h[i,]),HPDinterval(as.mcmc(aux.x1.h[i,]),0.95))
+}
+rm(aux.x0,aux.x1,aux.x0.h,aux.x1.h,i,j)
+
+# Example - Figure 3: Reliability functions / Boundary (Bayes)
+name <- paste("tbs_fig_ex-surv_be-survival",".eps",sep="")
+eps(name,width=5,height=5,paper="special",colormodel="gray")
+plot(km,xlim=c(0,3000),conf.int=FALSE,axes=FALSE,lty=1,lwd=1,mark.time=FALSE,xlab="",ylab="")
+title(ylab="S(t)",xlab="time",main="Survival function (BE)",cex.lab=1.2)
+lines(axis.x,x0[,1],type="l",lwd=3,col="gray30",lty=2)
+lines(axis.x,x0[,2],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x0[,3],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x1[,1],type="l",lwd=3,col="gray30",lty=1)
+lines(axis.x,x1[,2],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x1[,3],type="l",lwd=3,col="gray70",lty=3)
+axis(1,lwd=2,lwd.ticks=2,pos=0)
+axis(2,lwd=2,lwd.ticks=2,pos=0)
+legend(100,0.25,c("TBS | X=0","TBS | X=1","HPD CI 95%","Kaplan-Meier"),lty=c(2,1,3,1),lwd=c(3,3,3,1),
+       col=c("gray30","gray30","gray70",1),cex=0.7)
+dev.off()
+
+# Example - Figure 2: Hazard functions (Bayes)
+name <- paste("tbs_fig_ex-surv_be-hazard",".eps",sep="")
+eps(name,width=5,height=5,paper="special",colormodel="gray")
+plot(axis.x,x0[,4],type="l",lwd=3,col="gray30",lty=2,xlim=c(0,3000),axes=FALSE,
+     xlab="",ylab="",ylim=c(0,0.002))
+title(ylab="h(t)",xlab="time",main="Hazard function (BE)",cex.lab=1.2)
+lines(axis.x,x0[,5],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x0[,6],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x1[,4],type="l",lwd=3,col="gray30",lty=1)
+lines(axis.x,x1[,5],type="l",lwd=3,col="gray70",lty=3)
+lines(axis.x,x1[,6],type="l",lwd=3,col="gray70",lty=3)
+axis(1,lwd=2,lwd.ticks=2,pos=0)
+axis(2,lwd=2,lwd.ticks=2,pos=0)
+legend(1900,0.0019,c("TBS | X=0","TBS | X=1","HPD CI 95%"),lty=c(2,1,3),lwd=c(3,3,3),
+       col=c("gray30","gray30","gray70"),cex=0.7)
+dev.off()
+
+
+fit.be$par
+fit.be$par.std.error
+
+median.0 <- exp(fit.be$post[,3])
+median.1 <- exp(apply(fit.be$post[,3:4],1,sum))
+O        <- exp(fit.be$post[,4])
+c(mean(median.0),HPDinterval(as.mcmc(median.0),0.95))
+c(mean(median.1),HPDinterval(as.mcmc(median.1),0.95))
+c(mean(O),HPDinterval(as.mcmc(O),0.95))
+
 
 }
+
+
 
 
 
