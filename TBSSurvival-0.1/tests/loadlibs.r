@@ -32,9 +32,11 @@ installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
   install.packages("survival",lib=loc)
 #  install.packages("e1071",lib=loc)
 #  install.packages("eha",lib=loc)
-#  install.packages("truncnorm",lib=loc)
+  install.packages("truncnorm",lib=loc)
 
-  ##  install.packages('./TBSSurvival_0.1.tar.gz',repos=NULL,type="source")
+  ## this following line install the TBS package itself, so nothing else is needed.
+  ## For testing, sometimes it is better to work without installing it for a while...
+  ##      install.packages('./TBSSurvival_0.1.tar.gz',repos=NULL,type="source")
 }
 
 loadlibs <- function(libdir=NULL) {
@@ -51,7 +53,7 @@ loadlibs <- function(libdir=NULL) {
     library("survival",lib.loc=libdir)
 #    library("e1071",lib.loc=libdir)
 #    library("eha",lib.loc=libdir)
-#    library("truncnorm",lib.loc=libdir)
+    library("truncnorm",lib.loc=libdir)
     source("../R/tbs.survreg.be.r")
     source("../R/tbs.r")
     source("../R/tbs.survreg.mle.r")

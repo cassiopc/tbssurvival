@@ -17,13 +17,25 @@
 
 ## TBS estimation using a Bayesian approach. The lack of a closed form
 ## solution forces us to tackle the problem by MCMC.
-tbs.survreg.be <- function(formula,dist="norm",
-                              guess.beta,guess.lambda,guess.xi,
-                              burn=1000,jump=2,size=1000,scale=1,
-                              prior.mean=NULL,prior.sd=NULL) {
-  require("mcmc")
-  require("coda")
+## max.time is a time limit in minutes (<= 0 means no limit)
+## formula is specification containing a Surv model with right-censored data as in the package survival.
+## dist defines the error distribution: "norm", "doubexp", "t", "cauchy", "logistic".
+## guess.beta, guess.lambda, guess.xi are initial value of the Markov Chain (beta has to have the same
+## of elements as covariates, lambda and xi are scalars.
+## burn-in is the number of firsts samples of posterior to not use, and jump is the number of jump
+## between each sample of posterior to avoid the problem of auto-correlation between the samples.
+## size is the final sample size of the posterior. scale is a parameter of the `metrop' function which
+## controls the acceptance rate. prior.mean and prior.sd define the parameters of the normal prior for
+## the MCMC (by default, they are equal to 5 and 5).
+tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
+                           guess.beta,guess.lambda,guess.xi,
+                           burn=1000,jump=2,size=1000,scale=1,
+                           prior.mean=NULL,prior.sd=NULL) {
   initial.time <- .gettime()
+  if(max.time <= 0) {
+    ## user didn't define a timeout, so we set to a large number
+    max.time <- 1e10
+  }
 
   ## check the class of formula
   if (attributes(formula)$class != "formula")
@@ -39,8 +51,9 @@ tbs.survreg.be <- function(formula,dist="norm",
   delta <- y[,2]
   x.k   <- dim(x)[2]
   n     <- dim(x)[1]
+  ## check if delta is an indicator function
   if (any((delta != 0) & (delta != 1)))  {
-    stop("It is only accepted uncesored or right censored data")
+    stop("It is only accepted uncensored or right censored data")
   }
 
   out <- NULL
@@ -56,15 +69,15 @@ tbs.survreg.be <- function(formula,dist="norm",
   if (guess.xi <= 0)
     stop("guess.xi must be a positive number")
   if (length(guess.beta) != x.k)
-    stop("guess.beta length is not conform with the model specification")
+    stop("guess.beta length is not in accordance with the model specification")
   guess <- c(guess.lambda,guess.xi,guess.beta)
 
   if ((!is.integer(burn)) && (burn <= 0)) 
-    stop("burn must be a integer positive number")
+    stop("burn must be a positive integer number")
   if ((!is.integer(jump)) && (jump <= 0)) 
-    stop("jump must be a integer positive number")
+    stop("jump must be a positive integer number")
   if ((!is.integer(size)) && (size <= 0)) 
-    stop("size must be a integer positive number")
+    stop("size must be a positive integer number")
   if (scale <= 0)
     stop("scale must be a positive number")
 
@@ -105,13 +118,16 @@ tbs.survreg.be <- function(formula,dist="norm",
   }
 
   ## call the Metropolis algorithm for MCMC
-  chain <- metrop(obj=.logpost,initial=guess,time=time,delta=delta,dist=dist,x=x,
-                  mean=prior.mean,sd=prior.sd,
-                  nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale)
-  
+  chain <- try(evalWithTimeout(metrop(obj=.logpost,initial=guess,time=time,delta=delta,dist=dist,x=x,
+                                      mean=prior.mean,sd=prior.sd,
+                                      nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale),
+                               timeout=max.time*60,onTimeout="error"))
+  if(class(chain) == "try-error") {
+    stop("Time limit exceeded")
+  }
   out$post <- chain$batch[seq(burn,length(chain$batch[,1]),jump),]
 
-  # evaluating the point estiamtes
+  # evaluating the point estimates
   if (x.k != 1) {
     out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,mean))
     out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,sd))
@@ -119,7 +135,7 @@ tbs.survreg.be <- function(formula,dist="norm",
     out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),mean(out$post[,3:length(out$post[1,])]))
     out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),  sd(out$post[,3:length(out$post[1,])]))
   }
-  # evaluating the interval estiamtes
+  # evaluating the interval estimates
   out$par.HPD   <- cbind(c(HPDinterval(as.mcmc(out$post[,1]),0.95)),
                          c(HPDinterval(as.mcmc(out$post[,2]),0.95)))
   for (i in 3:length(out$post[1,])) {

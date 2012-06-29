@@ -15,8 +15,7 @@
 % #    You should have received a copy of the GNU General Public License
 % #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-% \documentclass[a4paper,12pt]{article}
-\documentclass[nogin,letterpaper,12pt]{article}
+\documentclass[nogin,letterpaper,11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{caption,subfig}
@@ -65,17 +64,16 @@
 %opening
 \title{R Package: TBSSurvival}
 
-%\author{A. Polpo\footnote{{\it polpo@ufscar.br}, Department of
-%   Statistics -- UFSCar and FSU}, C. P. de Campos\footnote{{\it
-%      cassio@idsia.ch}, Dalle Molle Institute}, D. Sinha\footnote{{\it sinhad@stat.fsu.edu}, Department of Statistics -- FSU}}
-\author{Adriano Polpo \and Casio de Campos \and Debajyoti Sinha \and Stuart Lipsitz \and Jianchang Lin}
+\author{Adriano Polpo \and Cassio de Campos \and Debajyoti Sinha \and Stuart Lipsitz \and Jianchang Lin}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-The purposes of this text is to provide a ``manual'' for the TBSSurvival package for R. We give some examples in how to use the main functions of the package.
+  The purpose of this text is to provide a simple manual for the
+  \verb=TBSSurvival= package for \verb=R= language. In short, we give some
+  examples on how to use the main functions of the package.
 \end{abstract}
 
 %\begin{keywords}
@@ -85,18 +83,30 @@ The purposes of this text is to provide a ``manual'' for the TBSSurvival package
 \section{Introduction}
 \label{intro}
 
-We assume that the reader know about the reliability problem. We are treating the mainly with reliability, but almost all that we did here works fine for survival analysis. Probably, the switch the other ``reliability'' for ``survival'' will work for the ones that want use the package for survival analysis.
+We assume the reader to be familiar with the survival estimation / reliability
+problem. For more details we suggest the accompanying technical paper:
+{\it Transform Both Sides Model: A Parametric Approach},
+Polpo et al. 2012. In this document we use as example a reliability analysis
+situation, but the methods will work as fine with survival analysis.
 
-Also, we treat the problem of non-censor problems or a series system (competing risks). The case of parallel models are not developed yet (for this package). One remark is that the non-censor problem can be viewed as a particular case of series system, and a reliability/survival problem with censor can be modeled by a series system without problem.
-
-Let $C_1$ and $C_2$ the random variables of the failure time of component $1$ and $2$. The failure time of the series sytem with two components is defined as $T = \min(C_1,C_2)$. The cause of failure it is known and defined by variable $\delta$ where $\delta = 1$ if was the first component that fail first and $\delta = 2$ if was the second.
-
-Translating the paragraph above to problem of right-censor data we just set the $C_1$ variable as the failure time without censor, $C_2$ as the censored time, and $\delta = 0$ if the time was censored and $\delta = 1$ if was not censored.
+The problem in view can be defined by \verb=time=, an array of times of failure
+(survival) or components (patients) and \verb=delta= the event indicator, that
+is, \verb=delta= equals to one if an event happened at that time, or zero in
+case of right-censoring. Furthermore, covariates can be present in the data set,
+which can be used in a regression analysis, in the very much same way as done by
+well-known functions such as \verb=survreg=. First, we exemplify the use of the
+methods without covariates.
 
 \begin{Example}
 \label{ex1}
-Simulated data set of right-censor failure time. Let us say that the problem is about the experiment with 30 machines. We observe the failure time of this machines, but our experiment has a limit maximum of 6 week. Then all machines that not failed before 6 weeks will be considered as censored time. Also, we define the failure time by a random variable with Gamma distribution.
+In this example we simulated data set with right-censored failure time. The
+problem is about an experiment with 30 machines. We observe the failure time of
+these machines, but our experiment has a maximum time of 6 week. After that, all
+machines that have not failed are considered to be censored with respect to
+their failure time. For simplicity, we define the failure time by a random
+variable with Gamma distribution.
 <<echo=FALSE>>=
+options(width=60)
 set.seed(1234)
 @
 <<example1>>=
@@ -126,34 +136,44 @@ g_\lambda(u) = \textnormal{sign}(u) |u|^\lambda,
 \end{equation}
 \noindent
 $\textnormal{sign}(u) = 1$ if $u \geq 0$ and $\textnormal{sign}(u) = -1$ if $u < 0$, $\lambda > 0$, $\theta(\mathbf{X})$ is a function of co-variables and the error has some distribution ($\varepsilon \sim F_\varepsilon$) with parameter $\xi$.
+The error distributions currently implemented in the TBSSurvival package are:
+normal (used with \verb=dist\=''norm''=), t-student (\verb=dist\=''t''=), Cauchy
+(\verb=dist\=''cauchy''=), double-exponential (\verb=dist\=''doubexp''=) and
+logistic (\verb=dist\=''logistic''=) distributions.
 
-The first thing to do it is load the library.
-<<tbs>>=
+In case you have not yet done so, the first thing to do before using the functions is to install and load the library.
+
+<<tbsinst,eval=FALSE>>=
+install.packages("TBSSurvival_0.1.tar.gz",repos=NULL,type="source")
+@ 
+<<<tbs>>=
 library("TBSSurvival")
 @
 
-The error distributions implemented in the TBSSurvival package are Normal, t-Student, Cauchy, Double-Exponential and Logistic distributions. Also, we have the options to use the Reduced Weibull, Reflected Reduced Weibull, Double Weibull, Mixed Uniform and Mixed Central Uniform distributions. The variations of Weibull distributions (the three above) in ours studies does not give an improvement on reliability estimation, so its is needed more research to understand when these type of error distribution can be good. The cases of Mixed Uniform distributions have only educational purposes, the main question is about the size of parametric space.
-
 \begin{Example}
-Density, reliability and hazard function for TBS model with different type of error distribution.
+Density, reliability and hazard functiosn for TBS model are available using the
+commonly used notation: \verb=dtbs, ptbs, qtbs, rtbs, htbs=. The error
+distribution is passed as argument, as well some other parameters such as
+$\lambda$ (for the TBS), $\xi$ (parameter of the error distribution) and
+covariates' weights ${\boldsymbol\beta}$.
 <<label=fig1a,fig=TRUE,height=3,width=3,include=FALSE>>=
 x <- seq(0.1,10,0.1)
-plot(x, (1-ptbs(x,lambda=1,xi=sqrt(2),beta=1,dist="norm")),
-     type="l",lwd=2,lty=1,col=2,ylim=c(0,1),xlab="t",ylab="R(t)",
-     main="Reliability",
-     cex.lab=1.2)
+plot(x, (1-ptbs(x,lambda=1,xi=sqrt(2),beta=1,
+                dist="norm")),
+     type="l",lwd=2,lty=1,col=2,ylim=c(0,1),xlab="t",
+     ylab="R(t)",main="Reliability",cex.lab=1.2)
 @
 <<label=fig1b,fig=TRUE,height=3,width=3,include=FALSE>>=
-plot(x, (dtbs(x,lambda=1,xi=sqrt(2),beta=1,dist="norm")),
-     type="l",lwd=2,lty=1,col=2,xlab="t",ylab="f(t)",
-     main="Density",
-     cex.lab=1.2)
+plot(x, (dtbs(x,lambda=1,xi=sqrt(2),beta=1,
+              dist="norm")),
+     type="l",lwd=2,lty=1,col=2,xlab="t",
+     ylab="f(t)",main="Density",cex.lab=1.2)
 @
 <<label=fig1c,fig=TRUE,height=3,width=3,include=FALSE>>=
-plot(x, (htbs(x,lambda=1,xi=sqrt(2),beta=1,dist="norm")),
-     type="l",lwd=2,lty=1,col=2,xlab="t",ylab="h(t)",
-     main="Hazard",
-     cex.lab=1.2)
+plot(x, (htbs(x,lambda=1,xi=sqrt(2),beta=1,
+              dist="norm")),
+     type="l",lwd=2,lty=1,col=2,xlab="t",
+     ylab="h(t)",main="Hazard",cex.lab=1.2)
 @
 
 \begin{figure}[ht!]
@@ -204,7 +224,10 @@ plot(x, (htbs(x, lambda=1, xi=1, beta=1,
 
 \subsection{Error distribution}
 
-Table \ref{table_1} presents the available (and working) error distributions. See that for Normal distribution the parameter is $\sigma$ (standard deviation) and not $\sigma^2$ (variance). Some functions use the following parameters: \verb="l"=: parameter of the TBS ($\lambda$), \verb="param"=: parameter of error distribution and \verb="beta"=: a vector with the $\beta$s parameters of $\theta(\mathbf{X})$. The main functions that uses these parameters are: \verb=dtbs=, \verb=ptbs=, \verb=qtbs=, \verb=rtbs= and \verb=htbs=.
+Table \ref{table_1} presents the available error distributions. Note that the
+meaning of the parameter changes according to the distribution being used. Moreover, for
+the normal distribution, the parameter is $\sigma$ (standard deviation) and not
+$\sigma^2$ (variance).
 
 \begin{center}
 \begin{table}[ht!]
@@ -228,86 +251,21 @@ Logistic & $\xi = s$ & $\frac{\exp\{-\epsilon/s\}}{s \left[\left(1+\exp\{-\epsil
 \end{table}
 \end{center}
 
-Table \ref{table_2} give the ``names'' of the distribution to be used in the parameter \verb=dist=.
-
-\begin{center}
-\begin{table}[ht!]
-\caption{Error distribution.}
-\label{table_2}
-\centering
-\begin{tabular}{ccc}
-\hline
-Distribution & \verb=dist=    & work?\\
-\hline
-\hline
-Normal    & \verb="norm"=     & Yes\\
-DoubExp   & \verb="doubexp"=  & Yes\\
-t-Student & \verb="t"=        & Yes\\
-Cauchy    & \verb="cauchy"=   & Yes\\
-Logistic  & \verb="logistic"= & Yes\\
-\hline
-\hline
-Reduced Weibull    & \verb="Rweib"=    & Maybe\\
-Refl. Red. Weibull & \verb="RRweib"=   & Maybe\\
-Double-Weibull     & \verb="doubweib"= & Maybe\\
-\hline
-Mixed Unif         & \verb="munif"=    & almost sure that no!\\
-Mixed Center Unif  & \verb="mcunif"=   & almost sure that no!\\
-\hline
-\end{tabular}
-\end{table}
-\end{center}
-
-We left these ``not working'' distribution options in the package because some one can be interested, principally in the density, cumulative distribution, quantile and generating functions (see functions \verb=dRweib=, \verb=dRRweib=, \verb=doubweib=, \verb=dmunif= and \verb=dmcunif=) that all is working fine.
-
 \section{Estimation}
 
-The most important part is the parameter estimation of the TBS model. There are two procedures available: Maximum Likelihood Estimation (MLE) and Bayesian Estimation (BE). We did the estimation with both methods for the simulated data in Example \ref{ex1}. Remember that we defined the observed failure time as \verb=time= and the censor indicator $\delta$ as \verb=delta=.
+The most important part is the parameter estimation of the TBS model. There are
+two procedures available: Maximum Likelihood Estimation (MLE) and Bayesian
+Estimation (BE). For illustration purposes, we will perform the estimation with
+both methods for the simulated data in Example \ref{ex1}. Remember that we
+defined the observed failure time as \verb=time= and the censor indicator
+$\delta$ as \verb=delta=.
 
 \subsection{MLE}
 
-First of all, we just show some simple tests with the MLE. These
-following examples are only to demonstrate the use of the estimation function.
-
-<<simple_mle,eval=FALSE>>=
-set.seed(1)
-
-####################
-## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
-library(ipred)
-data(GBSG2)
-cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
-s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1) ## as optim method not given, it tries all methods
-
-####################
-## test with the colon data set from the survival package
-library(survival)
-data(colon)
-cat('Running MLE on colon (from survival package) without covariates\n')
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
-
-## with covariate
-cat('Running MLE on colon (from survival package) with covariate=age60\n')
-colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
-## now discriminated by number of affected lymph nodes > 4
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$node4,dist="norm",method="BFGS",verbose=TRUE)
-
-## simple test with the Alloy T7987 data set (available in TBSSurvival)
-data(alloyT7987)
-
-# MLE Estimation
-method <- c("Rsolnp","BFGS","Nelder-Mead","CG","SANN")
-for (j in 1:length(method)) {
-  for (i in 1:5) {
-    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",method=method[j])
-    cat("i: ",i,"  - method: ",method[j],"  - log.lik: ",tbs.mle.logistic$log.lik,"\n")
-  }
-}
-@
-
-Getting back to the analysis of before, we build a formula with time
-and censoring indication (delta) and then perform the estimation:
+In order to perform the estimation, following the common practice with other
+survival analysis packages, the user has to build a formula with time
+and censoring indication (delta), which is then used to call the estimation
+method itself:
 
 <<mle>>=
 formula <- Surv(data[,1],data[,2]) ~ 1
@@ -315,7 +273,8 @@ tbs.mle <- tbs.survreg.mle(formula,dist="norm")
 tbs.mle
 @
 
-Now we can perform the desired analysis. For example, we can compare the TBS model with the non-parametric Kaplan-Meier estimator.
+Here, we compare the TBS model with the non-parametric Kaplan-Meier estimator.
+The result is presented in the Figure \ref{figtbsmle}.
 
 <<mlekm>>=
 # Kaplan-Meier estimation
@@ -338,8 +297,6 @@ lines(t,1-ptbs(t, lambda=tbs.mle$par[1], xi=tbs.mle$par[2],
       lwd=2, col=2, lty=1)
 @
 
-The result is presented in the Figure \ref{figtbsmle}.
-
 \begin{figure}[ht!]
 \centering
 \captionsetup{justification=centering}
@@ -348,17 +305,36 @@ The result is presented in the Figure \ref{figtbsmle}.
 \label{figtbsmle}
 \end{figure}
 
+In the following, we present a simple example on how to define covariates to be
+used. In fact, we use the same framework of formulas as other survival packages.
+We also point out that different optimization methods are available in order to
+maximize the likelihood with the TBS model. If the argument \verb=method= is not
+specific, all of them will be tried, and eventually the best one will be
+returned. As one can see, the output contains already some score criteria and
+other useful information.
+<<covars>>=
+library(survival)
+data(colon)
+## Running MLE on colon (from survival package) with a covariate
+colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,
+      dist="norm",method=c("BFGS","Nelder-Mead"),verbose=FALSE)
+str(s)
+@
+
 
 \subsection{BE}
 
-It is important say that for Bayesian estimation we need to be
-concerned about the choose of the prior and the convergence of MCMC
-method. Because that, probably will be necessary some modifications in
-the code to adapt to your data. In the cases that we tested the simple
-change in \verb=scale= parameter of the \verb=tbs.survreg.be= was
-enough to use the Bayesian procedure. We are using a prior that
-reflect our knowledge about the parameter of the model. More details
-about that see Polpo et al. 2012.
+When dealing with the Bayesian estimation, it is necessary to consider an
+informative choice of priors, as well as the convergence rate of the MCMC
+method, on which the estimation is based. However, we have experimented with
+some reasonable non-informative priors, which have shown adequate results.
+Nevertheless, the user is entitled to choose \verb=prior.mean= and
+\verb=prior.sd= for the normal distribution that is used as prior for the
+${boldsymbol \beta}$, a \verb=scale= parameter, and initial guesses for the
+previously mentioned parameters of the model. Other well known arguments that
+are used my the Metropolis Hastings can also be set. We refer to the technical
+paper for more details about the priors.
 
 <<be>>=
 tbs.be <- tbs.survreg.be(formula,dist="norm",
@@ -367,7 +343,9 @@ tbs.be <- tbs.survreg.be(formula,dist="norm",
                          jump=10,size=1000,scale=0.06)
 @
                                 
-Now we construct the graphic with the estimated reliability and the 95\% credal interval of High Posterior Density of the reliability function.
+As a visual example, we construct the plots with the estimated reliability and
+the 95\% credible interval of High Posterior Density of the reliability function.
+The result is presented in the Figure \ref{figtbsbe}.
 
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
 plot(km,ylab="R(t)", 
@@ -389,8 +367,6 @@ lines(tbs.be$time,tbs.be$survival[,8],type="l",lwd=2,col=2,
       lty=2)
 @
 
-The result is presented in the Figure \ref{figtbsbe}.
-
 \begin{figure}[ht!]
 \centering
 \captionsetup{justification=centering}
@@ -401,12 +377,11 @@ The result is presented in the Figure \ref{figtbsbe}.
 
 \section{Remarks}
 
-This ``manual'' content only the basics about the TBSSurvival, we
-suggest to the reader take a look on the help pages of the TBSSurvival
-package. More details about the TBSSurvival can be obtained in Polpo
-et al. 2012.
+This ``manual'' describes the basis of the TBSSurvival package, which is mainly
+centered around the estimation methods. We invite the user to the functions'
+help pages (available with the package) and the technical paper mentioned in the
+beginning of this document.
 
-\newpage
 \appendix
 \section{Article code}
 
@@ -415,5 +390,41 @@ in the article {\it Transform Both Sides Model: A Parametric Approach},
 Polpo et al. 2012, is available within this package in the file
 \verb=tests/article.r=.
 
+\section{Some extra examples}
+
+<<<extraexamples,eval=FALSE>>=
+set.seed(1)
+
+####################
+## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
+library(ipred)
+data(GBSG2)
+cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
+s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1) ## as optim method not given, it tries all methods
+
+####################
+## test with the colon data set from the survival package
+library(survival)
+data(colon)
+cat('Running MLE on colon (from survival package) without covariates\n')
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
+
+## with covariate
+cat('Running MLE on colon (from survival package) with covariate=age60\n')
+colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
+
+## simple test with the Alloy T7987 data set (available in TBSSurvival)
+data(alloyT7987)
+
+# MLE Estimation
+method <- c("Rsolnp","BFGS","Nelder-Mead","CG","SANN")
+for (j in 1:length(method)) {
+  for (i in 1:5) {
+    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",method=method[j])
+    cat("i: ",i,"  - method: ",method[j],"  - log.lik: ",tbs.mle.logistic$log.lik,"\n")
+  }
+}
+@
 
 \end{document}
