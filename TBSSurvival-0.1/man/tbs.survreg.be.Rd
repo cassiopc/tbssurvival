@@ -17,13 +17,14 @@
   done by metroplois-hasting (using the function `metrop' availible at package `mcmc').
 }
 \usage{
-  tbs.survreg.be(formula, dist = "norm", guess.beta, guess.lambda,
+  tbs.survreg.be(formula, dist = "norm",  max.time = -1, guess.beta, guess.lambda,
                  guess.xi, burn = 1000, jump = 2, size = 1000, scale = 1, 
 				 prior.mean = NULL, prior.sd = NULL)
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
   \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
+  \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
   \item{guess.beta}{initial value of the Markov Chain for the vector `beta'.}
   \item{guess.lambda}{initial value of the Markov Chain for the parameter `lambda'.}
   \item{guess.xi}{initial value of the Markov Chain for the parameter `xi'.}

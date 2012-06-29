@@ -15,7 +15,7 @@
   The optimization is done by the function `optim' (or the package Rsolnp when available).
 }
 \usage{
- tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=1,ncore=1)
+ tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=-1,ncore=1)
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
@@ -24,7 +24,7 @@
                 solution with maximal likelihood among them.}
   \item{verbose}{Boolean to indicate the amount of output during the execution of the optimization.}
   \item{nstart}{Number of feasible initial points to guess when performing the optimization.}
-  \item{max.time}{Maximum time (in minutes) to run the optimization.}
+  \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
   \item{ncore}{If parallel computing is available, ncore tells the number of cores to use.}
 }
 \details{
