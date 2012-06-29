@@ -95,7 +95,7 @@
   ## so we still take proper values even if the machine is running other stuff
   out <- (t[1]+t[2])/60
   names(out) <- NULL
-  return((t[1]+t[2])/60)
+  return(out)
 }
 
 ## computes the likelihood for the TBS model. par is an array with the lambda in the 1st
