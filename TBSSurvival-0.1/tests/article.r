@@ -1,3 +1,25 @@
+# TBSSurvival package for R (http://www.R-project.org)
+# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+#                    Jianchang Lin and Stuart Lipsitz.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#######
+####### Code to generate the results in the paper:
+####### Transform Both Sides Model: A parametric approach
+#######
+
 library("TBSSurvival")
 
 # To perform convergence analysis of BE set flag.convergence "TRUE".
@@ -58,7 +80,7 @@ dev.off()
 
 ############################################################################################
 # Data                                                                                     #
-# Number of Cycles (in Thousands) of Fatigue Life for 67 of 72 Alloy T7987 Speciments that #
+# Number of Cycles (in Thousands) of Fatigue Life for 67 of 72 Alloy T7987 Specimens that  #
 # Failed Before 300 Thousand Cycles.                                                       #
 # Meeker & Escobar, pp. 130-131 (1998)                                                     #
 ############################################################################################
