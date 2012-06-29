@@ -318,7 +318,7 @@ data(colon)
 ## Running MLE on colon (from survival package) with a covariate
 colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,
-      dist="norm",method=c("BFGS","Nelder-Mead"),verbose=FALSE)
+      dist="norm",method=c("Nelder-Mead"),nstart=3,verbose=FALSE)
 str(s)
 @
 
@@ -342,16 +342,16 @@ tbs.be <- tbs.survreg.be(formula,dist="norm",
                          guess.beta=1.5,burn=1000,
                          jump=10,size=1000,scale=0.06)
 @
-                                
+
 As a visual example, we construct the plots with the estimated reliability and
 the 95\% credible interval of High Posterior Density of the reliability function.
 The result is presented in the Figure \ref{figtbsbe}.
 
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
-aux.survival <- matrix(0,length(tbs.be$time),size)
-for (j in 1:size) {
-  aux.survival[,j] <-     c(1-ptbs(tbs.be$time,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
-                                   beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=x,dist=dist))
+aux.survival <- matrix(0,length(tbs.be$time),1000)
+for (j in 1:1000) {
+  aux.survival[,j] <- c(1-ptbs(tbs.be$time,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
+                               beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=x,dist="norm"))
 }
 survival <- matrix(0,length(tbs.be$time),8)
 for (i in 1:length(tbs.be$time)) {

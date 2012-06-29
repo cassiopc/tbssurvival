@@ -58,6 +58,8 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
 
   out <- NULL
   out$call <- Call
+  out$time <- time
+  out$delta <- delta
 
   ## perform a series of verifications for the given arguments of the function
   if (length(guess.lambda) != 1)
@@ -122,7 +124,7 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
                                       mean=prior.mean,sd=prior.sd,
                                       nbatch=(size-1)*jump+burn,blen=1,nspac=1,scale=scale),
                                timeout=max.time*60,onTimeout="error"),silent=TRUE)
-  if(class(chain) == "try-error") {
+  if(length(class(chain)) == 1 && class(chain) == "try-error") {
     stop("Time limit exceeded")
   }
   out$post <- chain$batch[seq(burn,length(chain$batch[,1]),jump),]
