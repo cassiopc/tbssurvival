@@ -4,7 +4,7 @@ citEntry(entry = "Article",
   title        = "Transform Both Sides Model: A Parametric Approach",
   author       = personList(person("Adriano", "Polpo"),
                    as.person("Adriano Polpo"),
-				   as.person("Cassio de Campos"),
+				   as.person("Cassio P. de Campos"),
                    as.person("Debajyoti Sinha"),
 				   as.person("Stuart Lipsitz"),
 				   as.person("Jianchang Lin")),
@@ -12,7 +12,7 @@ citEntry(entry = "Article",
   year         = "2012",
   url          = "http://code.google.com/p/tbssurvival/",
   textVersion  =
-  paste("Adriano Polpo and Debajyoti Sinha (2012).",
+  paste("A. Polpo and C. P. de Campos and D. Sinha and S. Lipsitz and J. Lin (2012).",
         "TBSSurvival R package",
         "URL http://code.google.com/p/tbssurvival/.")
 )
