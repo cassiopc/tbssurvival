@@ -15,7 +15,8 @@
   The optimization is done by the function `optim' (or the package Rsolnp when available).
 }
 \usage{
- tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),verbose=FALSE,nstart=10,max.time=-1,ncore=1)
+ tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
+                 verbose=FALSE,nstart=10,max.time=-1,ncore=1)
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
@@ -36,7 +37,7 @@
 }
 \value{
   A list with components:
-  \item{par}{The best set of parameters found.}
+  \item{par}{The best set of parameters found, the first value of par is the estimate of lambda, the second value is the estimate of xi and the others are the beta parameter.}
   \item{std.error}{Standar error for MLE. If it is not possible to evaluate return \code{NA}}
   \item{log.lik}{The log-likelihood at parameters \code{par}.}
   \item{error.dist}{The error distribution chosen.}
@@ -46,6 +47,10 @@
   \item{KS}{Komogorov-Simirnov Statistic. It is not evaluated with matrix \code{x} of co-variables.}
   \item{method}{Numerical method used to achive the MLE.}
   \item{convergence}{If \code{convergence} is \code{FALSE} then it was not possible to find the MLE.}
+  \item{time}{observed survival times.}
+  \item{error}{error of the estimated model.}
+  \item{call}{function evaluated.}
+  \item{formula}{formula entered by user.}
   \item{run.time}{Time spent with the function.}
 }
 \references{
