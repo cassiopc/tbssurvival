@@ -82,7 +82,7 @@ for (j in 1:length(tbs.be$post[,1])) {
 }
 survival <- matrix(NA,length(axis.x),3)
 for (i in 1:length(axis.x)) {
-  survival[i,] <- c(mean(aux.x0[i,]),HPDinterval(as.mcmc(aux.x0[i,]),0.95))
+  survival[i,] <- c(mean(aux[i,]),HPDinterval(as.mcmc(aux[i,]),0.95))
 }
 rm(aux,i,j)
 
@@ -101,9 +101,9 @@ axis(2,lwd=2,lwd.ticks=2,pos=min(alloyT7987$time))
 legend(170,0.95,c("Kaplan-Meier",
                   expression(textstyle(paste("TBS / ",sep="")) ~ epsilon
                   ~ textstyle(paste("~",sep="")) ~ Logistic),
-                  "95\% HPD Interval"),
+                  "0.95 HPD Interval"),
        col=c(1,2,2),lty=c(1,1,2),cex=1.1,lwd=c(1,2,2),bg="white")
-lines(tbs.be$time,survival[,1],type="l",lwd=2,col=2,lty=1)
-lines(tbs.be$time,survival[,2],type="l",lwd=2,col=2,lty=2)
-lines(tbs.be$time,survival[,3],type="l",lwd=2,col=2,lty=2)
+lines(axis.x,survival[,1],type="l",lwd=2,col=2,lty=1)
+lines(axis.x,survival[,2],type="l",lwd=2,col=2,lty=2)
+lines(axis.x,survival[,3],type="l",lwd=2,col=2,lty=2)
 }
