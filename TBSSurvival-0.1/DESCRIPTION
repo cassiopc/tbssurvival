@@ -9,5 +9,5 @@ Suggests: multicore, snowfall, Rsolnp
 Description: This package contais the functions used to perform the reliability
   analysis using a parametric Transform-both-sides (TBS) model.
 License: GPL (>= 3)
-Repository: CRAN (to be submitted)
+Repository: CRAN
 URL: http://code.google.com/p/tbssurvival/
