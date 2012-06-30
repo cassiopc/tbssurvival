@@ -77,8 +77,8 @@ tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5, dist="l
 # evaluating the estimated survival and HPD
 axis.x <- seq(0.01,300,1)
 aux <- matrix(NA,length(axis.x),length(tbs.be$post[,1]))
-for (j in 1:length(fit.be$post[,1])) {
-  aux[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="logistic")
+for (j in 1:length(tbs.be$post[,1])) {
+  aux[,j] <- 1-ptbs(axis.x,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],beta=tbs.be$post[j,3],dist="logistic")
 }
 survival <- matrix(NA,length(axis.x),3)
 for (i in 1:length(axis.x)) {
