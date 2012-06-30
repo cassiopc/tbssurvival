@@ -8,7 +8,7 @@
 
 %%%
 \alias{alloyT7987}
-\title{Data set of...}
+\title{Data set Alloy T7987}
 \description{
 Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
 }
