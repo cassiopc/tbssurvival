@@ -28,11 +28,11 @@
 \arguments{
   \item{time}{vector of quantiles.}
   \item{p}{vector of probabilities.}
-  \item{n}{number of observations. If `length(n) > 1', the length is taken to be the number required.}
+  \item{n}{number of observations.}
   \item{lambda}{parameter of TBS.}
   \item{xi}{parameter of the error distribution.}
   \item{beta}{parameter of the linear regressor.}
-  \item{x}{vector/matrix of co-variables}
+  \item{x}{vector/matrix of co-variables, x=NULL if there are not co-variables.}
   \item{dist}{Distribution of error, dist = "norm", "t", "doubexp", "cauchy" or "logistic".}
 }
 \details{
