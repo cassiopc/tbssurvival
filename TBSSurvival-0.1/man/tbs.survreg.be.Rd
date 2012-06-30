@@ -11,18 +11,18 @@
 
 \title{Bayesian Estimation of the TBS Model for Failure Data}
 \description{
-  This function perform the Bayesian estimation of the TBS model.
-  If not specified, the prior for the parameters `lambda' and `xi' are uniform-exponential mixture and 
-  for parameter beta0 is a normal with mean 5 and sd 5, and the estimations are
+  This function perform the Bayesian estimation of the TBS model. The prior for 
+  the parameters `lambda' and `xi' are uniform-exponential mixture and, if not 
+  specified, for parameter beta0 is a normal with mean 5 and sd 5. The estimations are
   done by metroplois-hasting (using the function `metrop' availible at package `mcmc').
 }
 \usage{
   tbs.survreg.be(formula, dist = "norm",  max.time = -1, guess.beta, guess.lambda,
                  guess.xi, burn = 1000, jump = 2, size = 1000, scale = 1, 
-				 prior.mean = NULL, prior.sd = NULL)
+                 prior.mean = NULL, prior.sd = NULL)
 }
 \arguments{
-  \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
+  \item{formula}{A formula specification containing a Surv model with right-censored (or no censored) data as in the package survival.}
   \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
   \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
   \item{guess.beta}{initial value of the Markov Chain for the vector `beta'.}
@@ -42,21 +42,15 @@
 }
 \value{
   A list with components:
+  \item{call}{function evaluated.}
+  \item{x}{co-variable matrix used.}
+  \item{time}{survival time.}
+  \item{delta}{censor status.}
   \item{post}{posterior sample of the parameters.}
-  \item{KS}{Komogorov-Simirnov Statistic.}
-  \item{DIC}{Deviance Information Criterion.}
   \item{par}{the parameters are estimated as median of posterior sample.}
-  \item{par.std.error}{standard deviation of posterior sample.}
+  \item{par.sd}{standard deviation of posterior sample.}
   \item{par.HPD}{95\% high posterior density credal interval of each parameter.}
-  \item{par.KS}{Komogorov-Simirnov Statistic for reliability/survival function using the plug-in estimator.}
-  \item{par.DIC}{Deviance Information Criterion using the plug-in estimator.}
-  \item{par.error}{error of TBS model using the plug-in estimator.}
-  \item{t.median}{summary statistics, credal interval of 95\% and high posterior density credal interval of
-                  95\% for the median failure time.}
-  \item{survival}{summary statistics and high posterior density credal interval of 95\% for
-                  the posterior of reliability/survival function.}
-  \item{hazard}{summary statistics and high posterior density credal interval of 95\% for
-                  the posterior of hazard function.}
+  \item{DIC}{Deviance Information Criterion.}
   \item{error}{summary statistics and high posterior density credal interval of 95\% for
                   the posterior of error of TBS model.}
   \item{run.time}{Time spent with the function.}
@@ -73,14 +67,26 @@ set.seed(1234)
 
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131)
 data(alloyT7987)
-alloyT7987$time <- as.double(alloyT7987$time)
+alloyT7987$time  <- as.double(alloyT7987$time)
 alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # Bayesian estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
 tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5, dist="logistic",
                             burn=1000,jump=10,size=1000,scale=0.06)
+# evaluating the estimated survival and HPD
+axis.x <- seq(0.01,300,1)
+aux <- matrix(NA,length(axis.x),length(tbs.be$post[,1]))
+for (j in 1:length(fit.be$post[,1])) {
+  aux[,j] <- 1-ptbs(axis.x,lambda=fit.be$post[j,1],xi=fit.be$post[j,2],beta=fit.be$post[j,3],dist="logistic")
+}
+survival <- matrix(NA,length(axis.x),3)
+for (i in 1:length(axis.x)) {
+  survival[i,] <- c(mean(aux.x0[i,]),HPDinterval(as.mcmc(aux.x0[i,]),0.95))
+}
+rm(aux,i,j)
 
+# Kapan-Meier estimator
 km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
 
 plot(km,ylab="",xlab="", xlim=c(min(alloyT7987$time),max(alloyT7987$time)),
@@ -97,7 +103,7 @@ legend(170,0.95,c("Kaplan-Meier",
                   ~ textstyle(paste("~",sep="")) ~ Logistic),
                   "95\% HPD Interval"),
        col=c(1,2,2),lty=c(1,1,2),cex=1.1,lwd=c(1,2,2),bg="white")
-lines(tbs.be$time,tbs.be$survival[,3],type="l",lwd=2,col=2,lty=1)
-lines(tbs.be$time,tbs.be$survival[,7],type="l",lwd=2,col=2,lty=2)
-lines(tbs.be$time,tbs.be$survival[,8],type="l",lwd=2,col=2,lty=2)
+lines(tbs.be$time,survival[,1],type="l",lwd=2,col=2,lty=1)
+lines(tbs.be$time,survival[,2],type="l",lwd=2,col=2,lty=2)
+lines(tbs.be$time,survival[,3],type="l",lwd=2,col=2,lty=2)
 }
