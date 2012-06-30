@@ -219,7 +219,10 @@ for (i.d in 1:length(dist)) {
 ####### Generating from Weibull distribution
 # Distributionsm sample sizes, percentage of censure and number of copies
 # are the same of "Weibull simulation"
-par <- matrix(NA,18,3)   # matrix with parameters combination
+dist <- c("norm","t","logistic","cauchy","doubexp") # Distributions to be estimate
+n    <- 1000                                        # Sample sizes
+cens <- c(0,0.2,0.4,0.6)                            # percentage of censure
+par  <- matrix(NA,15,3)   # matrix with parameters combination
 par[1,]  <- c(0.5,0.5,1)
 par[2,]  <- c(0.5,1.0,1)
 par[3,]  <- c(0.5,2.0,1)
@@ -235,9 +238,7 @@ par[12,] <- c(0.5,2.0,5)
 par[13,] <- c(1.0,0.5,5)
 par[14,] <- c(1.0,1.0,5)
 par[15,] <- c(1.0,2.0,5)
-par[16,] <- c(2.0,0.5,5)
-par[17,] <- c(2.0,1.0,5)
-par[18,] <- c(2.0,2.0,5)
+n.copies <- 1000                                    # numeber of copies for each scenario
 
 cat("\n"); cat("TBS simulation:\n")
 cat("This simulation will estimate a total of ",
