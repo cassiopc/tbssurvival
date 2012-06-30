@@ -85,12 +85,10 @@ dev.off()
 # Meeker & Escobar, pp. 130-131 (1998)                                                     #
 ############################################################################################
 data(alloyT7987)
-time  <- alloyT7987$time
-delta <- alloyT7987$delta
 
 #Summary statistic of the failure time in thousand cycles for the Alloy T7987 data set.
 cat("Time AlloyT7987: Summary statistics\n")
-print(summary(time))
+print(summary(alloyT7987$time))
 
 
 ###########
@@ -98,11 +96,11 @@ print(summary(time))
 cat("\n"); cat("Maximum Likelihood Estimation:\n")
 
 # MLE Estimation for each possible error distribution
-tbs.mle.norm     <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="norm")
-tbs.mle.doubexp  <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="doubexp")
-tbs.mle.t        <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="t")
-tbs.mle.cauchy   <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="cauchy")
-tbs.mle.logistic <- tbs.survreg.mle(Surv(time,delta) ~ 1,dist="logistic")
+tbs.mle.norm     <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="norm")
+tbs.mle.doubexp  <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="doubexp")
+tbs.mle.t        <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="t")
+tbs.mle.cauchy   <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="cauchy")
+tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic")
 
 # Building the Table of Example (MLE)
 text <- paste("\\begin{center}\n",
@@ -141,17 +139,17 @@ cat(text, file="table_alloy-mle.tex")
 rm(text)
 
 # Estimating the Kaplan-Meier
-km <- survfit(formula = Surv(time, delta == 1) ~ 1)
+km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
 
 i.fig <- i.fig+1
 # Figure (a) - Reliability functions (MLE)
 name <- paste("tbs_fig_",i.fig,"a",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
-plot(km,ylab="",xlab="",xlim=c(min(time),max(time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
-t <- seq(min(time),max(time),(max(time)-min(time)-0.01)/1000)
+plot(km,ylab="",xlab="",xlim=c(min(alloyT7987$time),max(alloyT7987$time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
+t <- seq(min(alloyT7987$time),max(alloyT7987$time),(max(alloyT7987$time)-min(alloyT7987$time)-0.01)/1000)
 title(ylab="R(t)",xlab="t: number of cycles (in thousands)",main="Reliability function (MLE)",cex.lab=1.2)
 axis(1,at=c(93,100,150,200,250,300),lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=min(time))
+axis(2,lwd=2,lwd.ticks=2,pos=min(alloyT7987$time))
 legend(170,0.95,c("Kaplan-Meier",
                  expression(textstyle(paste("TBS / ",sep="")) ~ epsilon ~ textstyle(paste("~",sep="")) ~ Normal)),
                  col=c(1,"gray20"),lty=c(1,1),cex=1.1,lwd=c(1,2),bg="white")
@@ -192,27 +190,27 @@ cat("95% c.i.: (",round(exp(tbs.mle.norm$par[3]+qnorm(0.025,0,1)*tbs.mle.norm$st
 cat("\n"); cat("Bayesian Estimation:\n")
 
 #Bayesian Estimation
-tbs.bayes.norm     <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="norm",
+tbs.bayes.norm     <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="norm",
                                      guess.beta=tbs.mle.norm$par[3],
                                      guess.lambda=tbs.mle.norm$par[1],
                                      guess.xi=tbs.mle.norm$par[2],
                                      burn=500000,jump=2000,size=1000,scale=0.07)
-tbs.bayes.t        <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="t",
+tbs.bayes.t        <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="t",
                                      guess.beta=tbs.mle.t$par[3],
                                      guess.lambda=tbs.mle.t$par[1],
                                      guess.xi=tbs.mle.t$par[2],
                                      burn=500000,jump=2000,size=1000,scale=0.07)
-tbs.bayes.cauchy   <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="cauchy",
+tbs.bayes.cauchy   <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="cauchy",
                                      guess.beta=tbs.mle.cauchy$par[3],
                                      guess.lambda=tbs.mle.cauchy$par[1],
                                      guess.xi=tbs.mle.cauchy$par[2],
                                      burn=500000,jump=2000,size=1000,scale=0.07)
-tbs.bayes.doubexp  <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="doubexp",
+tbs.bayes.doubexp  <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="doubexp",
                                      guess.beta=tbs.mle.doubexp$par[3],
                                      guess.lambda=tbs.mle.doubexp$par[1],
                                      guess.xi=tbs.mle.doubexp$par[2],
                                      burn=500000,jump=2000,size=1000,scale=0.07)
-tbs.bayes.logistic <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
+tbs.bayes.logistic <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",
                                      guess.beta=tbs.mle.logistic$par[3],
                                      guess.lambda=tbs.mle.logistic$par[1],
                                      guess.xi=tbs.mle.logistic$par[2],
@@ -255,19 +253,19 @@ rm(text)
 
 
 # Evaluating the Survival and Hazard functions
-aux.hazard   <- matrix(0,length(time),length(tbs.bayes.logistic$post[,1]))
-aux.survival <- matrix(0,length(time),length(tbs.bayes.logistic$post[,1]))
+aux.hazard   <- matrix(0,length(alloyT7987$time),length(tbs.bayes.logistic$post[,1]))
+aux.survival <- matrix(0,length(alloyT7987$time),length(tbs.bayes.logistic$post[,1]))
 for (j in 1:length(tbs.bayes.logistic$post[,1])) {
-  aux.hazard[,j]   <- c(htbs(time, lambda=tbs.bayes.logistic$post[j,1], xi=tbs.bayes.logistic$post[j,2],
+  aux.hazard[,j]   <- c(htbs(alloyT7987$time, lambda=tbs.bayes.logistic$post[j,1], xi=tbs.bayes.logistic$post[j,2],
                              beta=tbs.bayes.logistic$post[j,3:length(tbs.bayes.logistic$post[1,])],
                              dist="logistic"))
-  aux.survival[,j] <- c(1-ptbs(time, lambda=tbs.bayes.logistic$post[j,1], xi=tbs.bayes.logistic$post[j,2],
+  aux.survival[,j] <- c(1-ptbs(alloyT7987$time, lambda=tbs.bayes.logistic$post[j,1], xi=tbs.bayes.logistic$post[j,2],
                                beta=tbs.bayes.logistic$post[j,3:length(tbs.bayes.logistic$post[1,])],
                                dist="logistic"))
 }
-be.hazard   <- matrix(0,length(time),3)
-be.survival <- matrix(0,length(time),3)
-for (i in 1:length(time)) {
+be.hazard   <- matrix(0,length(alloyT7987$time),3)
+be.survival <- matrix(0,length(alloyT7987$time),3)
+for (i in 1:length(alloyT7987$time)) {
   be.hazard[i,]   <- c(  mean(aux.hazard[i,]),HPDinterval(as.mcmc(  aux.hazard[i,]),0.95))
   be.survival[i,] <- c(mean(aux.survival[i,]),HPDinterval(as.mcmc(aux.survival[i,]),0.95))
 }
@@ -278,32 +276,32 @@ i.fig <- i.fig+1
 # Figure (a) - Reliability functions / Boundary (Bayes)
 name <- paste("tbs_fig_",i.fig,"a",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
-plot(km,ylab="",xlab="",xlim=c(min(time),max(time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
-t <- seq(min(time),max(time),(max(time)-min(time)-0.01)/1000)
+plot(km,ylab="",xlab="",xlim=c(min(alloyT7987$time),max(alloyT7987$time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
+t <- seq(min(alloyT7987$time),max(alloyT7987$time),(max(alloyT7987$time)-min(alloyT7987$time)-0.01)/1000)
 title(ylab="R(t)",xlab="t: number of cycles (in thousands)",main="Reliability function (BE)",cex.lab=1.2)
 axis(1,at=c(93,100,150,200,250,300),lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=min(time))
+axis(2,lwd=2,lwd.ticks=2,pos=min(alloyT7987$time))
 legend(170,0.95,c("Kaplan-Meier",
                  expression(textstyle(paste("TBS / ",sep="")) ~ epsilon ~ textstyle(paste("~",sep="")) ~ Logistic),
                  "95% HPD Interval"),
                  col=c(1,"gray20","gray20"),lty=c(1,1,2),cex=1.1,lwd=c(1,2,2),bg="white")
-lines(time,be.survival[,1],type="l",lwd=2,col="gray20",lty=1)
-lines(time,be.survival[,2],type="l",lwd=2,col="gray20",lty=2)
-lines(time,be.survival[,3],type="l",lwd=2,col="gray20",lty=2)
+lines(alloyT7987$time,be.survival[,1],type="l",lwd=2,col="gray20",lty=1)
+lines(alloyT7987$time,be.survival[,2],type="l",lwd=2,col="gray20",lty=2)
+lines(alloyT7987$time,be.survival[,3],type="l",lwd=2,col="gray20",lty=2)
 dev.off()
 
 # Figure (b) - Hazard functions (Bayes)
 name <- paste("tbs_fig_",i.fig,"b",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
- plot(time,be.hazard[,1],type="l",col="gray20",lwd=2,axes="FALSE",ylim=c(0,0.05),xlab="",ylab="")
+ plot(alloyT7987$time,be.hazard[,1],type="l",col="gray20",lwd=2,axes="FALSE",ylim=c(0,0.05),xlab="",ylab="")
 title(ylab="h(t)",xlab="t: number of cycles (in thousands)",main="Hazard function (BE)",cex.lab=1.2)
 legend(100,0.048,c(expression(textstyle(paste("TBS / ",sep="")) ~ epsilon ~ textstyle(paste("~",sep="")) ~ Logistic),
                    "95% HPD Interval"),
                    col=c("gray20","gray20"),lty=c(1,2),cex=1.1,lwd=2,bg="white")
 axis(1,at=c(80,100,150,200,250,300),lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=min(time))
-lines(time,be.hazard[,2],type="l",lwd=2,col="gray20",lty=2)
-lines(time,be.hazard[,3],type="l",lwd=2,col="gray20",lty=2)
+axis(2,lwd=2,lwd.ticks=2,pos=min(alloyT7987$time))
+lines(alloyT7987$time,be.hazard[,2],type="l",lwd=2,col="gray20",lty=2)
+lines(alloyT7987$time,be.hazard[,3],type="l",lwd=2,col="gray20",lty=2)
 dev.off()
 
 
@@ -336,22 +334,22 @@ if (flag.convergence) {
   dev.off()
   
   # Analysis with 4 chains
-  chain.logistic1 <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
+  chain.logistic1 <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",
                                     guess.beta=tbs.mle.logistic$par[3],
                                     guess.lambda=tbs.mle.logistic$par[1],
                                     guess.xi=tbs.mle.logistic$par[2],
                                     burn=1,jump=1,size=250000,scale=0.06)
-  chain.logistic2 <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
+  chain.logistic2 <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",
                                     guess.beta=6,
                                     guess.lambda=1,
                                     guess.xi=1,
                                     burn=1,jump=1,size=250000,scale=0.06)
-  chain.logistic3 <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
+  chain.logistic3 <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",
                                     guess.beta=4,
                                     guess.lambda=2,
                                     guess.xi=2,
                                     burn=1,jump=1,size=250000,scale=0.06)
-  chain.logistic4 <- tbs.survreg.be(Surv(time,delta) ~ 1,dist="logistic",
+  chain.logistic4 <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",
                                     guess.beta=5.5,
                                     guess.lambda=0.5,
                                     guess.xi=0.5,
@@ -391,7 +389,7 @@ if (flag.convergence) {
 
   #Figure: Ergodic Means - beta
   i.conv <- i.conv+1
-  name <- paste("tbs_fig-conv_",i.fig,".eps",sep="")
+  name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
   aux.1 <- cumsum(chain.logistic1$post[,3])/seq(1,n,1)
   aux.2 <- cumsum(chain.logistic2$post[,3])/seq(1,n,1)
@@ -429,17 +427,17 @@ if (flag.convergence) {
 # Colon Cancer - library(survival)                                                         #
 ############################################################################################
 cat("\n"); cat("\n"); cat("Data - Colon\n")
-data <- colon
+data(colon)
 
 ###########
 # Part MLE
 cat("\n"); cat("Maximum Likelihood Estimation:\n")
 
 # Estimating TBS model with normal error distribution
-fit.mle <- tbs.survreg.mle(Surv(data$time,data$status) ~ data$node4,dist="norm")
+fit.mle <- tbs.survreg.mle(Surv(colon$time,colon$status) ~ colon$node4,dist="norm")
 
 # Kaplan-Meier estimates
-km <- survfit(formula = Surv(data$time, data$status) ~ data$node4)
+km <- survfit(formula = Surv(colon$time,colon$status) ~ colon$node4)
 
 # evaluating the estimated survival functions for both groups
 axis.x <- seq(0.01,3000,1)
@@ -480,7 +478,7 @@ cat("95% c.i.: (",round(exp(fit.mle$par[4]+qnorm(0.025,0,1)*fit.mle$std.error[4]
 cat("\n"); cat("Bayesian Estimation:\n")
 
 # Estimating TBS model with normal error distribution
-fit.be <- tbs.survreg.be(Surv(data$time,data$status) ~ data$node4,dist="norm",
+fit.be <- tbs.survreg.be(Surv(colon$time,colon$status) ~ colon$node4,dist="norm",
                          guess.lambda=fit.mle$par[1],
                          guess.xi=fit.mle$par[2],
                          guess.beta=fit.mle$par[3:4],
