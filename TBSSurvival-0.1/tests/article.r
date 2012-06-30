@@ -21,8 +21,16 @@
 #######
 
 library("TBSSurvival")
+## IF YOU DONT HAVE THE LIBRARY, PLEASE DOWNLOAD IT FROM
+## http://code.google.com/p/tbssurvival/
+## AND INSTALL IT USING:
+## R CMD install TBSSurvival_version.tar.gz
+## OR INSIDE R:
+## install.packages(""TBSSurvival_version.tar.gz",repos=NULL,type="source")
+##
 
-# To perform convergence analysis of BE set flag.convergence "TRUE".
+## To perform convergence analysis of BE set flag.convergence "TRUE".
+## This takes some extra time to run however...
 flag.convergence <- TRUE
 
 initial.time <- proc.time()
@@ -34,7 +42,9 @@ set.seed(1234)
 ##########################################
 
 i.fig <- 1 # counter figure number
-# Figure (a)
+## Figure 1(a)
+## hazard functions with normal N(0,1) error
+## plotted for lambda = 0.1, 1 and 2, 
 name <- paste("tbs_fig_",i.fig,"a",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 t <- seq(0.01,10,0.01)
@@ -51,7 +61,9 @@ legend(6,0.95,c(expression(lambda == 0.1),
               col=c("gray60","gray40","gray20"),lty=c(1,2,3),cex=1.1,lwd=2,bg="white")
 dev.off()
 
-# Figure (b)
+## Figure 1(b)
+## hazard functions with double-exp error (b=1)
+## and lambda = 0.5, 1, and 2
 name <- paste("tbs_fig_",i.fig,"b",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 t <- seq(0.01,10,0.01)
@@ -86,23 +98,25 @@ dev.off()
 ############################################################################################
 data(alloyT7987)
 
-#Summary statistic of the failure time in thousand cycles for the Alloy T7987 data set.
+## Summary statistic of the failure time in thousand cycles for the Alloy T7987 data set.
 cat("Time AlloyT7987: Summary statistics\n")
 print(summary(alloyT7987$time))
 
 
 ###########
-# Part MLE
+## Part MLE
 cat("\n"); cat("Maximum Likelihood Estimation:\n")
 
-# MLE Estimation for each possible error distribution
+## MLE Estimation for each possible error distribution
 tbs.mle.norm     <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="norm")
 tbs.mle.doubexp  <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="doubexp")
 tbs.mle.t        <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="t")
 tbs.mle.cauchy   <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="cauchy")
 tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic")
 
-# Building the Table of Example (MLE)
+## Building the Table of Example (MLE)
+## This is only for ease of inclusion in the paper, as the results are all available
+## in the corresponding R variables
 text <- paste("\\begin{center}\n",
               "\\begin{table}\n",
               "\\caption{Some quantities of the TBS Model for the Alloy T7987 data set ",
@@ -138,11 +152,13 @@ text <- paste("\\begin{center}\n",
 cat(text, file="table_alloy-mle.tex")
 rm(text)
 
-# Estimating the Kaplan-Meier
+## Estimating the Kaplan-Meier
+## This is used to plot the graph with the comparison of the estimations
 km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
 
 i.fig <- i.fig+1
-# Figure (a) - Reliability functions (MLE)
+## Figure 2(a) - Reliability functions (MLE)
+## Kaplan-Meier is also plotted
 name <- paste("tbs_fig_",i.fig,"a",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,ylab="",xlab="",xlim=c(min(alloyT7987$time),max(alloyT7987$time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
@@ -157,7 +173,7 @@ lines(t,1-ptbs(t,lambda=tbs.mle.norm$par[1],xi=tbs.mle.norm$par[2],
                beta=tbs.mle.norm$par[3],dist=tbs.mle.norm$error.dist),type="l",lwd=2,col="gray20",lty=1)
 dev.off()
 
-# Figure (b) - Hazard functions (MLE)
+## Figure 2(b) - Hazard function (MLE)
 name <- paste("tbs_fig_",i.fig,"b",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 t <- seq(0.01,350,(350-0.01)/1000)
@@ -173,7 +189,7 @@ lines(t,htbs(t,lambda=tbs.mle.norm$par[1],xi=tbs.mle.norm$par[2],
              beta=tbs.mle.norm$par[3],dist=tbs.mle.norm$error.dist),type="l",col="gray20",lwd=2)
 dev.off()
 
-# Residual summary statistics of TBS model with normal error distribution (MLE).
+## Residual summary statistics of TBS model with normal error distribution (MLE).
 cat("\n"); cat("Error: Summary statistics\n")
 print(summary(tbs.mle.norm$error))
 
@@ -186,10 +202,11 @@ cat("95% c.i.: (",round(exp(tbs.mle.norm$par[3]+qnorm(0.025,0,1)*tbs.mle.norm$st
 
 
 ###########
-# Part BE
+## Part of the Bayesian estimation
 cat("\n"); cat("Bayesian Estimation:\n")
 
-#Bayesian Estimation
+## Bayesian Estimation
+## We run for each of the five error functions
 tbs.bayes.norm     <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="norm",
                                      guess.beta=tbs.mle.norm$par[3],
                                      guess.lambda=tbs.mle.norm$par[1],
@@ -216,7 +233,9 @@ tbs.bayes.logistic <- tbs.survreg.be(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,
                                      guess.xi=tbs.mle.logistic$par[2],
                                      burn=500000,jump=2000,size=1000,scale=0.07)
 
-# Building the Table of Example (Bayes)
+## Here it is the code for Building the Table that goes into the paper
+## As before, all the info is already available in the R variables. The
+## table is just for presentation purposes.
 text <- paste("\\begin{center}\n",
               "\\begin{table}\n",
               "\\caption{Some quantities of the TBS Model for the Alloy T7987 data set using",
@@ -251,8 +270,11 @@ text <- paste("\\begin{center}\n",
 cat(text, file="table_alloy-bayes.tex")
 rm(text)
 
-
-# Evaluating the Survival and Hazard functions
+## Evaluating the Survival and Hazard functions
+## This code uses the output of the Bayesian estimation with the logistic error
+## to build the survival and hazard functions. The logistic is chosen because it
+## is the one with the best results for the particular data set, so we use it
+## to illustrate the curves in the next plots.
 aux.hazard   <- matrix(0,length(alloyT7987$time),length(tbs.bayes.logistic$post[,1]))
 aux.survival <- matrix(0,length(alloyT7987$time),length(tbs.bayes.logistic$post[,1]))
 for (j in 1:length(tbs.bayes.logistic$post[,1])) {
@@ -273,7 +295,9 @@ rm(aux.hazard,aux.survival)
 
 
 i.fig <- i.fig+1
-# Figure (a) - Reliability functions / Boundary (Bayes)
+## Figure 3(a) - Reliability functions / Boundary (Bayes)
+## This code generates the plot of the Kaplan-Meier and TBS BE estimation with
+## the logistic error distribution. It also plots the 95% HPD credible interval
 name <- paste("tbs_fig_",i.fig,"a",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
 plot(km,ylab="",xlab="",xlim=c(min(alloyT7987$time),max(alloyT7987$time)),conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
@@ -290,7 +314,8 @@ lines(alloyT7987$time,be.survival[,2],type="l",lwd=2,col="gray20",lty=2)
 lines(alloyT7987$time,be.survival[,3],type="l",lwd=2,col="gray20",lty=2)
 dev.off()
 
-# Figure (b) - Hazard functions (Bayes)
+## Figure 3(b) - Hazard functions (Bayes)
+## Again, the hazard function plus the 95% HPD interval for the TBS BE with logistic error
 name <- paste("tbs_fig_",i.fig,"b",".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
  plot(alloyT7987$time,be.hazard[,1],type="l",col="gray20",lwd=2,axes="FALSE",ylim=c(0,0.05),xlab="",ylab="")
@@ -320,7 +345,9 @@ if (flag.convergence) {
   # See the first lines of this code.
   
   i.conv <- 1
-  # Figure - ACF and Time series graphics
+  ## Figure - ACF and Time series graphics
+  ## Although this generates graphs regarding the convergence analysis,
+  ## they do not appear in the body of the paper.
   name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
   par(mfrow=c(2,3))
@@ -357,7 +384,8 @@ if (flag.convergence) {
   
   n <- length(chain.logistic1$post[,1])
   aux <- seq(1,n,500) 
-  #Figure: Ergodic Means - lambda
+  ## Figure: Ergodic Means - lambda
+  ## Again, the graphs about convergence are generated, but do not appear in the paper.
   i.conv <- i.conv+1
   name <- paste("tbs_fig-conv_",i.conv,".eps",sep="")
   eps(name,width=5,height=5,paper="special",colormodel="gray")
@@ -403,7 +431,9 @@ if (flag.convergence) {
   dev.off()
   rm(aux,aux.1,aux.2,aux.3,aux.4)
   
-  # Gelman and Rubin Statistics
+  ## Gelman and Rubin Statistics
+  ## It is presented in the paper to mention the convergence
+  ## of the parameters estimated with BE
   R <- rep(0,3)
   for (j in 1:3) {
     W <- (var(chain.logistic1$post[,j])+var(chain.logistic2$post[,j])+var(chain.logistic3$post[,j])+var(chain.logistic4$post[,j]))/4
@@ -444,7 +474,9 @@ axis.x <- seq(0.01,3000,1)
 x0 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3]),dist="norm")
 x1 <- 1-ptbs(axis.x,lambda=fit.mle$par[1],xi=fit.mle$par[2],beta=sum(fit.mle$par[3:4]),dist="norm")
 
-# Figure: estimated survival functions (MLE)
+## Figure 4(a): estimated survival functions (MLE)
+## This plots the Kaplan-Meier and the TBS curves for the colon data set,
+## with the patients split into 2 groups based on the variable node4
 i.fig <- i.fig+1
 name <- paste("tbs_fig_",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
@@ -459,6 +491,8 @@ legend(100,0.22,c("TBS | X=0","TBS | X=1","Kaplan-Meier"),lty=c(2,1,1),lwd=c(3,3
 dev.off()
 
 ## Quantile Estimation
+## This results of the quantile estimation with MLE are not displayed in the paper,
+## because they are very similar to the BE results, which we present.
 cat("\n"); cat("Quatile estimates:\n")
 cat("Median time | X=0: ",round(exp(fit.mle$par[3]),2),"\n")
 cat("95% c.i.: (",round(exp(fit.mle$par[3]+qnorm(0.025,0,1)*fit.mle$std.error[3]),2),",",
@@ -477,7 +511,9 @@ cat("95% c.i.: (",round(exp(fit.mle$par[4]+qnorm(0.025,0,1)*fit.mle$std.error[4]
 # Part BE
 cat("\n"); cat("Bayesian Estimation:\n")
 
-# Estimating TBS model with normal error distribution
+## Estimating TBS model with normal error distribution
+## The same as before for the colon data set with node4 as discriminative covariate,
+## but now using the Bayesian estimation
 fit.be <- tbs.survreg.be(Surv(colon$time,colon$status) ~ colon$node4,dist="norm",
                          guess.lambda=fit.mle$par[1],
                          guess.xi=fit.mle$par[2],
@@ -487,7 +523,8 @@ fit.be <- tbs.survreg.be(Surv(colon$time,colon$status) ~ colon$node4,dist="norm"
                          size=1000,
                          scale=0.05)
 
-# Estimating the survival function
+## Estimating the survival function
+## Computing the survival function for presenting in figure 4(b)
 axis.x <- seq(0.01,3000,1)
 aux.x0 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
 aux.x1 <- matrix(NA,length(axis.x),length(fit.be$post[,1]))
@@ -503,7 +540,8 @@ for (i in 1:length(axis.x)) {
 }
 rm(aux.x0,aux.x1,i,j)
 
-# Figure: estimated survival functions (BE)
+## Figure 4(b): estimated survival functions (BE)
+## It also shows the Kaplan-Meier and the 95% HPD credible intervals
 i.fig <- i.fig+1
 name <- paste("tbs_fig_",i.fig,".eps",sep="")
 eps(name,width=5,height=5,paper="special",colormodel="gray")
@@ -522,6 +560,7 @@ legend(100,0.25,c("TBS | X=0","TBS | X=1","HPD CI 95%","Kaplan-Meier"),lty=c(2,1
 dev.off()
 
 ## Quantile Estimation
+## This results are discussed in the final part of section 4.1 of the paper
 cat("\n"); cat("Quatile estimates:\n")
 median.0 <- mean(exp(fit.be$post[,3]))
 hpd <- HPDinterval(as.mcmc(exp(fit.be$post[,3])),0.95)
@@ -549,6 +588,8 @@ if (FALSE) {
 #####################
 # End
 
-
+## finally, just print the total time to run it.
+## Without running the article_simulation.r (which many take a very long time),
+## this file should run in about 2 to 3 hours in a modern computer (as of June-2012).
 run.time <- (proc.time()[3]-initial.time[3])/60
 print(run.time)
