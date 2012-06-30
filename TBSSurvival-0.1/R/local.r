@@ -275,7 +275,7 @@
         if(verbose) cat(' failed\n')
         out$run.time <- .gettime() - initial.time
         out$convergence <- FALSE
-        warning(paste(method,": It was not possible to find a feasible solution"))
+        cat(paste(method,": It was not possible to find a feasible solution"))
       }
       return(out)
     }
@@ -381,7 +381,7 @@
     if(verbose) cat(' failed\n')
     out$convergence <- FALSE
     out$run.time <- .gettime() - initial.time
-    warning(paste(method,": It was not possible to find a feasible solution"))
+    cat(paste(method,": It was not possible to find a feasible solution"))
   }
   return(out)
 }
@@ -396,13 +396,13 @@
   if ((dist != "norm") && (dist != "doubexp") && (dist != "cauchy") &&
       (dist != "t")    && (dist != "logistic"))
     stop("dist: Distribution not available")
-  if (!is.double(xi))
+  if (!is.numeric(xi))
     stop("xi is not a number")
   if (is.matrix(xi))
     stop("xi is matrix")
-  if ((!is.double(lambda)) || (length(lambda) != 1))
+  if ((!is.numeric(lambda)) || (length(lambda) != 1))
     stop("lambda is not a number or length != 1")
-  if (!is.double(beta))
+  if (!is.numeric(beta))
     stop("beta is not a (vector) number")
   if (is.matrix(beta))
     stop("beta is matrix")
@@ -427,7 +427,7 @@
 
   if (!is.null(type)) {
     if ((type == "d") || (type == "p")) {
-      if (!is.double(time))
+      if (!is.numeric(time))
         stop("time is not a (vector) number")
       if (is.matrix(time))
         stop("time is matrix")
@@ -454,7 +454,7 @@
       }
     } else {
       if (type == "q") {
-        if (!is.double(p))
+        if (!is.numeric(p))
           stop("p is not a (vector) number")
         if (is.matrix(p))
           stop("p is matrix")
@@ -463,7 +463,7 @@
         if (max(p) > 1)
           stop("p > 1")
       } else if (type == "r") {
-          if (!is.double(n))
+          if (!is.numeric(n))
             stop("n is not a number")
           if (n %% 1 != 0)
             stop("n is not a integer number")
