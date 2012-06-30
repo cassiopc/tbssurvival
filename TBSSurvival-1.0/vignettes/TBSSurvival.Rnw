@@ -144,7 +144,7 @@ logistic ( \verb=dist= = \verb="logistic"=) distributions.
 In case you have not yet done so, the first thing to do before using the functions is to install and load the library.
 
 <<tbsinst,eval=FALSE>>=
-install.packages("TBSSurvival_0.1.tar.gz",repos=NULL,type="source")
+install.packages("TBSSurvival_VERSION.tar.gz",repos=NULL,type="source")
 @ 
 <<<tbs>>=
 library("TBSSurvival")

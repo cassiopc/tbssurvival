@@ -36,7 +36,7 @@ installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
 
   ## this following line install the TBS package itself, so nothing else is needed.
   ## For testing, sometimes it is better to work without installing it for a while...
-  ##      install.packages('./TBSSurvival_0.1.tar.gz',repos=NULL,type="source")
+  ##      install.packages('./TBSSurvival_version.tar.gz',repos=NULL,type="source")
 }
 
 loadlibs <- function(libdir=NULL) {
