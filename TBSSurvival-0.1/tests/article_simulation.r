@@ -18,12 +18,19 @@
 ## This code is used for testing purposes. The TBSSurvival library does not
 ## depend on it for any of its functionalities
 library("TBSSurvival")
+## IF YOU DONT HAVE THE LIBRARY, PLEASE DOWNLOAD IT FROM
+## http://code.google.com/p/tbssurvival/
+## AND INSTALL IT USING:
+## R CMD install TBSSurvival_version.tar.gz
+## OR INSIDE R:
+## install.packages(""TBSSurvival_version.tar.gz",repos=NULL,type="source")
+##
 
 ######################
-# simulation: function used to generate data from Weibull distribution and
-#             then compare the Weibull model with TBSmodel.
-#             Also, this function is used to analyse if TBSmodel MLE is 
-#             working well.
+## simulation: function used to generate data from Weibull distribution and
+##             then compare the Weibull model with the TBS model.
+##             Also, this function is used to analyse if the TBS model MLE is 
+##             working just fine.
 sim.weib <- function(gen=list(n=100,cens=0,shape=2,scale=3),est=list(dist="norm"),
                      n.copies=1,initial.seed=1234,method="BFGS",verbose=TRUE,prefix="") {
   # gen: is a list with the parameters to generate from a Weibull distribution
@@ -179,7 +186,15 @@ sim.tbs <- function(gen=list(n=100,cens=0,lambda=2,xi=3,beta=1,dist="norm"),
 
 
 ##############################################
-# Building a code to run simulations
+##
+## Building a code to run simulations
+##
+## The following code generates an R source file with
+## many calls to the functions defined above. The idea
+## is to run experiments with many different possible
+## scenarios to test the code performance / accuracy.
+##
+#########################
 
 ####### Generating from Weibull distribution
 dist <- c("norm","t","logistic","cauchy","doubexp") # Distributions to be estimate
@@ -266,9 +281,14 @@ text <- paste(text,"run.time <- proc.time()[3]/60-initial.time\ncat('running tim
 # write a file to run the simulations
 cat(text,file="article_run-simulation.r",append=FALSE,sep="")
 
-# runing simulations
+## runing simulations
+## UNLESS TO CHANGE THE NEXT LINE THE FALSE TO TRUE,
+## THIS FILE WILL ONLY GENERATE THE .R FILE WITH THE CALLS,
+## BUT WILL NOT RUN ALL THE FUNCTION CALLS. THIS IS DONE LIKE
+## THAT SO AS WE COULD RUN THESE FUNCTION CALLS IN PARALLEL IN
+## A SUPERCOMPUTING CENTRE, DRASTICALLY REDUCING THE TOTAL RUNNING-TIME
+## In summary, we have not executed all the function calls that are
+## generated in the file article_run-simulation.r sequentially, but in parallel.
 if (FALSE) {
 source("article_run-simulation.r")
 }
-
-
