@@ -58,9 +58,12 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
 
   out <- NULL
   out$call <- Call
-  out$x <- x
-  out$time <- time
-  out$delta <- delta
+  if (is.matrix(x))
+    out$x <- x[order(time),]
+  else
+    out$x <- x[order(time)]
+  out$delta <- delta[order(time)]
+  out$time <- time[order(time)]
 
   ## perform a series of verifications for the given arguments of the function
   if (length(guess.lambda) != 1)
