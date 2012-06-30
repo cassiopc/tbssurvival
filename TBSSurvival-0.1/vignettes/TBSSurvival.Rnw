@@ -132,7 +132,7 @@ g_\lambda(\log(T)) = g_\lambda(\theta(\mathbf{X})) + \varepsilon,
 where the function $g_\lambda(\cdot)$ is the TBS defined by
 \begin{equation}
 \label{gl}
-g_\lambda(u) = \textnormal{sign}(u) |u|^\lambda,
+g_\lambda(u) = \frac{\textnormal{sign}(u) |u|^\lambda}{\lambda},
 \end{equation}
 \noindent
 $\textnormal{sign}(u) = 1$ if $u \geq 0$ and $\textnormal{sign}(u) = -1$ if $u < 0$, $\lambda > 0$, $\theta(\mathbf{X})$ is a function of co-variables and the error has some distribution ($\varepsilon \sim F_\varepsilon$) with parameter $\xi$.
