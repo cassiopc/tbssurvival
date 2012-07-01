@@ -60,13 +60,6 @@
   \code{\link{tbs.survreg.be},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
-# The colon data set is available within the library survival
-data(colon)
-# Running MLE on colon without covariates
-colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,nstart=3,
-		  	 			     dist="norm",method="Nelder-Mead",
-                             verbose=TRUE)
-
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
 data(alloyT7987)
 alloyT7987$time <- as.double(alloyT7987$time)
@@ -74,7 +67,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # MLE estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="BFGS",nstart=3)
+tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="Nelder-Mead",nstart=3)
 
 # Kaplan-Meier estimation
 km <- survfit(formula)
