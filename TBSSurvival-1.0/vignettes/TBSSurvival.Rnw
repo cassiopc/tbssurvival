@@ -269,7 +269,7 @@ method itself:
 
 <<mle>>=
 formula <- Surv(data[,1],data[,2]) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="norm")
+tbs.mle <- tbs.survreg.mle(formula,dist="norm",nstart=1,method="BFGS")
 tbs.mle
 @
 
@@ -310,16 +310,15 @@ used. In fact, we use the same framework of formulas as other survival packages.
 We also point out that different optimization methods are available in order to
 maximize the likelihood with the TBS model. If the argument \verb=method= is not
 specific, all of them will be tried, and eventually the best one will be
-returned. As one can see, the output contains already some score criteria and
-other useful information.
-<<covars>>=
+returned. The output, saved in the variable \verb=s= in the following example,
+contains some score criteria and other useful information.
+<<covars,eval=FALSE>>=
 library(survival)
 data(colon)
 ## Running MLE on colon (from survival package) with a covariate
 colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,nstart=1
       dist="norm",method=c("Nelder-Mead"),nstart=3,verbose=FALSE)
-str(s)
 @
 
 
