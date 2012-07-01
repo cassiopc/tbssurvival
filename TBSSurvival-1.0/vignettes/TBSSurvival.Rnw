@@ -267,11 +267,9 @@ survival analysis packages, the user has to build a formula with time
 and censoring indication (delta), which is then used to call the estimation
 method itself:
 
-%%set.seed(1)
-
 <<mle>>=
 formula <- Surv(data[,1],data[,2]) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="norm",nstart=1,method="BFGS")
+tbs.mle <- tbs.survreg.mle(formula,dist="norm",nstart=3,method="BFGS")
 tbs.mle
 @
 
@@ -351,12 +349,18 @@ The result is presented in the Figure \ref{figtbsbe}.
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
 aux.survival <- matrix(0,length(tbs.be$time),1000)
 for (j in 1:1000) {
-  aux.survival[,j] <- c(1-ptbs(tbs.be$time,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
-                               beta=tbs.be$post[j,3:length(tbs.be$post[1,])],x=tbs.be$x,dist="norm"))
+  aux.survival[,j] <- 
+    c(1-ptbs(tbs.be$time,
+             lambda=tbs.be$post[j,1],
+             xi=tbs.be$post[j,2],
+             beta=tbs.be$post[j,3:length(tbs.be$post[1,])],
+             x=tbs.be$x,dist="norm"))
 }
 survival <- matrix(0,length(tbs.be$time),8)
 for (i in 1:length(tbs.be$time)) {
-  survival[i,] <- c(summary(aux.survival[i,]),HPDinterval(as.mcmc(aux.survival[i,]),0.95))
+  survival[i,] <- 
+    c(summary(aux.survival[i,]),
+      HPDinterval(as.mcmc(aux.survival[i,]),0.95))
 }
 tbs.be$survival <- survival
 
