@@ -72,13 +72,14 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # Bayesian estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5, dist="logistic",
-                            burn=1000,jump=10,size=1000,scale=0.06)
+tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5,
+                         dist="logistic",burn=1000,jump=10,size=1000,scale=0.06)
 # evaluating the estimated survival and HPD
 axis.x <- seq(0.01,300,1)
 aux <- matrix(NA,length(axis.x),length(tbs.be$post[,1]))
 for (j in 1:length(tbs.be$post[,1])) {
-  aux[,j] <- 1-ptbs(axis.x,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],beta=tbs.be$post[j,3],dist="logistic")
+  aux[,j] <- 1-ptbs(axis.x,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
+                    beta=tbs.be$post[j,3],dist="logistic")
 }
 survival <- matrix(NA,length(axis.x),3)
 for (i in 1:length(axis.x)) {
