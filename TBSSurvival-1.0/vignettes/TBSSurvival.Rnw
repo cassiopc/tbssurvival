@@ -84,7 +84,7 @@
 \label{intro}
 
 We assume the reader to be familiar with the survival estimation / reliability
-problem. For more details we suggest the accompanying technical paper:
+problem. For more details we suggest the technical paper:
 {\it Transform Both Sides Model: A Parametric Approach},
 Polpo et al. 2012. In this document we use as example a reliability analysis
 situation, but the methods will work as fine with survival analysis.
@@ -269,7 +269,8 @@ method itself:
 
 <<mle>>=
 formula <- Surv(data[,1],data[,2]) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="norm",nstart=3,method="BFGS")
+tbs.mle <- tbs.survreg.mle(formula,dist="norm", nstart=3,
+                           method="Nelder-Mead")
 tbs.mle
 @
 
