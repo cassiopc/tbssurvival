@@ -15,7 +15,8 @@
   The optimization is done by the function `optim' (or the package Rsolnp when available).
 }
 \usage{
- tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
+ tbs.survreg.mle(formula,dist="norm",
+                 method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
                  verbose=FALSE,nstart=10,max.time=-1,ncore=1)
 }
 \arguments{
@@ -29,11 +30,14 @@
   \item{ncore}{If parallel computing is available, ncore tells the number of cores to use.}
 }
 \details{
-  This function calls numerical optimization methods to maximize the likelihood of the TBS model, according to the given error
-  distribution, method of optimization, and formula. The formula is supposed to have a Surv object and possibility co-variates,
-  just as the standard specification of R formulas. The optimizers are going to do their best to find high likelihood estimates,
-  but as in most estimation methods that need a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
-  global optimal solution, but instead is dependent on the initial points, and thus on the seed of the random number generation.
+  This function calls numerical optimization methods to maximize the likelihood 
+  of the TBS model, according to the given error distribution, method of optimization, 
+  and formula. The formula is supposed to have a Surv object and possibility co-variates,
+  just as the standard specification of R formulas. The optimizers are going to do their 
+  best to find high likelihood estimates, but as in most estimation methods that need 
+  a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
+  global optimal solution, but instead is dependent on the initial points, and thus on 
+  the seed of the random number generation.
 }
 \value{
   A list with components:
