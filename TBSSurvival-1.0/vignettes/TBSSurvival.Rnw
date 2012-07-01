@@ -319,7 +319,7 @@ library(survival)
 data(colon)
 ## Running MLE on colon (from survival package) with a covariate
 colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
-s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,nstart=1,
+s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,
       dist="norm",method=c("Nelder-Mead"),nstart=3,verbose=FALSE)
 @
 

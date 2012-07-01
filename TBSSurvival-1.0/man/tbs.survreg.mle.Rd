@@ -63,7 +63,7 @@
 # The colon data set is available within the library survival
 data(colon)
 # Running MLE on colon without covariates
-colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,
+colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,nstart=3,
 		  	 			     dist="norm",method=c("BFGS","Nelder-Mead"),
                              verbose=TRUE)
 
@@ -74,7 +74,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # MLE estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="BFGS")
+tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="BFGS",nstart=1)
 
 # Kaplan-Meier estimation
 km <- survfit(formula)
