@@ -63,8 +63,8 @@
 # The colon data set is available within the library survival
 data(colon)
 # Running MLE on colon without covariates
-colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,nstart=3,
-		  	 			     dist="norm",method=c("BFGS","Nelder-Mead"),
+colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,nstart=2,
+		  	 			     dist="norm",method=c(""Nelder-Mead"),
                              verbose=TRUE)
 
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
