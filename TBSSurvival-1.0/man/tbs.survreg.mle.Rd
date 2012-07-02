@@ -15,7 +15,8 @@
   The optimization is done by the function `optim' (or the package Rsolnp when available).
 }
 \usage{
- tbs.survreg.mle(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
+ tbs.survreg.mle(formula,dist="norm",
+                 method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
                  verbose=FALSE,nstart=10,max.time=-1,ncore=1)
 }
 \arguments{
@@ -29,11 +30,14 @@
   \item{ncore}{If parallel computing is available, ncore tells the number of cores to use.}
 }
 \details{
-  This function calls numerical optimization methods to maximize the likelihood of the TBS model, according to the given error
-  distribution, method of optimization, and formula. The formula is supposed to have a Surv object and possibility co-variates,
-  just as the standard specification of R formulas. The optimizers are going to do their best to find high likelihood estimates,
-  but as in most estimation methods that need a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
-  global optimal solution, but instead is dependent on the initial points, and thus on the seed of the random number generation.
+  This function calls numerical optimization methods to maximize the likelihood 
+  of the TBS model, according to the given error distribution, method of optimization, 
+  and formula. The formula is supposed to have a Surv object and possibility co-variates,
+  just as the standard specification of R formulas. The optimizers are going to do their 
+  best to find high likelihood estimates, but as in most estimation methods that need 
+  a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
+  global optimal solution, but instead is dependent on the initial points, and thus on 
+  the seed of the random number generation.
 }
 \value{
   A list with components:
@@ -60,13 +64,6 @@
   \code{\link{tbs.survreg.be},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
-# The colon data set is available within the library survival
-data(colon)
-# Running MLE on colon without covariates
-colon.mle <- tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,nstart=3,
-		  	 			     dist="norm",method="Nelder-Mead",
-                             verbose=TRUE)
-
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.
 data(alloyT7987)
 alloyT7987$time <- as.double(alloyT7987$time)
@@ -74,7 +71,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # MLE estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
-tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="BFGS",nstart=3)
+tbs.mle <- tbs.survreg.mle(formula,dist="logistic",method="Nelder-Mead",nstart=3)
 
 # Kaplan-Meier estimation
 km <- survfit(formula)
