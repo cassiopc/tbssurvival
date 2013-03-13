@@ -1,5 +1,5 @@
 # TBSSurvival package for R (http://www.R-project.org)
-# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+# Copyright (C) 2013 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 #                    Jianchang Lin and Stuart Lipsitz.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -58,6 +58,7 @@ loadlibs <- function(libdir=NULL) {
     source("../R/tbs.r")
     source("../R/tbs.survreg.mle.r")
     source("../R/local.r")
+    source("../R/dt2.r")
   } else {
     library("TBSSurvival")
   }
