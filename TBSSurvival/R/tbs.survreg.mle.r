@@ -49,5 +49,131 @@ tbs.survreg.mle <- function(formula,dist="norm",method=c("BFGS","Rsolnp","Nelder
   bestout$formula <- formula
   ## run.time is returned in minutes
   bestout$run.time <- .gettime() - initial.time
+
+  class(bestout) <- "tbs.survreg.mle"
   return(bestout)
 }
+
+print.tbs.survreg.mle <- function(x, ...) {
+  print(x$call)
+  if (x$error.dist == "norm")
+    text.dist <- "normal"
+  if (x$error.dist == "t")
+    text.dist <- "t-student"
+  if (x$error.dist == "cauchy")
+    text.dist <- "Cauchy"
+  if (x$error.dist == "doubexp")
+    text.dist <- "Double exponential"
+  if (x$error.dist == "logistic")
+    text.dist <- "logistic"
+  cat("\n",sep="")
+  cat("-----------------------------------------------------\n",sep="")
+  cat("TBS model with ",text.dist," error distribution.\n",sep="")
+  cat("\n",sep="")
+  cat("          point estimates (sd)\n",sep="")
+  cat("  lambda: ",sprintf("%.4f",x$par[1]),"  (",sprintf("%.4f",x$std.error[1]),")\n",sep="")
+  cat("      xi: ",sprintf("%.4f",x$par[2]),"  (",sprintf("%.4f",x$std.error[2]),")\n",sep="")
+  for (i in 3:length(x$par)) {
+  cat("   beta",i-3,": ",sprintf("%.4f",x$par[i]),"  (",sprintf("%.4f",x$std.error[i]),")\n",sep="")
+  }
+  cat("\n",sep="")
+  cat("    AIC: ",sprintf("%.4f",x$AIC),"\n",sep="")
+  cat("   AICc: ",sprintf("%.4f",x$AICc),"\n",sep="")
+  cat("    BIC: ",sprintf("%.4f",x$BIC),"\n",sep="")
+  cat("\n",sep="")
+  cat("Run time: ", sprintf("%.2f",x$run.time)," min \n",sep="")
+  cat("-----------------------------------------------------\n",sep="")
+  cat("\n",sep="")
+}
+
+summary.tbs.survreg.mle <- function(x, ...) {
+  if (x$error.dist == "norm")
+    text.dist <- "normal"
+  if (x$error.dist == "t")
+    text.dist <- "t-student"
+  if (x$error.dist == "cauchy")
+    text.dist <- "Cauchy"
+  if (x$error.dist == "doubexp")
+    text.dist <- "Double exponential"
+  if (x$error.dist == "logistic")
+    text.dist <- "logistic"
+  cat("-----------------------------------------------------\n",sep="")
+  cat("TBS model with ",text.dist," error distribution.\n",sep="")
+  cat("\n",sep="")
+
+  z.value <- rep(NA,length(x$par))
+  p.value <- rep(NA,length(x$par))
+  for (i in 3:length(x$par)) {
+    z.value[i] <- abs(x$par[i]/x$std.error[i])
+    p.value[i] <- 2*pnorm(-z.value[i],0,1)
+  }
+
+  aux1 <- nchar(trunc(x$par))+5
+  aux2 <- nchar(trunc(x$std.error))+5
+  aux3 <- nchar(trunc(z.value))+5
+  p.value2 <- rep(NA,length(x$par))
+  for (i in 3:length(x$par)) {
+    if (p.value[i] < 0.0001) {
+      p.value2[i] <- "< 0.0001"
+    } else {
+      p.value2[i] <- sprintf("%.4f",p.value[i])
+    }
+  }
+  aux4 <- nchar(p.value2)
+  text <- c("Estimates","Std. Error","z value","Pr(>|z|)")
+  auxc <- nchar(text)
+
+  auxc1 <- c(ifelse(max(aux1) > auxc[1],abs(max(aux1)-auxc[1]),0),
+             ifelse(max(aux2) > auxc[2],abs(max(aux2)-auxc[2]),0),
+             ifelse(max(aux3) > auxc[3],abs(max(aux3)-auxc[3]),0),
+             ifelse(max(aux4) > auxc[4],abs(max(aux4)-auxc[4]),0))
+
+  cat("         ",rep(" ",auxc1[1]+1),text[1],
+                  rep(" ",auxc1[2]+1),text[2],
+                  rep(" ",auxc1[3]+1),text[3],
+                  rep(" ",auxc1[4]+1),text[4],"\n",sep="")
+  auxc <- auxc+auxc1
+  cat("  lambda: ",
+      rep(ifelse(auxc[1] > aux1[1]," ",""),abs(auxc[1]-aux1[1])),sprintf("%.4f",x$par[1])," ",
+      rep(ifelse(auxc[2] > aux2[1]," ",""),abs(auxc[2]-aux2[1])),sprintf("%.4f",x$std.error[1]),
+      "\n",sep="")
+  cat("      xi: ",
+      rep(ifelse(auxc[1] > aux1[2]," ",""),abs(auxc[1]-aux1[2])),sprintf("%.4f",x$par[2])," ",
+      rep(ifelse(auxc[2] > aux2[2]," ",""),abs(auxc[2]-aux2[2])),sprintf("%.4f",x$std.error[2]),
+      "\n",sep="")
+  for (i in 3:length(x$par)) {
+    cat("   beta",i-3,": ",
+        rep(ifelse(auxc[1] > aux1[i]," ",""),abs(auxc[1]-aux1[i])),sprintf("%.4f",x$par[i])," ",
+        rep(ifelse(auxc[2] > aux2[i]," ",""),abs(auxc[2]-aux2[i])),sprintf("%.4f",x$std.error[i])," ",
+        rep(ifelse(auxc[3] > aux3[i]," ",""),abs(auxc[3]-aux3[i])),sprintf("%.4f",z.value[i])," ",
+        rep(ifelse(auxc[4] > aux4[i]," ",""),abs(auxc[4]-aux4[i])),p.value2[i],
+        ifelse(p.value[i] < 0.0001," ***",ifelse(p.value[i] < 0.01," **",
+               ifelse(p.value[i] < 0.05," *",ifelse(p.value[i] < 0.1," .","")))),
+        "\n",sep="")
+  }
+  cat("\n",sep="")
+  cat("Summary statistic of the error for the TBS model\n",sep="")
+  print(summary(x$error))
+  cat("\n",sep="")
+  if (length(x$par) == 3) {
+    cat("Estimated quantiles of time event\n",sep="")
+    aux1 <- qtbs(c(0.05,0.25,0.5,0.75,0.95),
+                 lambda=tbs.mle.norm$par[1],
+                 xi=tbs.mle.norm$par[2],
+                 beta=tbs.mle.norm$par[3],
+                 dist=tbs.mle.norm$error.dist)
+    aux2 <- nchar(trunc(aux1))
+    cat("   ",rep(" ",aux2[1]),"5%   ",rep(" ",aux2[2]),"25%   ",rep(" ",aux2[3]),
+        "50%   ",rep(" ",aux2[4]),"75%   ",rep(" ",aux2[5]),"95%\n",sep="")
+    cat(sprintf("%.4f",aux1[1])," ",sprintf("%.4f",aux1[2])," ",sprintf("%.4f",aux1[3])," ",
+        sprintf("%.4f",aux1[4])," ",sprintf("%.4f",aux1[5]),"\n",sep="")
+  }  
+  cat("-----------------------------------------------------\n",sep="")
+  cat("\n",sep="")
+}
+
+
+
+
+
+
