@@ -495,10 +495,10 @@
            r = rnorm(x,mean=0,sd=sqrt(xi))), # generation
          ## t-student distribution
          t        = switch(type,
-           d = dt(x,df=xi), # density
-           p = pt(x,df=xi), # distr
-           q = qt(x,df=xi), # quantile
-           r = rt(x,df=xi)), # generation
+           d = .dt2(x,df=xi), # density
+           p = .pt2(x,df=xi), # distr
+           q = .qt2(x,df=xi), # quantile
+           r = .rt2(x,df=xi)), # generation
          ## Cauchy distribution
          cauchy   = switch(type,
            d = dcauchy(x,location=0,scale=xi), # density
