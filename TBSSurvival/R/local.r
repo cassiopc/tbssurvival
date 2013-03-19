@@ -1,5 +1,5 @@
 # TBSSurvival package for R (http://www.R-project.org)
-# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+# Copyright (C) 2013 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 #                    Jianchang Lin and Stuart Lipsitz.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -352,14 +352,20 @@
   if(!is.na(est) && est$value > -Inf) {
     ## if there is at least one feasible solution that has been found, compute some quantities for it,
     ## such as AIC, BIC, std.err, and return them
-    out$par <- est$par
+#    out$par <- est$par
+    out$lambda <- est$par[1]
+    out$xi <- est$par[2]
+    out$beta <- est$par[3:length(est$par)]
     options(warn = -1)
     ## compute the std.error
     aux <- try(sqrt(diag(solve(-(est$hessian)))),silent=TRUE)
     options("warn" = 0)
-    out$std.error <- rep(NA,nparam)
+    std.error <- rep(NA,nparam)
     if (class(aux) != "try-error")
-      out$std.error <- aux
+      std.error <- aux
+    out$lambda.std.error <- std.error[1]
+    out$xi.std.error <- std.error[2]
+    out$beta.std.error <- std.error[3:length(std.error)]
     ## get the log.lik value
     out$log.lik <- est$value
     out$error.dist <- dist
