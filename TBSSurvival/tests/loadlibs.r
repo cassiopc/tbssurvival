@@ -42,7 +42,7 @@ installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
 loadlibs <- function(libdir=NULL) {
   w <- options("warn")
   options("warn" = -1)
-  if(require("TBSSurvival",quietly=TRUE)==FALSE) {
+  if (require("TBSSurvival",quietly=TRUE)==FALSE) {
     library("coda",lib.loc=libdir)
     library("mcmc",lib.loc=libdir)
     library("normalp",lib.loc=libdir)
@@ -64,3 +64,7 @@ loadlibs <- function(libdir=NULL) {
   }
   options("warn" = w[[1]])
 }
+
+## Load data
+alloyT7987 <- read.table("../data/alloyT7987.txt",header=TRUE)
+
