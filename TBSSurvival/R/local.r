@@ -375,11 +375,25 @@
     out$BIC  <- -2*est$value+nparam*log(length(time))
     out$convergence <- TRUE
     ## evaluate the "error"
-    aux <- .test.tbs(out$par[1],out$par[2],out$par[3:length(out$par)],x,dist,time,type="d")
+    aux <- .test.tbs(out$lambda,out$xi,out$beta,x,dist,time,type="d")
     out$time  <- time[delta == 1]
-    out$error <- c(.g.lambda(log(out$time),out$par[1])-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$par[1]))
+    out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
     names(out$time) <- NULL
     names(out$error) <- NULL
+    ## for the plot
+    if (length(out$beta) == 1) {
+      if (unique(aux$x[,1]) == 1) {
+        out$x <- 1
+        attr(out$x,"plot") <- 1
+      } else if (length(unique(aux$x[,1]) <= 4)) {
+        out$x <- unique(aux$x[,1])
+        attr(out$x,"plot") <- 2
+      }
+    } else if ((length(out$beta) == 2) && (unique(aux$x[,1]) == 1) &&
+               (length(unique(aux$x[,2])) <= 4)) {
+      out$x <- unique(aux$x[,2])
+      attr(out$x,"plot") <- 3
+    }
     ## record run time
     out$run.time <- .gettime() - initial.time
     if(verbose) cat(' ',out$log.lik,'PARS:',out$par,'TIME:',out$run.time,'\n')
