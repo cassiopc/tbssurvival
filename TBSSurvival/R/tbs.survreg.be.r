@@ -1,5 +1,5 @@
 # TBSSurvival package for R (http://www.R-project.org)
-# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+# Copyright (C) 2013 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 #                    Jianchang Lin and Stuart Lipsitz.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -27,11 +27,14 @@
 ## size is the final sample size of the posterior. scale is a parameter of the `metrop' function which
 ## controls the acceptance rate. prior.mean and prior.sd define the parameters of the normal prior for
 ## the MCMC (by default, they are equal to 5 and 5).
+## accept: fraction of Metropolis proposals accepted.
 tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
                            guess.beta,guess.lambda,guess.xi,
                            burn=1000,jump=2,size=1000,scale=1,
-                           prior.mean=NULL,prior.sd=NULL) {
+                           prior.mean=NULL,prior.sd=NULL,
+                           seed=1234) {
   initial.time <- .gettime()
+  set.seed(seed)
   if(max.time <= 0) {
     ## user didn't define a timeout, so we set to a large number
     max.time <- 1e10
@@ -56,14 +59,25 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
     stop("It is only accepted uncensored or right censored data")
   }
 
+  if (missing(guess.lambda)) {
+    guess.lambda <- 1
+  }
+  if (missing(guess.xi)) {
+    guess.xi <- 1
+  }
+  if (missing(guess.beta)) {
+    guess.beta <- rep(0,x.k)
+  }
+
   out <- NULL
   out$call <- Call
-  if (is.matrix(x))
-    out$x <- x[order(time),]
-  else
-    out$x <- x[order(time)]
-  out$delta <- delta[order(time)]
-  out$time <- time[order(time)]
+#  if (is.matrix(x))
+#    out$x <- x[order(time),]
+#  else
+#    out$x <- x[order(time)]
+#  out$delta <- delta[order(time)]
+#  out$time <- time[order(time)]
+  out$time <- time[delta == 1]
 
   ## perform a series of verifications for the given arguments of the function
   if (length(guess.lambda) != 1)
@@ -132,22 +146,32 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
     stop("Time limit exceeded")
   }
   out$post <- chain$batch[seq(burn,length(chain$batch[,1]),jump),]
+  out$accept <- chain$accept
 
   # evaluating the point estimates
   if (x.k != 1) {
-    out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,mean))
-    out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,sd))
+    par    <- c(mean(out$post[,1]),mean(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,mean))
+    par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),apply(out$post[,3:length(out$post[1,])],2,sd))
   } else { 
-    out$par    <- c(mean(out$post[,1]),mean(out$post[,2]),mean(out$post[,3:length(out$post[1,])]))
-    out$par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),  sd(out$post[,3:length(out$post[1,])]))
+    par    <- c(mean(out$post[,1]),mean(out$post[,2]),mean(out$post[,3:length(out$post[1,])]))
+    par.sd <- c(sd(out$post[,1]),    sd(out$post[,2]),  sd(out$post[,3:length(out$post[1,])]))
   }
+  out$lambda <- par[1]
+  out$xi     <- par[2]
+  out$beta   <- par[3:length(par)]
+  out$lambda.sd <- par.sd[1]
+  out$xi.sd     <- par.sd[2]
+  out$beta.sd   <- par.sd[3:length(par.sd)]
   # evaluating the interval estimates
-  out$par.HPD   <- cbind(c(HPDinterval(as.mcmc(out$post[,1]),0.95)),
-                         c(HPDinterval(as.mcmc(out$post[,2]),0.95)))
+  par.HPD   <- cbind(c(HPDinterval(as.mcmc(out$post[,1]),0.95)),
+                     c(HPDinterval(as.mcmc(out$post[,2]),0.95)))
   for (i in 3:length(out$post[1,])) {
-    out$par.HPD <- cbind(out$par.HPD,
-                         c(HPDinterval(as.mcmc(out$post[,i]),0.95)))
+    par.HPD <- cbind(par.HPD,
+                     c(HPDinterval(as.mcmc(out$post[,i]),0.95)))
   }
+  out$lambda.HPD <- par.HPD[,1]
+  out$xi.HPD     <- par.HPD[,2]
+  out$beta.HPD   <- par.HPD[,3:length(par.HPD[1,])]
 
   # evaluating DIC
   aux.loglik  <- rep(0,size)
@@ -155,7 +179,7 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
     aux.loglik[j] <- c(.lik.tbs(out$post[j,],time,delta,dist,x))
   loglik <- mean(-2*aux.loglik)
   rm(aux.loglik)
-  out$DIC <- 2*loglik+2*.lik.tbs(out$par,time,delta,dist,x)
+  out$DIC <- 2*loglik+2*.lik.tbs(par,time,delta,dist,x)
 
   # evaluating error of the model
   aux.error    <- matrix(0,length(time),size)
@@ -172,10 +196,12 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
   for (i in 1:length(time))
     error[i] <- mean(aux.error[i,])
   rm(aux.error)
-  out$error <- error
+  out$error <- error[delta == 1]
 
   # time spent to do BE
   out$run.time <- .gettime() - initial.time
+
+  class(out) <- "tbs.survreg.be"
   return(out)
 }
 
