@@ -32,7 +32,7 @@ library(survival)
 data(colon)
 cat('Running MLE on colon (from survival package) without covariates\n')
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
-b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist="norm",burn=10000,jump=150,scale=0.05)
+b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist="norm",burn=10000,jump=200,scale=0.05)
 
 ## with covariate
 cat('Running MLE on colon (from survival package) with covariate=age60\n')
