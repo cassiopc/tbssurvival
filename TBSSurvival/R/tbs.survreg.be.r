@@ -162,6 +162,15 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
   out$lambda.sd <- par.sd[1]
   out$xi.sd     <- par.sd[2]
   out$beta.sd   <- par.sd[3:length(par.sd)]
+
+  text <- c("lambda","xi")
+  if (length(out$beta) == 1) {
+    text <- c(text,"beta")
+  } else {
+    for (i in 1:length(out$beta))
+      text <- c(text,paste("beta",i-1,sep=""))
+  }
+  colnames(out$post) <- text
   # evaluating the interval estimates
   par.HPD   <- cbind(c(HPDinterval(as.mcmc(out$post[,1]),0.95)),
                      c(HPDinterval(as.mcmc(out$post[,2]),0.95)))
@@ -199,6 +208,21 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
   out$error <- error[delta == 1]
   out$error.dist <- dist
 
+  aux <- .test.tbs(out$lambda,out$xi,out$beta,x,dist,time,type="d")
+  ## for the plot
+  if (length(out$beta) == 1) {
+    if (unique(aux$x[,1]) == 1) {
+      out$x <- 1
+      attr(out$x,"plot") <- 1
+    } else if (length(unique(aux$x[,1]) <= 4)) {
+      out$x <- unique(aux$x[,1])
+      attr(out$x,"plot") <- 2
+    }
+  } else if ((length(out$beta) == 2) && (unique(aux$x[,1]) == 1) &&
+             (length(unique(aux$x[,2])) <= 4)) {
+    out$x <- unique(aux$x[,2])
+    attr(out$x,"plot") <- 3
+  }
   # time spent to do BE
   out$run.time <- .gettime() - initial.time
 
@@ -355,6 +379,185 @@ summary.tbs.survreg.be <- function(x, ...) {
   cat("\n",sep="")
 }
 
+plot.tbs.survreg.be <- function(x, HPD=TRUE, ...) {
+  h <- 1000
+  if (!exists("xlim")) {
+    LB <- 0.0001
+    UB <- max(x$time)*1.1
+  } else {
+    LB <- xlim[1]
+    UB <- xlim[2]
+  }
+  if (!exists("xlab")) {
+    xlab <- c("time","time","error")
+  } else if (length(xlab) != 3) {
+      stop("The 'xlab' length must be equal to 3")
+  }
+  if (!exists("ylab")) {
+    ylab <- c("S(t)","h(t)","Density")
+  } else if (length(ylab) != 3) {
+      stop("The 'ylab' length must be equal to 3")
+  }
+  if (!exists("main")) {
+    main <- c("Survival function (BE)","Hazard function (BE)","Posterior Mean of Error Distribution (BE)")
+  } else if (length(main) != 3) {
+      stop("The 'main' length must be equal to 3")
+  }
+  axis.t <- seq(LB,UB,(UB-LB)/(h-1))
+
+  par(ask=TRUE)
+  for (k in 1:2) {
+    if (attr(x$x,"plot") == 1) {
+      axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
+      if (k == 1) { ### Survival plot
+        for (j in 1:length(x$post[,1])) {
+          axis.y[,j] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                               beta=x$post[j,3],dist=x$error.dist)
+        }
+        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylim=c(0,1),
+             ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+      } else { ### Hazard plot
+        for (j in 1:length(x$post[,1])) {
+          axis.y[,j] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                             beta=x$post[j,3],dist=x$error.dist)
+        }
+        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylab=ylab[k],
+             xlab=xlab[k],main=main[k], ...)
+      }
+      if (HPD) {
+        lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
+        lines(axis.t,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+      }
+    } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
+      if (!exists("lty")) {
+        lty <- seq(1,length(x$x),1)
+      } else {
+        if (length(lty) != length(x$x)) {
+          stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (!is.numeric(col)) {
+        col <- rep(1,length(x$x))
+      } else {
+        if (length(col) != length(x$x)) {
+          stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (!exists("lwd")) {
+        lwd <- rep(1,length(x$x))
+      } else {
+        if (length(lwd) != length(x$x)) {
+          stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      axis.y <- array(NA,c(length(axis.t),length(x$post[,1]),length(x$x)))
+      for (i in 1:length(x$x)) {
+        if (attr(x$x,"plot") == 2) {
+          if (k == 1) { ### Survival plot
+            for (j in 1:length(x$post[,1])) {
+              axis.y[,j,i] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                   beta=x$post[j,3]*x$x[i],dist=x$error.dist)
+            }
+          } else { ### Hazard plot
+            for (j in 1:length(x$post[,1])) {
+              axis.y[,j,i] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                 beta=x$post[j,3]*x$x[i],dist=x$error.dist)
+            }
+          }
+        } else {
+          if (k == 1) { ### Survival plot
+            for (j in 1:length(x$post[,1])) {
+              axis.y[,j,i] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                     beta=(x$post[j,3]+x$post[j,4]*x$x[i]),dist=x$error.dist)
+            }
+          } else { ### Hazard plot
+            for (j in 1:length(x$post[,1])) {
+              axis.y[,j,i] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                   beta=(x$post[j,3]+x$post[j,4]*x$x[i]),dist=x$error.dist)
+            }
+          }
+        }
+        if (i == 1) {
+          if (k == 1) { ### Survival plot
+            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k],
+                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+          } else {
+            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k],
+                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+          }
+        } else {
+          lines(axis.t,apply(axis.y[,,i],1,mean),lty=lty[i],lwd=lwd[i],col=col[i])
+        }
+        if (HPD) {
+          lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.025),type="l",col="gray50", ...)
+          lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.975),type="l",col="gray50", ...)
+        }
+      }
+    }
+  }
+
+  ## Histogram for error distribution:
+  bound <- max(abs(c(min(x$error),max(x$error))))
+  hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
+  axis.x <- seq(-bound,bound,2*bound/(h-1))
+  axis.y <- matrix(NA,length(axis.x),length(x$post[,1]))
+  for (j in 1:length(x$post[,1])) {
+    axis.y[,j] <- .choice(axis.x,xi=x$post[j,2],dist=x$error.dist,type="d")
+  }
+  lines(axis.x,apply(axis.y,1,mean))
+  if (HPD) {
+    lines(axis.x,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
+    lines(axis.x,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+  }
+
+  if (FALSE) {
+    ## Q-Q plot for error distribution:
+    axis.x <- matrix(NA,length(x$error),length(x$post[,1]))
+    for (j in 1:length(x$post[,1])) {
+      axis.x[,j] <- qqplot(.choice(ppoints(length(x$error)), xi=x$post[j,2],
+                                   dist=x$error.dist, type="q"),x$error,plot.it=FALSE)$x
+    }
+    axis.y <- qqplot(.choice(ppoints(length(x$error)), xi=x$xi,
+                             dist=x$error.dist, type="q"),x$error,plot.it=FALSE)$y
+    plot(apply(axis.x,1,mean),axis.y,
+         main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
+    qqline(x$error, distribution = function(p) {
+                                     fn.aux <- function(p) {
+                                       aux <- rep(NA,length(x$post[,1]))
+                                       for (j in 1:length(x$post[,1]))
+                                         aux[j] <- .choice(p, xi=x$post[j,2], dist=x$error.dist, type="q")
+                                       return(mean(aux))
+                                     }
+                                     aux <- Vectorize(fn.aux,"p")
+                                     return(aux(p))
+                                   },
+           prob = c(0.25, 0.75), col = 2, lwd=2)
+  }
+
+  #autocorrelation plot
+  acf(x$post[,1],main=expression(lambda))
+  acf(x$post[,2],main=expression(xi))
+  if (length(x$post[1,]) == 3) {
+    acf(x$post[,3],main=expression(beta))
+  } else {
+    for (i in 3:length(x$post[1,])) {
+      acf(x$post[,i],main=bquote(beta[.(i-3)]))
+    }
+  }
+
+  #time series plot
+  plot(ts(x$post[,1]),ylab=expression(lambda),xlab="i")
+  plot(ts(x$post[,2]),ylab=expression(xi),xlab="i")
+  if (length(x$post[1,]) == 3) {
+    plot(ts(x$post[,3]),ylab=expression(beta),xlab="i")
+  } else {
+    for (i in 3:length(x$post[1,])) {
+      plot(ts(x$post[,i]),ylab=bquote(beta[.(i-3)]),xlab="i")
+    }
+  }
+
+  par(ask=FALSE)
+}
 
 
 
