@@ -71,15 +71,15 @@ print.tbs.survreg.mle <- function(x, ...) {
   cat("TBS model with ",text.dist," error distribution.\n",sep="")
   cat("\n",sep="")
   cat("          point estimates (sd)\n",sep="")
-  cat("  lambda: ",sprintf("%.4f",x$lambda),"  (",sprintf("%.4f",x$lambda.std.error),")\n",sep="")
-  cat("      xi: ",sprintf("%.4f",x$xi),"  (",sprintf("%.4f",x$xi.std.error),")\n",sep="")
+  cat("  lambda: ",ifelse(any(x$beta < 0)," ",""),sprintf("%.4f",x$lambda),"  (",sprintf("%.4f",x$lambda.std.error),")\n",sep="")
+  cat("      xi: ",ifelse(any(x$beta < 0)," ",""),sprintf("%.4f",x$xi),"  (",sprintf("%.4f",x$xi.std.error),")\n",sep="")
   for (i in 1:length(x$beta)) {
-    cat("   beta",i-1,": ",sprintf("%.4f",x$beta[i]),"  (",sprintf("%.4f",x$beta.std.error[i]),")\n",sep="")
+    cat("   beta",i-1,": ",ifelse((any(x$beta < 0) && (x$beta[i] > 0))," ",""),sprintf("%.4f",x$beta[i]),"  (",sprintf("%.4f",x$beta.std.error[i]),")\n",sep="")
   }
   cat("\n",sep="")
-  cat("    AIC: ",sprintf("%.4f",x$AIC),"\n",sep="")
-  cat("   AICc: ",sprintf("%.4f",x$AICc),"\n",sep="")
-  cat("    BIC: ",sprintf("%.4f",x$BIC),"\n",sep="")
+  cat("     AIC: ",sprintf("%.4f",x$AIC),"\n",sep="")
+  cat("    AICc: ",sprintf("%.4f",x$AICc),"\n",sep="")
+  cat("     BIC: ",sprintf("%.4f",x$BIC),"\n",sep="")
   cat("\n",sep="")
   cat("Run time: ", sprintf("%.2f",x$run.time)," min \n",sep="")
   cat("-----------------------------------------------------\n",sep="")
@@ -174,14 +174,108 @@ summary.tbs.survreg.mle <- function(x, ...) {
 
 plot.tbs.survreg.mle <- function(x, ...) {
   h <- 1000
-  if (attr(x$x,"plot") == 1) {
-    axis.t <- seq(0.0001,10,(10-0.0001)/(h-1))
-    
-  } else if (attr(x$x,"plot") == 2) {
-
-  } else if (attr(x$x,"plot") == 3) {
-
+  if (!exists("xlim")) {
+    LB <- 0.0001
+    UB <- max(x$time)*1.1
+  } else {
+    LB <- xlim[1]
+    UB <- xlim[2]
   }
+  if (!exists("xlab")) {
+    xlab <- c("time","time","error")
+  } else if (length(xlab) != 3) {
+      stop("The 'xlab' length must be equal to 3")
+  }
+  if (!exists("ylab")) {
+    ylab <- c("S(t)","h(t)","Density")
+  } else if (length(ylab) != 3) {
+      stop("The 'ylab' length must be equal to 3")
+  }
+  if (!exists("main")) {
+    main <- c("Survival function (MLE)","Hazard function (MLE)","Error Distribution (MLE)")
+  } else if (length(main) != 3) {
+      stop("The 'main' length must be equal to 3")
+  }
+  axis.t <- seq(LB,UB,(UB-LB)/(h-1))
+
+  par(ask=TRUE)
+  for (k in 1:2) {
+    if (attr(x$x,"plot") == 1) {
+      if (k == 1) { ### Survival plot
+        axis.y <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
+        plot(axis.t,axis.y,type="l",xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+      } else { ### Hazard plot
+        axis.y <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
+        plot(axis.t,axis.y,type="l",xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+      }
+    } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
+      if (!exists("lty")) {
+        lty <- seq(1,length(x$x),1)
+      } else {
+        if (length(lty) != length(x$x)) {
+          stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (!is.numeric(col)) {
+        col <- rep(1,length(x$x))
+      } else {
+        if (length(col) != length(x$x)) {
+          stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (!exists("lwd")) {
+        lwd <- rep(1,length(x$x))
+      } else {
+        if (length(lwd) != length(x$x)) {
+          stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      axis.y <- matrix(NA,length(axis.t),length(x$x))
+      for (i in 1:length(x$x)) {
+        if (attr(x$x,"plot") == 2) {
+          if (k == 1) { ### Survival plot
+            axis.y[,i] <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta*x$x[i],dist=x$error.dist)
+          } else { ### Hazard plot
+            axis.y[,i] <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta*x$x[i],dist=x$error.dist)
+          }
+        } else {
+          if (k == 1) { ### Survival plot
+            axis.y[,i] <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,
+                                 beta=(x$beta[1]+x$beta[2]*x$x[i]),dist=x$error.dist)
+          } else { ### Hazard plot
+            axis.y[,i] <- htbs(axis.t,lambda=x$lambda,xi=x$xi,
+                               beta=(x$beta[1]+x$beta[2]*x$x[i]),dist=x$error.dist)
+          }
+        }
+        if (i == 1) {
+          if (k == 1) { ### Survival plot
+            plot(axis.t,axis.y[,i],xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k],
+                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+          } else {
+            plot(axis.t,axis.y[,i],xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k],
+                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+          }
+        } else {
+          lines(axis.t,axis.y[,i],lty=lty[i],lwd=lwd[i],col=col[i])
+        }
+      }
+    }
+  }
+
+  ## Histogram for error distribution:
+  bound <- max(abs(c(min(x$error),max(x$error))))
+  hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
+  lines(seq(-bound,bound,2*bound/(h-1)),
+        .choice(seq(-bound,bound,2*bound/(h-1)),xi=x$xi,dist=x$error.dist,type="d"))
+
+  ## Q-Q plot for error distribution:
+  qqplot(.choice(ppoints(length(x$error)), xi=x$xi, dist=x$error.dist, type="q"),x$error,
+         main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
+  qqline(x$error, distribution = function(p) .choice(p, xi=x$xi, dist=x$error.dist, type="q"),
+         prob = c(0.25, 0.75), col = 2, lwd=2)
+
+  par(ask=FALSE)
 }
+
 
 
