@@ -45,7 +45,7 @@ tbs.survreg.mle <- function(formula,dist="all",method=c("BFGS","Rsolnp","Nelder-
     }
     ## check if at least one method found a solution...
     if (is.null(bestout)) {
-      if(verbose) cat('No method has found a solution\n')
+      if(verbose) cat('\nTBS: No method has found a solution\n')
       bestout$convergence <- FALSE
       bestout$method <- NULL
     }
