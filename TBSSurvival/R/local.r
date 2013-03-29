@@ -150,7 +150,7 @@
     }
   }
   ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -1e10 suffices
-  if(notinf && out==-Inf) return(-1e10)
+  if(notinf && out< -1e10) return(-1e10)
   return(out)
 }
 
@@ -229,6 +229,7 @@
         if (class(ans) != "try-error" && ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
           break
         }
+        print(ans)
       }
       if (class(ans) != "try-error" &&  ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
