@@ -40,10 +40,10 @@ dist.choice <- function(dist="norm") {
            ),
          ## t-student distribution
          t = list(
-           d = function(x,xi) .dt2(x,df=sqrt(xi)), # density
-           p = function(x,xi) .pt2(x,df=sqrt(xi)), # distr
-           q = function(x,xi) .qt2(x,df=sqrt(xi)), # quantile
-           r = function(x,xi) .rt2(x,df=sqrt(xi)), # generation
+           d = function(x,xi) .dt2(x,df=xi), # density
+           p = function(x,xi) .pt2(x,df=xi), # distr
+           q = function(x,xi) .qt2(x,df=xi), # quantile
+           r = function(x,xi) .rt2(x,df=xi), # generation
            test = .test.tbs,
            name = "t"
            ),
