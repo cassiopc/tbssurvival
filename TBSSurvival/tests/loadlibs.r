@@ -33,7 +33,8 @@ installpacks <- function(loc=NULL,repos="http://stat.ethz.ch/CRAN/") {
 #  install.packages("e1071",lib=loc)
 #  install.packages("eha",lib=loc)
   install.packages("truncnorm",lib=loc)
-
+  install.packages("BMS",lib=loc)
+  
   ## this following line install the TBS package itself, so nothing else is needed.
   ## For testing, sometimes it is better to work without installing it for a while...
   ##      install.packages('./TBSSurvival_version.tar.gz',repos=NULL,type="source")
@@ -43,6 +44,7 @@ loadlibs <- function(libdir=NULL) {
   w <- options("warn")
   options("warn" = -1)
   if (require("TBSSurvival",quietly=TRUE)==FALSE) {
+    library("BMS",lib.loc=libdir)
     library("coda",lib.loc=libdir)
     library("mcmc",lib.loc=libdir)
     library("normalp",lib.loc=libdir)

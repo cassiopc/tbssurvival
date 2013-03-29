@@ -150,7 +150,8 @@
     }
   }
   ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -1e10 suffices
-  if(notinf && out< -1e10) return(-1e10)
+  if(notinf && out< -1e10) out = -1e10
+  if(out > 1e10 && notinf) out = 1e10
   return(out)
 }
 
@@ -304,11 +305,11 @@
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
-      aux <- try(evalWithTimeout(optim(guess, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
+      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, 
                        method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
         repeat {
-          aux1 <- try(evalWithTimeout(optim(aux$par, .lik.tbs, time=time, delta=delta, dist=dist, x=x,
+          aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x,
                            method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
           if (class(aux1) != "try-error") {
             if (aux1$value < aux$value + 0.0001) {
@@ -515,3 +516,118 @@
 
   return(out)
 }
+
+.deriv.tbs <- function(x, xi, dist, type, var) {
+  switch(dist$name,
+    norm = switch(var,
+      xi = switch(type,
+        dens = ((x^2)/(xi^(5/2))-1/(xi^(3/2)))*exp(-(x^2)/(2*xi))/sqrt((2^3)*pi),
+        surv = -x*exp(-(x^2)/(2*xi))/sqrt(((2*xi)^3)*pi)),
+      x  = switch(type,
+        dens = -x*exp(-(x^2)/(2*xi))/sqrt(2*pi*xi^3),
+        surv = -dnorm(x,0,sqrt(xi)))),
+   t = switch(var,
+      xi = switch(type,
+        dens = ((((x^2)/xi+1)^((-xi-1)/2)*
+                gamma((xi+1)/2)/(sqrt(pi*xi)*gamma(xi/2)))*
+                (digamma((xi+1)/2)/2-digamma((xi)/2)/2
+                 -(x^2)*(-xi-1)/(2*((x^2)/xi+1)*xi^2)-log((x^2)/xi+1)/2-1/(2*xi))),
+        surv = ((-digamma((xi+1)/2)+digamma(xi/2)+(1/xi))*
+                f21hyper(1/2,(xi+1)/2,3/2,-(x^2)/xi)*x*gamma((xi+1)/2)/(2*sqrt(pi*xi)*gamma(xi/2))
+                -f21hyper(3/2,(xi+1)/2+1,5/2,-(x^2)/xi)*(x^3)*(xi+1)*gamma((xi+1)/2)/(6*sqrt(pi*xi^5)*gamma(xi/2)))),
+      x  = switch(type,
+        dens = x*(((x^2)/xi+1)^((-xi-1)/2-1))*(-xi-1)*gamma((xi+1)/2)/(sqrt(pi*xi^3)*gamma(xi/2)),
+        surv = -dt(x,df=xi))),
+    cauchy = switch(var,
+      xi = switch(type,
+        dens = ((2*x^2)/(((x^2)/(xi^2)+1)*(xi^2))-1)/(pi*((x^2)/(xi^2)+1)*(xi^2)),
+        surv = x/(pi*((x^2)/(xi^2)+1)*(xi^2))),
+      x  = switch(type,
+        dens = -2*x/(pi*(((x^2)/(xi^2)+1)^2)*xi^3),
+        surv = -dcauchy(x,location=0,scale=xi))),
+    doubexp = switch(var,
+      xi = switch(type,
+        dens = (abs(x)/xi-1)*exp(-abs(x)/xi)/(2*xi^2),
+        surv = (x/2)*exp(-abs(x)/xi)/(xi^2)),
+      x  = switch(type,
+        dens = -x*exp(-abs(x)/xi)/(2*abs(x)*xi^2),
+        surv = -ddoubexp(x,b=xi))),
+    logistic = switch(var,
+      xi = switch(type,
+        dens = (2*x*exp(2*x/xi)/((xi^3)*(exp(x/xi)+1)^3)-exp(x/xi)/((xi^2)*(exp(x/xi)+1)^2)
+               -x*exp(x/xi)/((xi^3)*(exp(x/xi)+1)^2)),
+        surv = -x*exp(-x/xi)/((xi^2)*(exp(-x/xi)+1)^2)),
+      x  = switch(type,
+        dens = exp(x/xi)/((xi^2)*(exp(x/xi)+1)^2)-2*exp(2*x/xi)/((xi^2)*(exp(x/xi)+1)^3),
+        surv = -dlogis(x,location=0,scale=xi))))
+}
+
+.deriv.logL.tbs <- function(t, eta, lambda, xi, dist, type, var) {
+  switch(type,
+    Se = switch(var,
+      eta    = (-(abs(eta)^(lambda-1))*
+                dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda))*
+                ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
+      lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
+                -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
+                (-dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))*
+               ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
+      xi     =  .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="surv",var="xi")* 
+                ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
+    fe = switch(var,
+      eta    = ((abs(eta)^(lambda-1))*
+                .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="x")*
+                  (.dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))),
+      lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
+                -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
+                (.deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="x"))*
+                   (dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))),
+      xi     =  .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="xi")*
+                  (dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))))
+}
+
+.grad.tbs <- function(par,time,delta,dist,x=NULL,notinf=FALSE) {
+  lambda <- par[1]
+  xi     <- par[2]
+  ## at least one beta must exist, so length(par) >= 3
+  beta   <- par[3:length(par)]
+
+  if (is.null(x)) {
+    x <- rep(1,length(time))
+    eta <- beta*x
+  } else {
+    if (is.matrix(x)) {
+      eta <- c(beta%*%t(x))
+    } else {
+      eta <- beta*x
+    }
+  }
+  aux.eta    <- rep(NA,length(time))
+  aux.lambda <- rep(NA,length(time))
+  aux.xi     <- rep(NA,length(time))
+  for (i in 1:length(time)) {
+    aux.eta[i] <-    (delta[i]*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="fe",var="eta")+
+                  (1-delta[i])*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="Se",var="eta"))
+    aux.lambda[i] <- (delta[i]*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="fe",var="lambda")+
+                  (1-delta[i])*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="Se",var="lambda"))
+    aux.xi[i] <-     (delta[i]*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="fe",var="xi")+
+                  (1-delta[i])*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="Se",var="xi"))
+  }
+
+  if (is.matrix(x)) {
+    out <- rep(NA,2+length(x[1,]))
+    out[1] <- sum(aux.lambda)
+    out[2] <- sum(aux.xi)
+    for (i in 3:(2+length(x[1,])))
+      out[i] <- sum(x[,(i-2)]*aux.eta)
+  } else {
+    out <- c(sum(aux.lambda),sum(aux.xi),sum(x*aux.eta))
+  }
+  if(out < -1e10 && notinf) out = -1e10
+  if(out > 1e10 && notinf) out = 1e10
+  return(out)
+}
+
+
+
+
