@@ -518,7 +518,7 @@
 }
 
 .deriv.tbs <- function(x, xi, dist, type, var) {
-  switch(dist$name,
+  switch(dist,
     norm = switch(var,
       xi = switch(type,
         dens = ((x^2)/(xi^(5/2))-1/(xi^(3/2)))*exp(-(x^2)/(2*xi))/sqrt((2^3)*pi),
@@ -566,24 +566,24 @@
   switch(type,
     Se = switch(var,
       eta    = (-(abs(eta)^(lambda-1))*
-                dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda))*
-                ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
+                dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda))*
+                ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
       lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
                 -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
-                (-dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))*
-               ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
-      xi     =  .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="surv",var="xi")* 
-                ((1-dist$p(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi))^(-1))),
+                (-dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))*
+               ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
+      xi     =  .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="surv",var="xi")* 
+                ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
     fe = switch(var,
       eta    = ((abs(eta)^(lambda-1))*
-                .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="x")*
-                  (.dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))),
+                .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x")*
+                  (.dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))),
       lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
                 -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
-                (.deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="x"))*
-                   (dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))),
-      xi     =  .deriv.tbs(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi,dist,type="dens",var="xi")*
-                  (dist$d(g.lambda(log(t),lambda)-g.lambda(eta,lambda),xi)^(-1))))
+                (.deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x"))*
+                   (dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))),
+      xi     =  .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="xi")*
+                  (dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))))
 }
 
 .grad.tbs <- function(par,time,delta,dist,x=NULL,notinf=FALSE) {
@@ -591,6 +591,7 @@
   xi     <- par[2]
   ## at least one beta must exist, so length(par) >= 3
   beta   <- par[3:length(par)]
+  dist <- dist$name
 
   if (is.null(x)) {
     x <- rep(1,length(time))
@@ -623,8 +624,8 @@
   } else {
     out <- c(sum(aux.lambda),sum(aux.xi),sum(x*aux.eta))
   }
-  if(out < -1e10 && notinf) out = -1e10
-  if(out > 1e10 && notinf) out = 1e10
+#  if(out < -1e10 && notinf) out = -1e10
+#  if(out > 1e10 && notinf) out = 1e10
   return(out)
 }
 
