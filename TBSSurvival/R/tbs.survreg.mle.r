@@ -172,7 +172,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
     z.value <- rep(NA,length(x$beta))
     p.value <- rep(NA,length(x$beta))
     for (i in 1:length(x$beta)) {
-      if ((!is.na(x$beta.std.error[i]) && (!is.nan(x$beta.std.error[i])) {
+      if ((!is.na(x$beta.std.error[i])) && (!is.nan(x$beta.std.error[i]))) {
         z.value[i] <- x$beta[i]/x$beta.std.error[i]
         p.value[i] <- 2*pnorm(-abs(z.value[i]),0,1)
       } else {
