@@ -28,11 +28,12 @@
 ## controls the acceptance rate. prior.mean and prior.sd define the parameters of the normal prior for
 ## the MCMC (by default, they are equal to 5 and 5).
 ## accept: fraction of Metropolis proposals accepted.
-tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
+tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
                            guess.beta,guess.lambda,guess.xi,
                            burn=1000,jump=2,size=1000,scale=1,
                            prior.mean=NULL,prior.sd=NULL,
                            seed=1234) {
+  if(is.character(dist)) dist=dist.choice(dist)
   initial.time <- .gettime()
   set.seed(seed)
   if(max.time <= 0) {
@@ -208,7 +209,7 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
   out$error <- error[delta == 1]
   out$error.dist <- dist
 
-  aux <- .test.tbs(out$lambda,out$xi,out$beta,x,dist,time,type="d")
+  aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
   ## for the plot
   if (length(out$beta) == 1) {
     if (unique(aux$x[,1]) == 1) {
@@ -232,15 +233,15 @@ tbs.survreg.be <- function(formula,dist="norm",max.time=-1,
 
 print.tbs.survreg.be <- function(x, ...) {
   print(x$call)
-  if (x$error.dist == "norm")
+  if (x$error.dist$name == "norm")
     text.dist <- "normal"
-  if (x$error.dist == "t")
+  if (x$error.dist$name == "t")
     text.dist <- "t-student"
-  if (x$error.dist == "cauchy")
+  if (x$error.dist$name == "cauchy")
     text.dist <- "Cauchy"
-  if (x$error.dist == "doubexp")
+  if (x$error.dist$name == "doubexp")
     text.dist <- "Double exponential"
-  if (x$error.dist == "logistic")
+  if (x$error.dist$name == "logistic")
     text.dist <- "logistic"
   cat("\n",sep="")
   cat("--------------------------------------------------------\n",sep="")
@@ -294,15 +295,15 @@ print.tbs.survreg.be <- function(x, ...) {
 }
 
 summary.tbs.survreg.be <- function(x, ...) {
-  if (x$error.dist == "norm")
+  if (x$error.dist$name == "norm")
     text.dist <- "normal"
-  if (x$error.dist == "t")
+  if (x$error.dist$name == "t")
     text.dist <- "t-student"
-  if (x$error.dist == "cauchy")
+  if (x$error.dist$name == "cauchy")
     text.dist <- "Cauchy"
-  if (x$error.dist == "doubexp")
+  if (x$error.dist$name == "doubexp")
     text.dist <- "Double exponential"
-  if (x$error.dist == "logistic")
+  if (x$error.dist$name == "logistic")
     text.dist <- "logistic"
   cat("--------------------------------------------------------\n",sep="")
   cat(" TBS model with ",text.dist," error distribution (BE).\n",sep="")
@@ -379,7 +380,9 @@ summary.tbs.survreg.be <- function(x, ...) {
   cat("\n",sep="")
 }
 
-plot.tbs.survreg.be <- function(x, HPD=TRUE, ...) {
+plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
+  if(! (plot.type %in% c('surv','ts','hazard','auto')))
+    stop('Invalid plot type for tbs.survreg.be. Options are surv, ts, hazard, auto.')
   h <- 1000
   if (!exists("xlim")) {
     LB <- 0.0001
@@ -405,8 +408,10 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, ...) {
   }
   axis.t <- seq(LB,UB,(UB-LB)/(h-1))
 
-  par(ask=TRUE)
-  for (k in 1:2) {
+  k = 0
+  if(plot.type=='surv') k = 1
+  if(plot.type=='hazard') k = 2
+  if(k > 0) {
     if (attr(x$x,"plot") == 1) {
       axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
       if (k == 1) { ### Survival plot
@@ -495,37 +500,35 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, ...) {
       }
     }
   }
-
-  ## Histogram for error distribution:
-  bound <- max(abs(c(min(x$error),max(x$error))))
-  hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
-  axis.x <- seq(-bound,bound,2*bound/(h-1))
-  axis.y <- matrix(NA,length(axis.x),length(x$post[,1]))
-  for (j in 1:length(x$post[,1])) {
-    axis.y[,j] <- .choice(axis.x,xi=x$post[j,2],dist=x$error.dist,type="d")
+  if(plot.type=='error') {
+    ## Histogram for error distribution:
+    bound <- max(abs(c(min(x$error),max(x$error))))
+    hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
+    axis.x <- seq(-bound,bound,2*bound/(h-1))
+    axis.y <- matrix(NA,length(axis.x),length(x$post[,1]))
+    for (j in 1:length(x$post[,1])) {
+      axis.y[,j] <- x$error.dist$d(axis.x,xi=x$post[j,2])
+    }
+    lines(axis.x,apply(axis.y,1,mean))
+    if (HPD) {
+      lines(axis.x,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
+      lines(axis.x,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+    }
   }
-  lines(axis.x,apply(axis.y,1,mean))
-  if (HPD) {
-    lines(axis.x,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
-    lines(axis.x,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
-  }
-
   if (FALSE) {
     ## Q-Q plot for error distribution:
     axis.x <- matrix(NA,length(x$error),length(x$post[,1]))
     for (j in 1:length(x$post[,1])) {
-      axis.x[,j] <- qqplot(.choice(ppoints(length(x$error)), xi=x$post[j,2],
-                                   dist=x$error.dist, type="q"),x$error,plot.it=FALSE)$x
+      axis.x[,j] <- qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$post[j,2]),x$error,plot.it=FALSE)$x
     }
-    axis.y <- qqplot(.choice(ppoints(length(x$error)), xi=x$xi,
-                             dist=x$error.dist, type="q"),x$error,plot.it=FALSE)$y
+    axis.y <- qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,plot.it=FALSE)$y
     plot(apply(axis.x,1,mean),axis.y,
          main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
     qqline(x$error, distribution = function(p) {
                                      fn.aux <- function(p) {
                                        aux <- rep(NA,length(x$post[,1]))
                                        for (j in 1:length(x$post[,1]))
-                                         aux[j] <- .choice(p, xi=x$post[j,2], dist=x$error.dist, type="q")
+                                         aux[j] <- x$error.dist$q(p, xi=x$post[j,2])
                                        return(mean(aux))
                                      }
                                      aux <- Vectorize(fn.aux,"p")
@@ -534,35 +537,29 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, ...) {
            prob = c(0.25, 0.75), col = 2, lwd=2)
   }
 
-  #autocorrelation plot
-  acf(x$post[,1],main=expression(lambda))
-  acf(x$post[,2],main=expression(xi))
-  if (length(x$post[1,]) == 3) {
-    acf(x$post[,3],main=expression(beta))
-  } else {
-    for (i in 3:length(x$post[1,])) {
-      acf(x$post[,i],main=bquote(beta[.(i-3)]))
+  if(plot.type=='auto') {
+    ## autocorrelation plot
+    acf(x$post[,1],main=expression(lambda))
+    acf(x$post[,2],main=expression(xi))
+    if (length(x$post[1,]) == 3) {
+      acf(x$post[,3],main=expression(beta))
+    } else {
+      for (i in 3:length(x$post[1,])) {
+        acf(x$post[,i],main=bquote(beta[.(i-3)]))
+      }
     }
   }
 
-  #time series plot
-  plot(ts(x$post[,1]),ylab=expression(lambda),xlab="i")
-  plot(ts(x$post[,2]),ylab=expression(xi),xlab="i")
-  if (length(x$post[1,]) == 3) {
-    plot(ts(x$post[,3]),ylab=expression(beta),xlab="i")
-  } else {
-    for (i in 3:length(x$post[1,])) {
-      plot(ts(x$post[,i]),ylab=bquote(beta[.(i-3)]),xlab="i")
+  if(plot.type=='ts') {
+    ## time series plot of the MCMC
+    plot(ts(x$post[,1]),ylab=expression(lambda),xlab="i")
+    plot(ts(x$post[,2]),ylab=expression(xi),xlab="i")
+    if (length(x$post[1,]) == 3) {
+      plot(ts(x$post[,3]),ylab=expression(beta),xlab="i")
+    } else {
+      for (i in 3:length(x$post[1,])) {
+        plot(ts(x$post[,i]),ylab=bquote(beta[.(i-3)]),xlab="i")
+      }
     }
   }
-
-  par(ask=FALSE)
 }
-
-
-
-
-
-
-
-

@@ -55,10 +55,16 @@ loadlibs <- function(libdir=NULL) {
 #    library("eha",lib.loc=libdir)
     library("truncnorm",lib.loc=libdir)
     source("../R/tbs.survreg.be.r")
-    source("../R/tbs.r")
+    source("../R/ptbs.r")
+    source("../R/qtbs.r")
+    source("../R/dtbs.r")
+    source("../R/rtbs.r")
+    source("../R/htbs.r")
     source("../R/tbs.survreg.mle.r")
     source("../R/local.r")
     source("../R/dt2.r")
+    source("../R/dist.choice.r")
+    
   } else {
     library("TBSSurvival")
   }

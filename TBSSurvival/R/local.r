@@ -56,12 +56,12 @@
   if (lambda > 0 && xi > 0) {
     beta <- par[3:length(par)]
     ## check if the arguments are all ok
-    aux <- .test.tbs(lambda,xi,beta,x,dist,time=time,type="d")
-    ## .test.tbs may eventually re-cast beta and x, so we update them here
+    aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
+    ## dist$test may eventually re-cast beta and x, so we update them here
     beta <- aux$beta
     x <- aux$x
 
-    if (dist != "t") {
+    if (dist$name != "t") {
       ## for any dist not t-student, use a mixture of uniform-exponential with the flat prior
       ## between 0 and 3 for lambda with 0.8 of the mass, a mixture of uniform-exponential with
       ## flat prior for xi between 0 and 2 with 0.9 of the mass, and a normal distribution with
@@ -105,7 +105,7 @@
 ## distribution of the TBS model (has to be one of the available ones), x gives the information
 ## about the covariates, and notinf flags whether to turn -inf into a very negative number, which
 ## in some cases is useful for numerical reasons.
-.lik.tbs <- function(par,time,delta,dist="norm",x=NULL,notinf=FALSE)
+.lik.tbs <- function(par,time,delta,dist=dist.choice("norm"),x=NULL,notinf=FALSE)
 {
   ## split the info from par
   lambda <- par[1]
@@ -113,8 +113,8 @@
   ## at least one beta must exist, so length(par) >= 3
   beta   <- par[3:length(par)]
   ## check if the arguments are all ok
-  aux <- .test.tbs(lambda,xi,beta,x,dist,time=time,type="d")
-  ## .test.tbs may eventually re-cast beta and x, so we update them here
+  aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
+  ## dist$test may eventually re-cast beta and x, so we update them here
   beta <- aux$beta
   x <- aux$x
 
@@ -156,13 +156,12 @@
 
 ## nstart is the number of (feasible!) initial points to use. The method will try many guesses to find feasible points
 ## max.time (in minutes) to run the optimization
-## ncore is the number of cores to use with Rsolnp in case multicore/snowfall packages are installed
 ## method has to be one of the available in the function optim or "Rsolnp"
-## dist has to be one of those available in the .choice function (currently "norm", "t", "cauchy", "doubexp", "logistic")
+## dist has to be one of those available in the dist.choice function (see file tbs.r)
 ## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
-.tbs.survreg <- function(formula,dist="norm",method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,ncore=1) {
+.tbs.survreg <- function(formula,dist=dist.choice("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1) {
   initial.time <- .gettime()
   if(max.time <= 0) {
     ## user didn't define a timeout, so we set to a large number
@@ -220,28 +219,11 @@
       LB[2] = 0.0001
       ## upper bound for xi is not very clear, but 1000 should be enough. Lambda is left with 50 as upper.
       UB[2] = 1000
-      ## try to run the solver, using parallel computing if available
-      parallel=FALSE
-      parallel.control=NULL
       if(verbose) cat('RSOLNP: ')
-      if(ncore > 1) {
-        if(require("multicore",quietly=TRUE)) {
-          if(verbose) cat('multicore: ')
-          parallel=TRUE
-          parallel.control=list(pkg="multicore",core=ncore)
-        } else {
-          if(require("snowfall",quietly=TRUE)) {
-            if(verbose) cat('snowfall: ')
-            parallel=TRUE
-            parallel.control=list(pkg="snowfall",core=ncore)
-          }
-        }
-      }
       ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL,
         fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
         LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
-        distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, parallel=parallel,
-        parallel.control=parallel.control, rseed = runif(n=1,min=1,max=1000000), n = nparam),
+        distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, rseed = runif(n=1,min=1,max=1000000), n = nparam),
         timeout=max.time*60,onTimeout="error"))
       if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
@@ -264,7 +246,7 @@
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
         out$convergence <- TRUE
         ## evaluate the "error"
-        aux <- .test.tbs(out$par[1],out$par[2],out$par[3:length(out$par)],x,dist,time,type="d")
+        aux <- dist$test(out$par[1],out$par[2],out$par[3:length(out$par)],x,time,type="d")
         out$time  <- time[delta == 1]
         out$error <- c(.g.lambda(log(out$time),out$par[1])-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$par[1]))
         names(out$time) <- NULL
@@ -275,7 +257,7 @@
         if(verbose) cat(' failed\n')
         out$run.time <- .gettime() - initial.time
         out$convergence <- FALSE
-        cat(paste(method,": It was not possible to find a feasible solution"))
+        cat(paste(method,": It was not possible to find a feasible solution\n"))
       }
       return(out)
     }
@@ -375,7 +357,7 @@
     out$BIC  <- -2*est$value+nparam*log(length(time))
     out$convergence <- TRUE
     ## evaluate the "error"
-    aux <- .test.tbs(out$lambda,out$xi,out$beta,x,dist,time,type="d")
+    aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
     out$time  <- time[delta == 1]
     out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
     names(out$time) <- NULL
@@ -401,25 +383,36 @@
     if(verbose) cat(' failed\n')
     out$convergence <- FALSE
     out$run.time <- .gettime() - initial.time
-    cat(paste(method,": It was not possible to find a feasible solution"))
+    cat(paste(method,": It was not possible to find a feasible solution\n"))
   }
   return(out)
+}
+
+## \code{.g.lambda} gives the generalized power transformation function
+.g.lambda <- function(x,lambda) {
+  return(sign(x)*(abs(x)^lambda)/lambda)
+}
+
+## \code{.g.lambda.inv} is the inverse of generalized power transformation function.
+.g.lambda.inv <- function(x,lambda) {
+  return(sign(x)*(abs(x*lambda)^(1/lambda)))
 }
 
 ## this function has the sole purpose of checking whether the arguments respect the
 ## needs of the other TBS functions' implementation. It also re-cast the arguments in
 ## case it is needed, but does not really perform calculations.
-.test.tbs <- function(lambda, xi, beta, x=NULL, dist, time=NULL, type=NULL, p=NULL, n=NULL) {
-  out   <- NULL
-  out$x <- x
-  out$beta <- beta
-  if ((dist != "norm") && (dist != "doubexp") && (dist != "cauchy") &&
-      (dist != "t")    && (dist != "logistic"))
-    stop("dist: Distribution not available")
+.test.tbs <- function(lambda, xi, beta, x=NULL, time=NULL, type=NULL, p=NULL, n=NULL) {
   if (!is.numeric(xi))
     stop("xi is not a number")
   if (is.matrix(xi))
     stop("xi is matrix")
+  if (xi <= 0)
+    stop("xi <= 0")
+  
+  out   <- NULL
+  out$x <- x
+  out$beta <- beta
+
   if ((!is.numeric(lambda)) || (length(lambda) != 1))
     stop("lambda is not a number or length != 1")
   if (!is.numeric(beta))
@@ -442,8 +435,6 @@
   }
   if (lambda <= 0)
     stop("lambda <= 0")
-  if (xi <= 0)
-    stop("xi <= 0")
 
   if (!is.null(type)) {
     if ((type == "d") || (type == "p")) {
@@ -497,55 +488,4 @@
   }
 
   return(out)
-}
-
-## this is just a "switch" function to call the appropriate density, distribution, quantile
-## or generation function (respectively type = "d", "p", "q", "r"), according to the
-## five available distributions, namely dist = "norm", "t", "cauchy", "doubexp", "logistic"
-## this function helps to write the other functions without having to care about which of
-## these distributions where chosen by the user for the error. x is the point, xi is the
-## parameter of the distribution (the exact meaning varies according to it).
-.choice <- function(x, xi, dist, type) {
-  switch(dist,
-         ## Normal distribution
-         norm     = switch(type,
-           d = dnorm(x,mean=0,sd=sqrt(xi)), # density
-           p = pnorm(x,mean=0,sd=sqrt(xi)), # distr
-           q = qnorm(x,mean=0,sd=sqrt(xi)), # quantile
-           r = rnorm(x,mean=0,sd=sqrt(xi))), # generation
-         ## t-student distribution
-         t        = switch(type,
-           d = .dt2(x,df=xi), # density
-           p = .pt2(x,df=xi), # distr
-           q = .qt2(x,df=xi), # quantile
-           r = .rt2(x,df=xi)), # generation
-         ## Cauchy distribution
-         cauchy   = switch(type,
-           d = dcauchy(x,location=0,scale=xi), # density
-           p = pcauchy(x,location=0,scale=xi), # distr
-           q = qcauchy(x,location=0,scale=xi), # quantile
-           r = rcauchy(x,location=0,scale=xi)), # generation
-         ## Laplace/Double exponential distribution
-         doubexp  = switch(type,
-           d = dnormp(x,sigmap=xi,mu=0,p=1), # density
-           p = pnormp(x,sigmap=xi,mu=0,p=1), # distr
-           q = qnormp(x,sigmap=xi,mu=0,p=1), # quantile
-           r = rnormp(x,sigmap=xi,mu=0,p=1)), # generation
-         ## Logistic distribution
-         logistic = switch(type,
-           d = dlogis(x,location=0,scale=xi), # density
-           p = plogis(x,location=0,scale=xi), # distr
-           q = qlogis(x,location=0,scale=xi), # quantile
-           r = rlogis(x,location=0,scale=xi))) # generation
-}
-
-
-## \code{.g.lambda} gives the generalized power transformation function
-.g.lambda <- function(x,lambda) {
-  return(sign(x)*(abs(x)^lambda)/lambda)
-}
-
-## \code{.g.lambda.inv} is the inverse of generalized power transformation function.
-.g.lambda.inv <- function(x,lambda) {
-  return(sign(x)*(abs(x*lambda)^(1/lambda)))
 }

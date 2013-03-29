@@ -86,7 +86,7 @@
 We assume the reader to be familiar with the survival estimation / reliability
 problem. For more details we suggest the technical paper:
 {\it Transform Both Sides Model: A Parametric Approach},
-Polpo et al. 2012. In this document we use as example a reliability analysis
+Polpo et al. 2013. In this document we use as example a reliability analysis
 situation, but the methods will work as fine with survival analysis.
 
 The problem in view can be defined by \verb=time=, an array of times of failure
@@ -107,7 +107,6 @@ their failure time. For simplicity, we define the failure time by a random
 variable with Gamma distribution.
 <<echo=FALSE>>=
 options(width=60)
-set.seed(1234)
 @
 <<example1>>=
 time <- pmin(rgamma(30,10,2),rep(6,30))
@@ -144,7 +143,8 @@ logistic ( \verb=dist= = \verb="logistic"=) distributions.
 In case you have not yet done so, the first thing to do before using the functions is to install and load the library.
 
 <<tbsinst,eval=FALSE>>=
-install.packages("TBSSurvival_VERSION.tar.gz",repos=NULL,type="source")
+install.packages("TBSSurvival_VERSION.tar.gz",repos=NULL,type="source") ## from local file
+install.packages("TBSSurvival")  ## or from CRAN
 @ 
 <<<tbs>>=
 library("TBSSurvival")

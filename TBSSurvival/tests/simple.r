@@ -24,7 +24,7 @@ set.seed(1)
 library(ipred)
 data(GBSG2)
 cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
-s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1) ## as optim method not given, it tries all methods
+s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,verbose=TRUE) ## as optim method not given, it tries all methods
 
 ####################
 ## test with the colon data set from the survival package
@@ -32,7 +32,9 @@ library(survival)
 data(colon)
 cat('Running MLE on colon (from survival package) without covariates\n')
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
-b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist="norm",burn=10000,jump=200,scale=0.05)
+plot.hist(s)
+
+b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist=dist.choice("norm"),burn=10000,jump=200,scale=0.05)
 
 ## with covariate
 cat('Running MLE on colon (from survival package) with covariate=age60\n')
@@ -46,7 +48,7 @@ data(alloyT7987)
 method <- c("Rsolnp","BFGS","Nelder-Mead","CG","SANN")
 for (j in 1:length(method)) {
   for (i in 1:5) {
-    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist="logistic",method=method[j])
+    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist=dist.choice("logistic"),method=method[j])
     cat("i: ",i,"  - method: ",method[j],"  - log.lik: ",tbs.mle.logistic$log.lik,"\n")
   }
 }
