@@ -228,14 +228,20 @@
       if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
         ## get parameters
-        out$par <- ans$pars
+#        out$par <- ans$pars
+        out$lambda <- ans$par[1]
+        out$xi <- ans$par[2]
+        out$beta <- ans$par[3:length(ans$par)]
         options(warn = -1)
         ## compute the std.error
-        aux <- try(sqrt(diag(solve((ans$hessian)))),silent=TRUE)
+        aux <- try(sqrt(diag(solve(-(ans$hessian)))),silent=TRUE)
         options("warn" = 0)
-        out$std.error <- rep(NA,nparam)
+        std.error <- rep(NA,nparam)
         if (class(aux) != "try-error")
-          out$std.error <- aux
+          std.error <- aux
+        out$lambda.std.error <- std.error[1]
+        out$xi.std.error <- std.error[2]
+        out$beta.std.error <- std.error[3:length(std.error)]
         ## get the log-lik value
         out$log.lik <- -ans$values[length(ans$values)]
         if(verbose) cat(out$log.lik,'PARS:',ans$pars,'TIME:',ans$elapsed,'\n')
@@ -246,11 +252,25 @@
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
         out$convergence <- TRUE
         ## evaluate the "error"
-        aux <- dist$test(out$par[1],out$par[2],out$par[3:length(out$par)],x,time,type="d")
+        aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
         out$time  <- time[delta == 1]
-        out$error <- c(.g.lambda(log(out$time),out$par[1])-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$par[1]))
+        out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
         names(out$time) <- NULL
         names(out$error) <- NULL
+        ## for the plot
+        if (length(out$beta) == 1) {
+          if (unique(aux$x[,1]) == 1) {
+            out$x <- 1
+            attr(out$x,"plot") <- 1
+          } else if (length(unique(aux$x[,1]) <= 4)) {
+            out$x <- unique(aux$x[,1])
+            attr(out$x,"plot") <- 2
+          }
+        } else if ((length(out$beta) == 2) && (unique(aux$x[,1]) == 1) &&
+                   (length(unique(aux$x[,2])) <= 4)) {
+          out$x <- unique(aux$x[,2])
+          attr(out$x,"plot") <- 3
+        }
         ## set time run time
         out$run.time <- .gettime() - initial.time
       } else {
