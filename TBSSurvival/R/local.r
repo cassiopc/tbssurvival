@@ -220,12 +220,17 @@
       ## upper bound for xi is not very clear, but 1000 should be enough. Lambda is left with 50 as upper.
       UB[2] = 1000
       if(verbose) cat('RSOLNP: ')
-      ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL,
-        fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
+      for(itk in 1:3) {
+        ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL,
+          fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
         LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
         distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, rseed = runif(n=1,min=1,max=1000000), n = nparam),
         timeout=max.time*60,onTimeout="error"))
-      if (class(ans) != "try-error" && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
+        if (class(ans) != "try-error" && ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
+          break
+        }
+      }
+      if (class(ans) != "try-error" &&  ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
         ## get parameters
 #        out$par <- ans$pars
@@ -250,7 +255,7 @@
         out$AIC  <- 2*nparam-2*out$log.lik
         out$AICc <- 2*nparam-2*out$log.lik + 2*nparam*(nparam+1)/(length(time)-nparam-1)
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
-        out$convergence <- TRUE
+        out$convergence <- ans$convergence
         ## evaluate the "error"
         aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
         out$time  <- time[delta == 1]
