@@ -255,7 +255,7 @@
         out$AIC  <- 2*nparam-2*out$log.lik
         out$AICc <- 2*nparam-2*out$log.lik + 2*nparam*(nparam+1)/(length(time)-nparam-1)
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
-        out$convergence <- ans$convergence
+        out$convergence <- TRUE
         ## evaluate the "error"
         aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
         out$time  <- time[delta == 1]
