@@ -355,6 +355,7 @@
     ## if enough starts have been tried, stop. Also stop if too many unsuccessfull tries have been made :(
     if(ii>100 && is.na(est)) {
       inimethod="SANN"
+      grad=NULL
       if(verbose) cat('$')
     }
     ## ii counts the number of initial guess that have been tried but were unfeasible ones. We try at least
