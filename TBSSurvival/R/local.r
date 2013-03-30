@@ -171,6 +171,8 @@
   }
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
+  grad=NULL
+  if(gradient) grad=.grad.tbs
 
   ## read the information from within the formula to populate the required variables
   mf <- model.frame(formula=formula)
@@ -213,27 +215,27 @@
       return(out)
     } else {
       out$method <- method
-      ## Rsolnp needs some bounds for the unknowns. We arbitrarily define them to be between -50 and 50.
-      LB = rep(-50,nparam)
-      UB = rep(50,nparam)
+      ## Rsolnp needs some bounds for the unknowns. We arbitrarily define them to be between -100 and 100.
+      LB = rep(-100,nparam)
+      UB = rep(100,nparam)
       ## unless for lambda and xi, which must always be positive
       LB[1] = 0.0001
       LB[2] = 0.0001
-      ## upper bound for xi is not very clear, but 1000 should be enough. Lambda is left with 50 as upper.
+      ## upper bound for xi is not very clear, but 1000 should be enough. Lambda is left with 100 as upper.
       UB[2] = 1000
       if(verbose) cat('RSOLNP: ')
       for(itk in 1:3) {
         ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL,
           fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
         LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
-        distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 1000, rseed = runif(n=1,min=1,max=1000000), n = nparam),
+        distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim = 2000, rseed = runif(n=1,min=1,max=1000000), n = nparam),
         timeout=max.time*60,onTimeout="error"))
-        if (class(ans) != "try-error" && ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
+        if (class(ans) != "try-error" && ans$convergence == 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
           break
         }
 ######        print(ans)
       }
-      if (class(ans) != "try-error" &&  ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
+      if (class(ans) != "try-error" &&  ans$convergence == 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
         ## get parameters
 #        out$par <- ans$pars
@@ -306,28 +308,15 @@
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
-      ### The gradient is not working for any method... why?
-      ## gr is not the gradient for SANN method, is a function to generate points.
-      if (method == "SANN" || gradient==FALSE) {   
-        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
-                         method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-      } else {
-        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
-                         method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-      }
+      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+                                       method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
 ##        print(paste('aux$value',aux$value))
-        if(method == "SANN") {
+        if(aux$convergence != 0) {
           repeat {
-            ## gr is not the gradient for SANN method, is a function to generate points.
-            if (method == "SANN" || gradient==FALSE) {
-              aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
-                                                method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-            } else {
-              aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
-                                                method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-##              print(paste('aux1$value',aux1$value))
-            }
+            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+                                              method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+            ##              print(paste('aux1$value',aux1$value))
             if (class(aux1) != "try-error") {
               if (aux1$value < aux$value + 0.0001) {
                 ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...
