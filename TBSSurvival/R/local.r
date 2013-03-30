@@ -172,7 +172,7 @@
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
   grad=NULL
-  if(gradient) grad=.grad.tbs
+  if(gradient && (method != "SANN")) grad=.grad.tbs
 
   ## read the information from within the formula to populate the required variables
   mf <- model.frame(formula=formula)
