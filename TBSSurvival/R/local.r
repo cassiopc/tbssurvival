@@ -414,7 +414,7 @@
     }
     ## record run time
     out$run.time <- .gettime() - initial.time
-    if(verbose) cat(' ',out$log.lik,'PARS:',out$par,'TIME:',out$run.time,'\n')
+    if(verbose) cat(' ',out$log.lik,'TIME:',out$run.time,'\n')
   } else {
     if(verbose) cat(' failed\n')
     out$convergence <- FALSE

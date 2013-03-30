@@ -68,12 +68,15 @@ tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("Nelder-Mea
       if ((aux > out[[i]]$AIC) && (out[[i]]$convergence)) {
         aux <- out[[i]]$AIC
         best <- dist[[i]]$name
+        bestn <- i
       }
     }
     if (exists("best")) {
       out$best <- best
+      out$best.n <- bestn
     } else {
       out$best <- "none"
+      out$best.n <- 0
     }
   } else {
     out <- fn.aux(formula,dist,method,verbose,nstart,max.time)
