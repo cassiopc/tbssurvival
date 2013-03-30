@@ -22,7 +22,7 @@
 ##   available there are dist.choice(name), with name = "norm", "t", "cauchy", "doubexp", "logistic"
 ## formula is a R formula with a Surv object on the left side
 tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
-                            verbose=FALSE,nstart=10,max.time=-1,seed=1234) {
+                            verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=TRUE) {
   if(is.character(dist)) dist=dist.choice(dist)
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
@@ -35,7 +35,7 @@ tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("BFGS","Rso
     bestout <- NULL
     for(i in 1:length(method)) {
       ## call the estimation function
-      out <- .tbs.survreg(formula,dist=dist,method=method[i],verbose=verbose,max.time=max.time,nstart=nstart)
+      out <- .tbs.survreg(formula,dist=dist,method=method[i],verbose=verbose,max.time=max.time,nstart=nstart,gradient=gradient)
       ## if converged, we are happy
       if(out$convergence) {
         if(is.null(bestout) || out$log.lik > bestout$log.lik) {

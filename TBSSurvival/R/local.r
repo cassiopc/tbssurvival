@@ -112,16 +112,16 @@
   xi     <- par[2]
   ## at least one beta must exist, so length(par) >= 3
   beta   <- par[3:length(par)]
-  ## check if the arguments are all ok
-  aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
-  ## dist$test may eventually re-cast beta and x, so we update them here
-  beta <- aux$beta
-  x <- aux$x
-
   out <- log(0)
   ## result is -inf unless all vars below are positive
   if ((xi > 0) && (all(time > 0)) && (lambda > 0))
   {
+    ## check if the arguments are all ok
+    aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
+    ## dist$test may eventually re-cast beta and x, so we update them here
+    beta <- aux$beta
+    x <- aux$x
+
     out <- 0
     ## if there are covariates, R requires us treat x as a matrix, but that is the only
     ## difference between the if and else statements here (which we write just to avoid copying x
@@ -150,8 +150,8 @@
     }
   }
   ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -1e10 suffices
-  if(notinf && out< -1e10) out = -1e10
-  if(out > 1e10 && notinf) out = 1e10
+  if(notinf && out < -1e10) out = -1e10
+  if(notinf && out > 1e10) out = 1e10
   return(out)
 }
 
@@ -162,7 +162,7 @@
 ## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
-.tbs.survreg <- function(formula,dist=dist.choice("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1) {
+.tbs.survreg <- function(formula,dist=dist.choice("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,gradient=TRUE) {
   initial.time <- .gettime()
   if(max.time <= 0) {
     ## user didn't define a timeout, so we set to a large number
@@ -307,32 +307,35 @@
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
       ### The gradient is not working for any method... why?
       ## gr is not the gradient for SANN method, is a function to generate points.
-      if (TRUE) { #(method == "SANN") {   
-        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, 
+      if (method == "SANN" || gradient==FALSE) {   
+        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
                          method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       } else {
-        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, 
+        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
                          method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       }
       if (class(aux) != "try-error") {
-        repeat {
-          ### The gradient is not working for any method... why?
-          ## gr is not the gradient for SANN method, is a function to generate points.
-          if (TRUE) { #(method == "SANN") {
-            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x,
-                             method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-          } else {
-            aux1 <- try(evalWithTimeout(optim(aux$par, f=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x,
-                             method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-          }
-          if (class(aux1) != "try-error") {
-            if (aux1$value < aux$value + 0.0001) {
-              ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...
+        print(paste('aux$value',aux$value))
+        if(method == "SANN") {
+          repeat {
+            ## gr is not the gradient for SANN method, is a function to generate points.
+            if (method == "SANN" || gradient==FALSE) {
+              aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+                                                method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+            } else {
+              aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+                                                method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+              print(paste('aux1$value',aux1$value))
+            }
+            if (class(aux1) != "try-error") {
+              if (aux1$value < aux$value + 0.0001) {
+                ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...
+                break
+              }
+              aux=aux1
+            } else {
               break
             }
-            aux=aux1
-          } else {
-            break
           }
         }
         ## if a new best solution was found, update the current one
@@ -344,6 +347,7 @@
         i = i + 1
         if(verbose) cat('@')
       } else {
+        print(aux)
         if(verbose) cat('*')
         ## one more unfeasible point tried
         ii = ii + 1
@@ -532,7 +536,7 @@
 }
 
 .deriv.tbs <- function(x, xi, dist, type, var) {
-  switch(dist,
+  switch(dist$name,
     norm = switch(var,
       xi = switch(type,
         dens = ((x^2)/(xi^(5/2))-1/(xi^(3/2)))*exp(-(x^2)/(2*xi))/sqrt((2^3)*pi),
@@ -576,36 +580,44 @@
         surv = -dlogis(x,location=0,scale=xi))))
 }
 
+.mylog <- function(t) log(t+1e-8)
+.invn <- function(t) (1.0/(t+1e-8))
+.pown <- function(a,b) exp(b*log(abs(a)+1e-8))
+
 .deriv.logL.tbs <- function(t, eta, lambda, xi, dist, type, var) {
   switch(type,
     Se = switch(var,
-      eta    = (-(abs(eta)^(lambda-1))*
-                dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda))*
-                ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
-      lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
-                -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
-                (-dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))*
-               ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
-      xi     =  .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="surv",var="xi")* 
-                ((1-dist$p(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi))^(-1))),
+      eta    = (- .pown(eta,lambda-1))*
+                dist$d(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi)*
+                (.invn(1-dist$p(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi))),
+      lambda = (((sign(.mylog(t))* .pown(.mylog(t),lambda)/lambda)*(.mylog(abs(.mylog(t)))-1/lambda)
+                -(sign(eta)* .pown(eta,lambda)/lambda)*(.mylog(abs(eta))-1/lambda))*
+                (-dist$d(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi))*
+               (.invn(1-dist$p(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi)))),
+      xi     =  .deriv.tbs(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="surv",var="xi")* 
+                (.invn(1-dist$p(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi)))),
     fe = switch(var,
-      eta    = ((abs(eta)^(lambda-1))*
-                .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x")*
-                  (.dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))),
-      lambda = (((sign(log(t))*(abs(log(t))^lambda)/lambda)*(log(abs(log(t)))-1/lambda)
-                -(sign(eta)*(abs(eta)^lambda)/lambda)*(log(abs(eta))-1/lambda))*
-                (.deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x"))*
-                   (dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))),
-      xi     =  .deriv.tbs(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="xi")*
-                  (dist$d(.g.lambda(log(t),lambda)-.g.lambda(eta,lambda),xi)^(-1))))
+      eta    = .pown(eta,lambda-1)*
+                .deriv.tbs(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x")*
+                  (.invn(dist$d(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi))),
+      lambda = (((sign(.mylog(t))* .pown(.mylog(t),lambda)/lambda)*(.mylog(abs(.mylog(t)))-1/lambda)
+                -(sign(eta)* .pown(eta,lambda)/lambda)*(.mylog(abs(eta))-1/lambda))*
+                (.deriv.tbs(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="x"))*
+                   (.invn(dist$d(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi)))),
+      xi     =  .deriv.tbs(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi,dist,type="dens",var="xi")*
+                  (.invn(dist$d(.g.lambda(.mylog(t),lambda)-.g.lambda(eta,lambda),xi)))))
 }
 
-.grad.tbs <- function(par,time,delta,dist,x=NULL,notinf=FALSE) {
+.grad.tbs <- function(par,time,delta,dist,x=NULL,notinf=TRUE) {
   lambda <- par[1]
   xi     <- par[2]
+  if(lambda < 0 || xi < 0) {
+    if(is.matrix(x)) out <- rep(-Inf,2+length(x[1,]))
+    else out <- c(-Inf,-Inf,-Inf)
+    return(out)
+  }
   ## at least one beta must exist, so length(par) >= 3
   beta   <- par[3:length(par)]
-  dist <- dist$name
 
   if (is.null(x)) {
     x <- rep(1,length(time))
@@ -617,6 +629,11 @@
       eta <- beta*x
     }
   }
+  ## print(time)
+  ## print(delta)
+  ## print(par)
+  ## print(x)
+  
   aux.eta    <- rep(NA,length(time))
   aux.lambda <- rep(NA,length(time))
   aux.xi     <- rep(NA,length(time))
@@ -628,7 +645,10 @@
     aux.xi[i] <-     (delta[i]*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="fe",var="xi")+
                   (1-delta[i])*.deriv.logL.tbs(time[i],eta[i],lambda,xi,dist,type="Se",var="xi"))
   }
-
+  ## print(aux.eta)
+  ## print(aux.lambda)
+  ## print(aux.xi)
+  
   if (is.matrix(x)) {
     out <- rep(NA,2+length(x[1,]))
     out[1] <- sum(aux.lambda)
@@ -638,8 +658,12 @@
   } else {
     out <- c(sum(aux.lambda),sum(aux.xi),sum(x*aux.eta))
   }
-#  if(out < -1e10 && notinf) out = -1e10
-#  if(out > 1e10 && notinf) out = 1e10
+  if(notinf) {
+    for(i in 1:length(out)) {
+      if(out[i] < -1e10) out[i] = -1e10
+      if(out[i] > 1e10) out[i] = 1e10
+    }
+  }
   return(out)
 }
 
