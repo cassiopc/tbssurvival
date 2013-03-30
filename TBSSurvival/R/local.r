@@ -230,7 +230,7 @@
         if (class(ans) != "try-error" && ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
           break
         }
-        print(ans)
+######        print(ans)
       }
       if (class(ans) != "try-error" &&  ans$convergence > 0 && length(ans$values)>0 && ans$values[length(ans$values)] < 1e10) {
         ## process the solution in case one was found
@@ -305,12 +305,26 @@
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
-      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, 
-                       method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+      ### The gradient is not working for any method... why?
+      ## gr is not the gradient for SANN method, is a function to generate points.
+      if (TRUE) { #(method == "SANN") {   
+        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x, 
+                         method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+      } else {
+        aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, 
+                         method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+      }
       if (class(aux) != "try-error") {
         repeat {
-          aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x,
-                           method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+          ### The gradient is not working for any method... why?
+          ## gr is not the gradient for SANN method, is a function to generate points.
+          if (TRUE) { #(method == "SANN") {
+            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, time=time, delta=delta, dist=dist, x=x,
+                             method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+          } else {
+            aux1 <- try(evalWithTimeout(optim(aux$par, f=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x,
+                             method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+          }
           if (class(aux1) != "try-error") {
             if (aux1$value < aux$value + 0.0001) {
               ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...
@@ -619,8 +633,8 @@
     out <- rep(NA,2+length(x[1,]))
     out[1] <- sum(aux.lambda)
     out[2] <- sum(aux.xi)
-    for (i in 3:(2+length(x[1,])))
-      out[i] <- sum(x[,(i-2)]*aux.eta)
+    for (i in 1:length(x[1,]))
+      out[i+2] <- sum(x[,i]*aux.eta)
   } else {
     out <- c(sum(aux.lambda),sum(aux.xi),sum(x*aux.eta))
   }
