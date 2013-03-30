@@ -312,7 +312,7 @@
                                        method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
 ##        print(paste('aux$value',aux$value))
-        if(aux$convergence != 0) {
+        if((inimethod=="SANN") || (aux$convergence != 0)) {
           for(itx in 1:10) {
             aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
                                               method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
