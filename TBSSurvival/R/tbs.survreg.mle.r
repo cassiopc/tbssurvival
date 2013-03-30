@@ -58,8 +58,7 @@ tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("BFGS","Rso
     class(bestout) <- "tbs.survreg.mle"
     return(bestout)
   }
-
-  if (is.list(dist) > 1) {
+  if (is.list(dist)) {
     out <- NULL
     aux <- Inf
     for (i in 1:length(dist)) {
