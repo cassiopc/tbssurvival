@@ -21,9 +21,9 @@
 ##   points to use, dist has to be one of the available distributions or one of your own (see dist.choice.r), currently
 ##   available there are dist.choice(name), with name = "norm", "t", "cauchy", "doubexp", "logistic"
 ## formula is a R formula with a Surv object on the left side
-tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
+tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("Nelder-Mead","BFGS","Rsolnp","SANN","CG"),
                             verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=FALSE) {
-  if(is.character(dist)) dist=dist.choice(dist)
+  if(is.character(dist)) dist <- dist.choice(dist)
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.
@@ -58,7 +58,7 @@ tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("BFGS","Rso
     class(bestout) <- "tbs.survreg.mle"
     return(bestout)
   }
-  if (is.list(dist)) {
+  if (is.list(dist) && typeof(dist[[1]])=="list") {
     out <- NULL
     aux <- Inf
     for (i in 1:length(dist)) {
