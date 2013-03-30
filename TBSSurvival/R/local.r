@@ -150,6 +150,7 @@
     }
   }
   ## if it is not to return -inf, then return a very negative value... as we are dealing with logs, -1e10 suffices
+  if(is.na(out) || length(out)==0) return(NA)
   if(notinf && out < -1e10) out = -1e10
   if(notinf && out > 1e10) out = 1e10
   return(out)
@@ -315,7 +316,7 @@
                          method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       }
       if (class(aux) != "try-error") {
-        print(paste('aux$value',aux$value))
+##        print(paste('aux$value',aux$value))
         if(method == "SANN") {
           repeat {
             ## gr is not the gradient for SANN method, is a function to generate points.
@@ -325,7 +326,7 @@
             } else {
               aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=.grad.tbs, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
                                                 method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-              print(paste('aux1$value',aux1$value))
+##              print(paste('aux1$value',aux1$value))
             }
             if (class(aux1) != "try-error") {
               if (aux1$value < aux$value + 0.0001) {
@@ -347,7 +348,7 @@
         i = i + 1
         if(verbose) cat('@')
       } else {
-        print(aux)
+##        print(aux)
         if(verbose) cat('*')
         ## one more unfeasible point tried
         ii = ii + 1
