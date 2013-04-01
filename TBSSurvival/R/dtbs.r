@@ -1,5 +1,5 @@
 # TBSSurvival package for R (http://www.R-project.org)
-# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+# Copyright (C) 2012-2013 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 #                    Jianchang Lin and Stuart Lipsitz.
 #
 #    This program is free software: you can redistribute it and/or modify

@@ -64,6 +64,7 @@ loadlibs <- function(libdir=NULL) {
     source("../R/htbs.r")
     source("../R/tbs.survreg.mle.r")
     source("../R/local.r")
+    source("../R/test.tbs.r")
     source("../R/dt2.r")
     source("../R/dist.choice.r")
     

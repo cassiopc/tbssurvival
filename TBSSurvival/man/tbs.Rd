@@ -1,6 +1,6 @@
 % File TBSSurvival/man/tbs.Rd
 % Part of the TBSSurvival package for R (http://www.R-project.org)
-% Copyright (C) 2012, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+% Copyright (C) 2012-2013, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 %                     Jianchang Lin and Stuart Lipsitz.
 % Distributed under GPL 3 or later
 
@@ -16,7 +16,7 @@
 \title{The TBS Time Failure Distribution}
 \description{
   Density, distribution function, quantile function, random
-  generation and hazard function for the TBS distribution.
+  generation and hazard function for the Transform-Both-Sides (TBS) distribution.
 }
 \usage{
  dtbs(time,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
@@ -33,12 +33,15 @@
   \item{xi}{parameter of the error distribution.}
   \item{beta}{parameter of the linear regressor.}
   \item{x}{vector/matrix of co-variables, x=NULL if there are not co-variables.}
-  \item{dist}{Distribution of error, dist = "norm", "t", "doubexp", "cauchy" or "logistic".}
+  \item{dist}{Distribution of error, dist = "norm", "t", "doubexp", "cauchy" or "logistic". It can also be
+given as a list of functions (density, distribution, quantile, random generation, test function, name). Details below.}
 }
 \details{
   The density, distribution function, quantile function, random
   generation and hazard function for the failure time of a TBS Model.
-  The distribution of error can be chosen from Normal, t-Student, Cauchy, Logistic and Doub-Exponential (Laplace).
+  The distribution of error can be chosen from Normal, t-Student, Cauchy, Logistic and Doub-Exponential (Laplace), or can
+  be given by the user (as long as it is unimodal and symmetric -- TBS does not check it). See the help of \link{dist.choice}
+  for examples.
 }
 \value{
      `dtbs' gives the density, `ptbs' gives the distribution

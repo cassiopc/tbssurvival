@@ -1,5 +1,5 @@
 # TBSSurvival package for R (http://www.R-project.org)
-# Copyright (C) 2012 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+# Copyright (C) 2012-2013 Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 #                    Jianchang Lin and Stuart Lipsitz.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ dist.choice <- function(dist="norm") {
            p = function(x,xi) pnorm(x,mean=0,sd=sqrt(xi)), # distr
            q = function(x,xi) qnorm(x,mean=0,sd=sqrt(xi)), # quantile
            r = function(x,xi) rnorm(x,mean=0,sd=sqrt(xi)), # generation
-           test = .test.tbs,
+           test = test.tbs,
            name = "norm"
            ),
          ## t-student distribution
@@ -44,7 +44,7 @@ dist.choice <- function(dist="norm") {
            p = function(x,xi) .pt2(x,df=xi), # distr
            q = function(x,xi) .qt2(x,df=xi), # quantile
            r = function(x,xi) .rt2(x,df=xi), # generation
-           test = .test.tbs,
+           test = test.tbs,
            name = "t"
            ),
          ## Cauchy distribution
@@ -53,7 +53,7 @@ dist.choice <- function(dist="norm") {
            p = function(x,xi) pcauchy(x,location=0,scale=xi), # distr
            q = function(x,xi) qcauchy(x,location=0,scale=xi), # quantile
            r = function(x,xi) rcauchy(x,location=0,scale=xi), # generation
-           test = .test.tbs,
+           test = test.tbs,
            name = "cauchy"
            ),
          ## Laplace/Double exponential distribution
@@ -62,7 +62,7 @@ dist.choice <- function(dist="norm") {
            p = function(x,xi) pnormp(x,sigmap=xi,mu=0,p=1), # distr
            q = function(x,xi) qnormp(x,sigmap=xi,mu=0,p=1), # quantile
            r = function(x,xi) rnormp(x,sigmap=xi,mu=0,p=1), # generation
-           test = .test.tbs,
+           test = test.tbs,
            name = "doubexp"
            ),
          ## Logistic distribution
@@ -71,7 +71,7 @@ dist.choice <- function(dist="norm") {
            p = function(x,xi) plogis(x,location=0,scale=xi), # distr
            q = function(x,xi) qlogis(x,location=0,scale=xi), # quantile
            r = function(x,xi) rlogis(x,location=0,scale=xi), # generation
-           test = .test.tbs,
+           test = test.tbs,
            name = "logistic"
            ),
          all = list(dist.choice("norm"),dist.choice("t"),dist.choice("cauchy"),dist.choice("doubexp"),dist.choice("logistic"))

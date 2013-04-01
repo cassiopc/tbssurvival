@@ -249,9 +249,9 @@
         std.error <- rep(NA,nparam)
         if (class(aux) != "try-error")
           std.error <- aux
-        out$lambda.std.error <- std.error[1]
-        out$xi.std.error <- std.error[2]
-        out$beta.std.error <- std.error[3:length(std.error)]
+        out$lambda.se <- std.error[1]
+        out$xi.se <- std.error[2]
+        out$beta.se <- std.error[3:length(std.error)]
         ## get the log-lik value
         out$log.lik <- -ans$values[length(ans$values)]
         if(verbose) cat(out$log.lik,'PARS:',ans$pars,'TIME:',ans$elapsed,'\n')
@@ -381,9 +381,9 @@
     std.error <- rep(NA,nparam)
     if (class(aux) != "try-error")
       std.error <- aux
-    out$lambda.std.error <- std.error[1]
-    out$xi.std.error <- std.error[2]
-    out$beta.std.error <- std.error[3:length(std.error)]
+    out$lambda.se <- std.error[1]
+    out$xi.se <- std.error[2]
+    out$beta.se <- std.error[3:length(std.error)]
     ## get the log.lik value
     out$log.lik <- est$value
     out$error.dist <- dist
@@ -432,98 +432,6 @@
 ## \code{.g.lambda.inv} is the inverse of generalized power transformation function.
 .g.lambda.inv <- function(x,lambda) {
   return(sign(x)*(abs(x*lambda)^(1/lambda)))
-}
-
-## this function has the sole purpose of checking whether the arguments respect the
-## needs of the other TBS functions' implementation. It also re-cast the arguments in
-## case it is needed, but does not really perform calculations.
-.test.tbs <- function(lambda, xi, beta, x=NULL, time=NULL, type=NULL, p=NULL, n=NULL) {
-  if (!is.numeric(xi))
-    stop("xi is not a number")
-  if (is.matrix(xi))
-    stop("xi is matrix")
-  if (xi <= 0)
-    stop("xi <= 0")
-  
-  out   <- NULL
-  out$x <- x
-  out$beta <- beta
-
-  if ((!is.numeric(lambda)) || (length(lambda) != 1))
-    stop("lambda is not a number or length != 1")
-  if (!is.numeric(beta))
-    stop("beta is not a (vector) number")
-  if (is.matrix(beta))
-    stop("beta is matrix")
-  if (!is.null(x)) {
-    if (is.matrix(x)) {
-      if (length(beta) != length(x[1,]))
-        stop(paste("size of beta != ",length(x[1,]),sep=""))
-    }
-    else {
-      if ((length(beta) != 1) && (length(beta) != length(x)))
-        stop("size of beta is not conform")
-    }
-  }
-  else {
-    if (length(beta) > 1)
-      stop("x is wrong or length(beta) > 1")  
-  }
-  if (lambda <= 0)
-    stop("lambda <= 0")
-
-  if (!is.null(type)) {
-    if ((type == "d") || (type == "p")) {
-      if (!is.numeric(time))
-        stop("time is not a (vector) number")
-      if (is.matrix(time))
-        stop("time is matrix")
-      if (any(time <= 0))
-        stop("time <= 0")
-      if (!is.null(x)) {
-        if (is.matrix(x)) {
-          if (length(time) != length(x[,1]))
-            stop("length of time is different of length of x")
-        }
-        else {
-          if (length(beta) == length(x)) {
-            out$x <- matrix(x,1,length(x))
-          } else {
-            if (length(time) != length(x))
-              stop("length of time is different of length of x")
-            out$x <- matrix(x,length(x),1)
-          }
-        }
-        out$beta <- matrix(beta,length(beta),1)
-      }
-      else {
-        out$x <- matrix(1,length(time),1)
-      }
-    } else {
-      if (type == "q") {
-        if (!is.numeric(p))
-          stop("p is not a (vector) number")
-        if (is.matrix(p))
-          stop("p is matrix")
-        if (min(p) < 0)
-          stop("p < 0")
-        if (max(p) > 1)
-          stop("p > 1")
-      } else if (type == "r") {
-          if (!is.numeric(n))
-            stop("n is not a number")
-          if (n %% 1 != 0)
-            stop("n is not a integer number")
-        }
-      if (is.null(x)) {
-        if (length(beta) > 1)
-          stop("If x is omitted then beta must have length 1")
-        out$x <- 1
-      }
-    }
-  }
-
-  return(out)
 }
 
 .deriv.tbs <- function(x, xi, dist, type, var) {

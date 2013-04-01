@@ -99,13 +99,14 @@ print.tbs.survreg.mle <- function(x, ...) {
       text.dist <- "Double exponential"
     if (x$error.dist$name == "logistic")
       text.dist <- "logistic"
+    else test.dist <- x$error.dist$name 
     cat("\n",sep="")
     cat("--------------------------------------------------------\n",sep="")
     cat(" TBS model with ",text.dist," error distribution (MLE).\n",sep="")
     cat("\n",sep="")
     
     aux1 <- nchar(sprintf("%.4f",c(x$lambda,x$xi,x$beta)))
-    aux2 <- nchar(sprintf("%.4f",c(x$lambda.std.error,x$xi.std.error,x$beta.std.error)))
+    aux2 <- nchar(sprintf("%.4f",c(x$lambda.se,x$xi.se,x$beta.se)))
     text <- c("Estimates","Std. Error")
     auxc <- nchar(text)
     auxc1 <- c(ifelse(max(aux1) > auxc[1],abs(max(aux1)-auxc[1]),0),
@@ -116,28 +117,28 @@ print.tbs.survreg.mle <- function(x, ...) {
         rep(" ",auxc1[2]+1),text[2],"\n",sep="")
     cat("  lambda: ",
         rep(ifelse(auxc[1] > aux1[1]," ",""),abs(auxc[1]-aux1[1])),sprintf("%.4f",x$lambda)," ",
-        rep(ifelse(auxc[2] > aux2[1]," ",""),abs(auxc[2]-aux2[1])),sprintf("%.4f",x$lambda.std.error),
+        rep(ifelse(auxc[2] > aux2[1]," ",""),abs(auxc[2]-aux2[1])),sprintf("%.4f",x$lambda.se),
         "\n",sep="")
     cat("      xi: ",
         rep(ifelse(auxc[1] > aux1[2]," ",""),abs(auxc[1]-aux1[2])),sprintf("%.4f",x$xi)," ",
-        rep(ifelse(auxc[2] > aux2[2]," ",""),abs(auxc[2]-aux2[2])),sprintf("%.4f",x$xi.std.error),
+        rep(ifelse(auxc[2] > aux2[2]," ",""),abs(auxc[2]-aux2[2])),sprintf("%.4f",x$xi.se),
         "\n",sep="")
     if (length(x$beta) == 1) {
       cat("    beta: ",
           rep(ifelse(auxc[1] > aux1[3]," ",""),abs(auxc[1]-aux1[3])),sprintf("%.4f",x$beta)," ",
-          rep(ifelse(auxc[2] > aux2[3]," ",""),abs(auxc[2]-aux2[3])),sprintf("%.4f",x$beta.std.error)," ",
+          rep(ifelse(auxc[2] > aux2[3]," ",""),abs(auxc[2]-aux2[3])),sprintf("%.4f",x$beta.se)," ",
           "\n",sep="")
     } else {
       for (i in 1:length(x$beta)) {
         if (i-1 < 10) {
           cat("   beta",i-1,": ",
               rep(ifelse(auxc[1] > aux1[(i+2)]," ",""),abs(auxc[1]-aux1[(i+2)])),sprintf("%.4f",x$beta[i])," ",
-              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.std.error[i])," ",
+              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.se[i])," ",
               "\n",sep="")
         } else {
           cat("  beta",i-1,": ",
               rep(ifelse(auxc[1] > aux1[(i+2)]," ",""),abs(auxc[1]-aux1[(i+2)])),sprintf("%.4f",x$beta[i])," ",
-              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.std.error[i])," ",
+              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.se[i])," ",
               "\n",sep="")
         }
       }
@@ -167,6 +168,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
       text.dist <- "Double exponential"
     if (x$error.dist$name == "logistic")
       text.dist <- "logistic"
+    else test.dist <- x$error.dist$name 
     cat("--------------------------------------------------------\n",sep="")
     cat(" TBS model with ",text.dist," error distribution (MLE).\n",sep="")
     cat("\n",sep="")
@@ -174,8 +176,8 @@ summary.tbs.survreg.mle <- function(x, ...) {
     z.value <- rep(NA,length(x$beta))
     p.value <- rep(NA,length(x$beta))
     for (i in 1:length(x$beta)) {
-      if ((!is.na(x$beta.std.error[i])) && (!is.nan(x$beta.std.error[i]))) {
-        z.value[i] <- x$beta[i]/x$beta.std.error[i]
+      if ((!is.na(x$beta.se[i])) && (!is.nan(x$beta.se[i]))) {
+        z.value[i] <- x$beta[i]/x$beta.se[i]
         p.value[i] <- 2*pnorm(-abs(z.value[i]),0,1)
       } else {
         z.value[i] <- NA
@@ -184,7 +186,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
     }
     
     aux1 <- nchar(sprintf("%.4f",c(x$lambda,x$xi,x$beta)))
-    aux2 <- nchar(sprintf("%.4f",c(x$lambda.std.error,x$xi.std.error,x$beta.std.error)))
+    aux2 <- nchar(sprintf("%.4f",c(x$lambda.se,x$xi.se,x$beta.se)))
     aux3 <- nchar(sprintf("%.4f",z.value))
     p.value2 <- rep(NA,length(x$beta))
     for (i in 1:length(x$beta)) {
@@ -210,18 +212,18 @@ summary.tbs.survreg.mle <- function(x, ...) {
     auxc <- auxc+auxc1
     cat("  lambda: ",
         rep(ifelse(auxc[1] > aux1[1]," ",""),abs(auxc[1]-aux1[1])),sprintf("%.4f",x$lambda)," ",
-        rep(ifelse(auxc[2] > aux2[1]," ",""),abs(auxc[2]-aux2[1])),sprintf("%.4f",x$lambda.std.error),
+        rep(ifelse(auxc[2] > aux2[1]," ",""),abs(auxc[2]-aux2[1])),sprintf("%.4f",x$lambda.se),
         "\n",sep="")
     cat("      xi: ",
         rep(ifelse(auxc[1] > aux1[2]," ",""),abs(auxc[1]-aux1[2])),sprintf("%.4f",x$xi)," ",
-        rep(ifelse(auxc[2] > aux2[2]," ",""),abs(auxc[2]-aux2[2])),sprintf("%.4f",x$xi.std.error),
+        rep(ifelse(auxc[2] > aux2[2]," ",""),abs(auxc[2]-aux2[2])),sprintf("%.4f",x$xi.se),
         "\n",sep="")
     
     if (length(x$beta) == 1) {
       i <- 1
       cat("    beta: ",
           rep(ifelse(auxc[1] > aux1[(i+2)]," ",""),abs(auxc[1]-aux1[(i+2)])),sprintf("%.4f",x$beta[i])," ",
-          rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.std.error[i])," ",
+          rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.se[i])," ",
           rep(ifelse(auxc[3] > aux3[i]," ",""),abs(auxc[3]-aux3[i])),sprintf("%.4f",z.value[i])," ",
           rep(ifelse(auxc[4] > aux4[i]," ",""),abs(auxc[4]-aux4[i])),p.value2[i],
           ifelse(!is.na(p.value[i]),ifelse(p.value[i] < 0.0001," ***",
@@ -234,7 +236,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
         if (i-1 < 10) {
           cat("   beta",i-1,": ",
               rep(ifelse(auxc[1] > aux1[(i+2)]," ",""),abs(auxc[1]-aux1[(i+2)])),sprintf("%.4f",x$beta[i])," ",
-              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.std.error[i])," ",
+              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.se[i])," ",
               rep(ifelse(auxc[3] > aux3[i]," ",""),abs(auxc[3]-aux3[i])),sprintf("%.4f",z.value[i])," ",
               rep(ifelse(auxc[4] > aux4[i]," ",""),abs(auxc[4]-aux4[i])),p.value2[i],
               ifelse(!is.na(p.value[i]),ifelse(p.value[i] < 0.0001," ***",
@@ -245,7 +247,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
         } else {
           cat("  beta",i-1,": ",
               rep(ifelse(auxc[1] > aux1[(i+2)]," ",""),abs(auxc[1]-aux1[(i+2)])),sprintf("%.4f",x$beta[i])," ",
-              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.std.error[i])," ",
+              rep(ifelse(auxc[2] > aux2[(i+2)]," ",""),abs(auxc[2]-aux2[(i+2)])),sprintf("%.4f",x$beta.se[i])," ",
               rep(ifelse(auxc[3] > aux3[i]," ",""),abs(auxc[3]-aux3[i])),sprintf("%.4f",z.value[i])," ",
               rep(ifelse(auxc[4] > aux4[i]," ",""),abs(auxc[4]-aux4[i])),p.value2[i],
               ifelse(!is.na(p.value[i]),ifelse(p.value[i] < 0.0001," ***",
