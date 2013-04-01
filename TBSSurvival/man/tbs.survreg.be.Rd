@@ -1,6 +1,6 @@
 % File TBSSurvival/man/tbs.survreg.be.Rd
 % Part of the TBSSurvival package for R (http://www.R-project.org)
-% Copyright (C) 2012, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+% Copyright (C) 2012-2013, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
 %                     Jianchang Lin and Stuart Lipsitz.
 % Distributed under GPL 3 or later
 
@@ -11,21 +11,21 @@
 
 \title{Bayesian Estimation of the TBS Model for Failure Data}
 \description{
-  This function perform the Bayesian estimation of the TBS model. The prior for 
-  the parameters `lambda' and `xi' are uniform-exponential mixture and, if not 
-  specified, for parameter beta0 is a normal with mean 5 and sd 5. The estimations are
-  done by metroplois-hasting (using the function `metrop' availible at package `mcmc').
+  This function perform the Bayesian estimation of the Transform-Both-Sides (TBS) model. The priors for 
+  the parameters `lambda' and `xi' are uniform-exponential mixtures and, if not 
+  specified, for parameter beta is a normal with mean 5 and sd 5. The estimations are
+  done by Metropolis-Hasting (using the function `metrop' availible with the package `mcmc').
 }
 \usage{
-  tbs.survreg.be(formula, dist = "norm",  max.time = -1, guess.beta, guess.lambda,
-                 guess.xi, burn = 1000, jump = 2, size = 1000, scale = 1, 
+  tbs.survreg.be(formula, dist = "norm",  max.time = -1, guess.beta = NULL, guess.lambda = 1,
+                 guess.xi = 1, burn = 1000, jump = 2, size = 500, scale = 0.1, 
                  prior.mean = NULL, prior.sd = NULL)
 }
 \arguments{
-  \item{formula}{A formula specification containing a Surv model with right-censored (or no censored) data as in the package survival.}
-  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
+  \item{formula}{A formula specification containing a \link{Surv} model with right-censored (or no censored) data as in the package survival.}
+  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}. The user can also provide one: see \link{dist.choice}}
   \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
-  \item{guess.beta}{initial value of the Markov Chain for the vector `beta'.}
+  \item{guess.beta}{initial value of the Markov Chain for the vector `beta'. Default will fill it with zeros.}
   \item{guess.lambda}{initial value of the Markov Chain for the parameter `lambda'.}
   \item{guess.xi}{initial value of the Markov Chain for the parameter `xi'.}
   \item{burn}{burn-in, number of firsts samples of posterior to not use.}
@@ -37,22 +37,27 @@
   \item{prior.sd}{Prior std deviation for the MCMC.}
 }
 \details{
-  This function was developed to the problem without co-variables. Some changes maybe are need to work
-  with co-variables.
+  Currently this function has been developed and tested for case without covariates. 
 }
 \value{
-  A list with components:
+  An element of the class tbs.survreg.be, with the components:
   \item{call}{function evaluated.}
   \item{x}{co-variable matrix used.}
   \item{time}{survival time.}
   \item{delta}{censor status.}
   \item{post}{posterior sample of the parameters.}
-  \item{par}{the parameters are estimated as median of posterior sample.}
-  \item{par.sd}{standard deviation of posterior sample.}
-  \item{par.HPD}{95\% high posterior density credal interval of each parameter.}
+  \item{lambda}{posterior mean of lambda.}
+  \item{xi}{posterior mean of xi.}
+  \item{beta}{vector with posterior mean of beta.}
+  \item{lamda.sd}{standard deviation for lambda.}
+  \item{xi.sd}{standard deviation of for xi.}
+  \item{beta.sd}{standard deviation of for beta.}
+  \item{lambda.HPD}{95\% high posterior density credal interval of lambda.}
+  \item{xi.HPD}{95\% high posterior density credal interval of xi.}
+  \item{beta.HPD}{95\% high posterior density credal interval vector of beta.}
   \item{DIC}{Deviance Information Criterion.}
-  \item{error}{summary statistics and high posterior density credal interval of 95\% for
-                  the posterior of error of TBS model.}
+  \item{error}{summary statistics for the posterior of error of TBS model.}
+  \item{error.dist}{error distribution.}
   \item{run.time}{Time spent with the function.}
 }
 \references{

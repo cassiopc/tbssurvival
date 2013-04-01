@@ -49,14 +49,11 @@
   \item{lambda.se}{The standard error for parameter lambda}
   \item{xi.se}{The standard error for parameter xi}
   \item{beta.se}{A vector with the standard error for parameter beta}
-
-
   \item{log.lik}{The log-likelihood at parameters \code{par}.}
   \item{error.dist}{The error distribution chosen.}
   \item{AIC}{Akaike Information Criterion.}
   \item{AICc}{AICc is AIC with a second order correction for small sample sizes.}
   \item{BIC}{Bayesian Information Criterion.}
-  \item{KS}{Komogorov-Simirnov Statistic. It is not evaluated with matrix \code{x} of co-variables.}
   \item{method}{Numerical method used to achive the MLE.}
   \item{convergence}{If \code{convergence} is \code{FALSE} then it was not possible to find the MLE.}
   \item{time}{observed survival times.}

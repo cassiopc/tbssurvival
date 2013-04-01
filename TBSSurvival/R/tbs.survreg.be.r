@@ -29,8 +29,8 @@
 ## the MCMC (by default, they are equal to 5 and 5).
 ## accept: fraction of Metropolis proposals accepted.
 tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
-                           guess.beta,guess.lambda,guess.xi,
-                           burn=1000,jump=2,size=1000,scale=1,
+                           guess.beta=NULL,guess.lambda=1,guess.xi=1,
+                           burn=1000,jump=2,size=500,scale=0.1,
                            prior.mean=NULL,prior.sd=NULL,
                            seed=1234) {
   if(is.character(dist)) dist=dist.choice(dist)
@@ -40,7 +40,6 @@ tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
     ## user didn't define a timeout, so we set to a large number
     max.time <- 1e10
   }
-
   ## check the class of formula
   if (attributes(formula)$class != "formula")
     stop("A formula argument is required")
@@ -59,14 +58,7 @@ tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
   if (any((delta != 0) & (delta != 1)))  {
     stop("It is only accepted uncensored or right censored data")
   }
-
-  if (missing(guess.lambda)) {
-    guess.lambda <- 1
-  }
-  if (missing(guess.xi)) {
-    guess.xi <- 1
-  }
-  if (missing(guess.beta)) {
+  if (is.null(guess.beta)) {
     guess.beta <- rep(0,x.k)
   }
 
