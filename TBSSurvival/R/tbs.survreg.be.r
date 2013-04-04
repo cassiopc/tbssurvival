@@ -64,13 +64,17 @@ tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
 
   out <- NULL
   out$call <- Call
-#  if (is.matrix(x))
-#    out$x <- x[order(time),]
-#  else
-#    out$x <- x[order(time)]
-#  out$delta <- delta[order(time)]
-#  out$time <- time[order(time)]
-  out$time <- time[delta == 1]
+  if (is.matrix(x)) {
+    out$x <- x[order(time),]
+  } else {
+    out$x <- x[order(time)]
+  }
+  out$delta <- delta[order(time)]
+  out$time  <- time[order(time)]
+  x     <- out$x
+  delta <- out$delta
+  time  <- out$time
+##  out$time <- time[delta == 1]
 
   ## perform a series of verifications for the given arguments of the function
   if (length(guess.lambda) != 1)
@@ -198,7 +202,8 @@ tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
   for (i in 1:length(time))
     error[i] <- mean(aux.error[i,])
   rm(aux.error)
-  out$error <- error[delta == 1]
+  out$error <- error
+##  out$error <- error[delta == 1]
   out$error.dist <- dist
 
   aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
@@ -375,8 +380,8 @@ summary.tbs.survreg.be <- function(x, ...) {
 }
 
 plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
-  if(! (plot.type %in% c('surv','ts','hazard','auto')))
-    stop('Invalid plot type for tbs.survreg.be. Options are surv, ts, hazard, auto.')
+  if(! (plot.type %in% c('surv','hazard','error','auto','ts')))
+    stop('Invalid plot type for tbs.survreg.be. Options are surv, hazard, error, auto, ts.')
   h <- 1000
   if (!exists("xlim")) {
     LB <- 0.0001
@@ -385,26 +390,27 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
     LB <- xlim[1]
     UB <- xlim[2]
   }
-  if (!exists("xlab")) {
-    xlab <- c("time","time","error")
-  } else if (length(xlab) != 3) {
-      stop("The 'xlab' length must be equal to 3")
-  }
-  if (!exists("ylab")) {
-    ylab <- c("S(t)","h(t)","Density")
-  } else if (length(ylab) != 3) {
-      stop("The 'ylab' length must be equal to 3")
-  }
-  if (!exists("main")) {
-    main <- c("Survival function (BE)","Hazard function (BE)","Posterior Mean of Error Distribution (BE)")
-  } else if (length(main) != 3) {
-      stop("The 'main' length must be equal to 3")
-  }
   axis.t <- seq(LB,UB,(UB-LB)/(h-1))
 
   k = 0
-  if(plot.type=='surv') k = 1
-  if(plot.type=='hazard') k = 2
+  if(plot.type=='surv') {
+    k = 1
+    if (!exists("xlab"))
+      xlab <- "time"
+    if (!exists("ylab"))
+      ylab <- "S(t)"
+    if (!exists("main"))
+      main <- "Survival function (BE)"
+  }
+  if(plot.type=='hazard') {
+    k = 2
+    if (!exists("xlab"))
+      xlab <- "time"
+    if (!exists("ylab"))
+      ylab <- "h(t)"
+    if (!exists("main"))
+      main <- "Hazard function (BE)"
+  }
   if(k > 0) {
     if (attr(x$x,"plot") == 1) {
       axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
@@ -414,14 +420,14 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
                                beta=x$post[j,3],dist=x$error.dist)
         }
         plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylim=c(0,1),
-             ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+             ylab=ylab,xlab=xlab,main=main, ...)
       } else { ### Hazard plot
         for (j in 1:length(x$post[,1])) {
           axis.y[,j] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
                              beta=x$post[j,3],dist=x$error.dist)
         }
-        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylab=ylab[k],
-             xlab=xlab[k],main=main[k], ...)
+        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylab=ylab,
+             xlab=xlab,main=main, ...)
       }
       if (HPD) {
         lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
@@ -478,10 +484,10 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
         }
         if (i == 1) {
           if (k == 1) { ### Survival plot
-            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k],
+            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylim=c(0,1),ylab=ylab,xlab=xlab,main=main,
                  type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
           } else {
-            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k],
+            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylab=ylab,xlab=xlab,main=main,
                  type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
           }
         } else {
@@ -496,8 +502,15 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
   }
   if(plot.type=='error') {
     ## Histogram for error distribution:
+    if (!exists("xlab"))
+      xlab <- "error"
+    if (!exists("ylab"))
+      ylab <- "Density"
+    if (!exists("main"))
+      main <- "Posterior Mean of Error Distribution (BE)"
+
     bound <- max(abs(c(min(x$error),max(x$error))))
-    hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
+    hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main,xlab=xlab,ylab=ylab)
     axis.x <- seq(-bound,bound,2*bound/(h-1))
     axis.y <- matrix(NA,length(axis.x),length(x$post[,1]))
     for (j in 1:length(x$post[,1])) {
