@@ -283,8 +283,8 @@ summary.tbs.survreg.mle <- function(x, ...) {
 }
 
 plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
-  if(! (plot.type %in% c('surv','hazard','error','qqplot')))
-    stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard, error, qqplot.')
+  if(! (plot.type %in% c('surv','hazard','error')))
+    stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard, error.')
   if (x$convergence) {
     h <- 1000
     if (!exists("xlim")) {
@@ -294,26 +294,28 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
       LB <- xlim[1]
       UB <- xlim[2]
     }
-    if (!exists("xlab")) {
-      xlab <- c("time","time","error")
-    } else if (length(xlab) != 3) {
-      stop("The 'xlab' length must be equal to 3")
-    }
-    if (!exists("ylab")) {
-      ylab <- c("S(t)","h(t)","Density")
-    } else if (length(ylab) != 3) {
-      stop("The 'ylab' length must be equal to 3")
-    }
-    if (!exists("main")) {
-      main <- c("Survival function (MLE)","Hazard function (MLE)","Error Distribution (MLE)")
-    } else if (length(main) != 3) {
-      stop("The 'main' length must be equal to 3")
-    }
     axis.t <- seq(LB,UB,(UB-LB)/(h-1))
 
     k=0
-    if(plot.type=='surv') k=1
-    if(plot.type=='hazard') k=2
+    if(plot.type=='surv') {
+      k = 1
+      if (!exists("xlab"))
+        xlab <- "time"
+      if (!exists("ylab"))
+        ylab <- "S(t)"
+      if (!exists("main"))
+        main <- "Survival function (BE)"
+    }
+    if(plot.type=='hazard') {
+      k = 2
+      if (!exists("xlab"))
+        xlab <- "time"
+      if (!exists("ylab"))
+        ylab <- "h(t)"
+      if (!exists("main"))
+        main <- "Hazard function (BE)"
+    }
+
 
     if(k > 0) {
       if (attr(x$x,"plot") == 1) {
@@ -379,17 +381,25 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
     }
     if(plot.type=='error') {
       ## Histogram for error distribution:
+      if (!exists("xlab"))
+        xlab <- "error"
+      if (!exists("ylab"))
+        ylab <- "Density"
+      if (!exists("main"))
+        main <- "Error Distribution (MLE)"
       bound <- max(abs(c(min(x$error),max(x$error))))
       hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
       lines(seq(-bound,bound,2*bound/(h-1)),
             x$error.dist$d(seq(-bound,bound,2*bound/(h-1)),xi=x$xi))
     }
-    if(plot.type=='qqplot') {
-      ## Q-Q plot for error distribution:
-      qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,
-             main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
-      qqline(x$error, distribution = function(p) x$error.dist$q(p, xi=x$xi),
-             prob = c(0.25, 0.75), col = 2, lwd=2)
+    if (FALSE) {
+      if(plot.type=='qqplot') {
+        ## Q-Q plot for error distribution:
+        qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,
+               main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
+        qqline(x$error, distribution = function(p) x$error.dist$q(p, xi=x$xi),
+               prob = c(0.25, 0.75), col = 2, lwd=2)
+      }
     }
   } else {
     cat("Convergence has not been obtained for this tbs.survreg.mle.\n",sep="")
