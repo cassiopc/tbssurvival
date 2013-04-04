@@ -263,8 +263,13 @@
         out$convergence <- TRUE
         ## evaluate the "error"
         aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
-        out$time  <- time[delta == 1]
-        out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
+#        out$time  <- time[delta == 1]
+#        out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
+        out$time  <- time
+        out$delta <- delta[order(time)]
+        out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta),out$lambda))[order(time)]
+        out$time  <- time[order(time)]
+
         names(out$time) <- NULL
         names(out$error) <- NULL
         ## for the plot
@@ -394,8 +399,12 @@
     out$convergence <- TRUE
     ## evaluate the "error"
     aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
-    out$time  <- time[delta == 1]
-    out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
+##    out$time  <- time[delta == 1]
+##    out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
+    out$time  <- time
+    out$delta <- delta[order(time)]
+    out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta),out$lambda))[order(time)]
+    out$time  <- time[order(time)]
     names(out$time) <- NULL
     names(out$error) <- NULL
     ## for the plot
