@@ -311,7 +311,7 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
       if (!exists("ylab"))
         ylab <- "S(t)"
       if (!exists("main"))
-        main <- "Survival function (BE)"
+        main <- "Survival function (MLE)"
     }
     if(plot.type=='hazard') {
       k = 2
@@ -320,7 +320,7 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
       if (!exists("ylab"))
         ylab <- "h(t)"
       if (!exists("main"))
-        main <- "Hazard function (BE)"
+        main <- "Hazard function (MLE)"
     }
 
 
