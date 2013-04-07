@@ -39,8 +39,14 @@ tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead
       out <- .tbs.survreg(formula,dist=dist,method=method[i],verbose=verbose,max.time=max.time,nstart=nstart,gradient=gradient)
       ## if converged, we are happy
       if(out$convergence) {
-        if(is.null(bestout) || out$log.lik > bestout$log.lik) {
+        if(is.null(bestout)) {
           bestout <- out
+        } else {
+          wasnan <- bestout$lambda.se + bestout$xi.se + sum(bestout$beta.se)
+          isnan <- out$lambda.se + out$xi.se + sum(out$beta.se)
+          if (out$log.lik > bestout$log.lik && (is.nan(wasnan) || !is.nan(isnan))) {
+            bestout <- out
+          }
         }
       }
     }

@@ -114,7 +114,7 @@
   beta   <- par[3:length(par)]
   out <- -Inf
   ## result is -inf unless all vars below are positive
-  if ((xi > 0.001) && (all(time > 0)) && (lambda > 0.001))
+  if ((xi > 0.0001) && (all(time > 0)) && (lambda > 0.0001))
   {
     ## check if the arguments are all ok
     aux <- .test.tbs(lambda,xi,beta,x,time=time,type="d")
@@ -439,12 +439,14 @@
 
 ## \code{.g.lambda} gives the generalized power transformation function
 .g.lambda <- function(x,lambda) {
-  return(sign(x)*(.pown(x,lambda)* .invn(lambda)))
+  return(sign(x)*exp(lambda*log(abs(x)))/lambda)
+#  return(sign(x)*(.pown(x,lambda)* .invn(lambda)))
 }
 
 ## \code{.g.lambda.inv} is the inverse of generalized power transformation function.
 .g.lambda.inv <- function(x,lambda) {
-  return(sign(x)*(.pown(x*lambda,.invn(lambda))))
+  return(sign(x)*(exp(log(abs(x*lambda))/lambda)))
+#  return(sign(x)*(.pown(x*lambda,.invn(lambda))))
 }
 
 .deriv.tbs <- function(x, xi, dist, type, var) {
