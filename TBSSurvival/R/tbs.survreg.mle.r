@@ -99,7 +99,7 @@ print.tbs.survreg.mle <- function(x, ...) {
       text.dist <- "Double exponential"
     if (x$error.dist$name == "logistic")
       text.dist <- "logistic"
-    else test.dist <- x$error.dist$name 
+    else text.dist <- x$error.dist$name 
     cat("\n",sep="")
     cat("--------------------------------------------------------\n",sep="")
     cat(" TBS model with ",text.dist," error distribution (MLE).\n",sep="")
@@ -168,7 +168,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
       text.dist <- "Double exponential"
     if (x$error.dist$name == "logistic")
       text.dist <- "logistic"
-    else test.dist <- x$error.dist$name 
+    else text.dist <- x$error.dist$name 
     cat("--------------------------------------------------------\n",sep="")
     cat(" TBS model with ",text.dist," error distribution (MLE).\n",sep="")
     cat("\n",sep="")

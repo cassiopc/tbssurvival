@@ -11,7 +11,7 @@
 
 \title{Bayesian Estimation of the TBS Model for Failure Data}
 \description{
-  This function perform the Bayesian estimation of the Transform-Both-Sides (TBS) model. The priors for 
+  This function performs the Bayesian estimation of the Transform-Both-Sides (TBS) model. The priors for 
   the parameters `lambda' and `xi' are uniform-exponential mixtures and, if not 
   specified, for parameter beta is a normal with mean 5 and sd 5. The estimations are
   done by Metropolis-Hasting (using the function `metrop' availible with the package `mcmc').
@@ -23,22 +23,25 @@
 }
 \arguments{
   \item{formula}{A formula specification containing a \link{Surv} model with right-censored (or no censored) data as in the package survival.}
-  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}. The user can also provide one: see \link{dist.error}}
+  \item{dist}{Error distribution; \code{dist} can be given by name (\code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}) or by \link{dist.error}.}
   \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
-  \item{guess.beta}{initial value of the Markov Chain for the vector `beta'. Default will fill it with zeros.}
-  \item{guess.lambda}{initial value of the Markov Chain for the parameter `lambda'.}
-  \item{guess.xi}{initial value of the Markov Chain for the parameter `xi'.}
-  \item{burn}{burn-in, number of firsts samples of posterior to not use.}
-  \item{jump}{number of jump between each sample of posterior to avoid the problem of auto-correlation
+  \item{guess.beta}{Initial value of the Markov Chain for the vector `beta'. Default will fill it with zeros.}
+  \item{guess.lambda}{Initial value of the Markov Chain for the parameter `lambda'.}
+  \item{guess.xi}{Initial value of the Markov Chain for the parameter `xi'.}
+  \item{burn}{Burn-in: number of initial samples of the posterior not to use.}
+  \item{jump}{Number of jumps between each sample of the posterior to avoid the problem of auto-correlation
               between the samples.}
-  \item{size}{size of final sample of posterior.}
-  \item{scale}{parameter of `metrop' function. Controls the acceptance rate.}
+  \item{size}{Size of final sample of the posterior.}
+  \item{scale}{Parameter of `metrop' function. Controls the acceptance rate.}
   \item{prior.mean}{Prior Mean for the MCMC.}
   \item{prior.sd}{Prior std deviation for the MCMC.}
   \item{seed}{The number that is used to initialize the seed for random number generation.}
 }
 \details{
-  Currently this function has been developed and tested for case without covariates. 
+  This function performs the Bayesian estimation of the Transform-Both-Sides (TBS) model. The priors for 
+  the parameters `lambda' and `xi' are uniform-exponential mixtures and, if not 
+  specified, for parameter beta is a normal with mean 5 and sd 5. The estimations are
+  done by Metropolis-Hasting (using the function `metrop' availible with the package `mcmc').
 }
 \value{
   An element of the class tbs.survreg.be, with the components:
@@ -79,7 +82,7 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 # Bayesian estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
 tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5,
-                         dist="logistic",burn=1000,jump=10,size=1000,scale=0.06)
+                         dist=dist.error("logistic"),burn=1000,jump=10,size=1000,scale=0.06)
 # evaluating the estimated survival and HPD
 axis.x <- seq(0.01,300,1)
 aux <- matrix(NA,length(axis.x),length(tbs.be$post[,1]))

@@ -11,8 +11,8 @@
 
 \title{MLE of the TBS Model for Failure Data}
 \description{
-  This function perform the Maximum Likelihhod Estimation of the TBS model.
-  The optimization is done by the function `optim' (or the package Rsolnp when available).
+  This function performs the Maximum Likelihhod Estimation of the TBS model.
+  The optimization is done by the function `optim' (or optionally the package Rsolnp when available).
 }
 \usage{
  tbs.survreg.mle(formula,dist=dist.error("all"),
@@ -21,7 +21,7 @@
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
-  \item{dist}{error distribution; \code{dist} can be given by name (\code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}) or by \code{dist.error}.}
+  \item{dist}{error distribution; \code{dist} can be given by name (\code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}) or by \link{dist.error}.}
   \item{method}{a vector of numerical methods to be used in the optimization. The function try all listed methods and returns all results, together with an indication of the
                 solution with maximal likelihood among them.}
   \item{verbose}{Boolean to indicate the amount of output during the execution of the optimization.}

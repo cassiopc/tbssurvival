@@ -241,7 +241,7 @@ print.tbs.survreg.be <- function(x, ...) {
     text.dist <- "Double exponential"
   if (x$error.dist$name == "logistic")
     text.dist <- "logistic"
-  else test.dist <- x$error.dist$name 
+  else text.dist <- x$error.dist$name 
   cat("\n",sep="")
   cat("--------------------------------------------------------\n",sep="")
   cat(" TBS model with ",text.dist," error distribution (BE).\n",sep="")
@@ -304,7 +304,7 @@ summary.tbs.survreg.be <- function(x, ...) {
     text.dist <- "Double exponential"
   if (x$error.dist$name == "logistic")
     text.dist <- "logistic"
-  else test.dist <- x$error.dist$name 
+  else text.dist <- x$error.dist$name 
   cat("--------------------------------------------------------\n",sep="")
   cat(" TBS model with ",text.dist," error distribution (BE).\n",sep="")
   cat("\n",sep="")
