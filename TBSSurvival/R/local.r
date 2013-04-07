@@ -114,7 +114,7 @@
   beta   <- par[3:length(par)]
   out <- log(0)
   ## result is -inf unless all vars below are positive
-  if ((xi > 0) && (all(time > 0)) && (lambda > 0))
+  if ((xi > 0.001) && (all(time > 0)) && (lambda > 0.001))
   {
     ## check if the arguments are all ok
     aux <- .test.tbs(lambda,xi,beta,x,time=time,type="d")
