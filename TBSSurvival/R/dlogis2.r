@@ -17,12 +17,12 @@
 
 # logistic density function (an alternative to dlogis)
 .dlogis2 <- function(x,s) {
-  return(exp(-(x/s)-s-2*log(exp(-x/s)+1)))
+  return(exp(-(x/s))/(s*(1+exp(-x/s))^2))
 }
 
 # logistic distribution function (an alternative to plogis)
 .plogis2 <- function(x,s) {
-  return(exp(-log(1+exp(-x/s))))
+  return(1/(1+exp(-x/s)))
 }
 
 # logistic quantile function (an alternative to qlogis)

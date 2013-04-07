@@ -112,7 +112,7 @@
   xi     <- par[2]
   ## at least one beta must exist, so length(par) >= 3
   beta   <- par[3:length(par)]
-  out <- log(0)
+  out <- -Inf
   ## result is -inf unless all vars below are positive
   if ((xi > 0.001) && (all(time > 0)) && (lambda > 0.001))
   {
@@ -313,13 +313,13 @@
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
-      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
                                        method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
 ##        print(paste('aux$value',aux$value))
         if((inimethod=="SANN") || (aux$convergence != 0)) {
           for(itx in 1:10) {
-            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=TRUE,
+            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
                                               method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
             ##              print(paste('aux1$value',aux1$value))
             if (class(aux1) != "try-error") {

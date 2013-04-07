@@ -21,7 +21,7 @@
 ## the last element in the list is the distribution name.
 dist.error <- function(dist="norm") {
   if ((dist != "norm") && (dist != "doubexp") && (dist != "cauchy") &&
-      (dist != "t")    && (dist != "logistic") && (dist != "all"))
+      (dist != "t")    && (dist != "logistic") && (dist != "logis2") && (dist != "all"))
     stop("TBS: Distribution not available at dist.error")
 
   switch(dist,
@@ -58,15 +58,18 @@ dist.error <- function(dist="norm") {
            name = "doubexp"
            ),
          ## Logistic distribution
-         logistic = list(
+         logis2 = list(
            d = function(x,xi) .dlogis2(x,s=xi), # density
            p = function(x,xi) .plogis2(x,s=xi), # distr
            q = function(x,xi) .qlogis2(x,s=xi), # quantile
            r = function(x,xi) .rlogis2(x,s=xi), # generation
-#           d = function(x,xi) dlogis(x,location=0,scale=xi), # density
-#           p = function(x,xi) plogis(x,location=0,scale=xi), # distr
-#           q = function(x,xi) qlogis(x,location=0,scale=xi), # quantile
-#           r = function(x,xi) rlogis(x,location=0,scale=xi), # generation
+           name = "logis2"
+           ),
+         logistic = list(
+           d = function(x,xi) dlogis(x,location=0,scale=xi), # density
+           p = function(x,xi) plogis(x,location=0,scale=xi), # distr
+           q = function(x,xi) qlogis(x,location=0,scale=xi), # quantile
+           r = function(x,xi) rlogis(x,location=0,scale=xi), # generation
            name = "logistic"
            ),
          all = list(dist.error("norm"),dist.error("t"),dist.error("cauchy"),dist.error("doubexp"),dist.error("logistic"))
