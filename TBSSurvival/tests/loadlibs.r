@@ -65,6 +65,7 @@ loadlibs <- function(libdir=NULL) {
     source("../R/tbs.survreg.mle.r")
     source("../R/local.r")
     source("../R/dt2.r")
+    source("../R/dlogis2.r")
     source("../R/dist.error.r")
     
   } else {
