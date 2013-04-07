@@ -59,10 +59,14 @@ dist.error <- function(dist="norm") {
            ),
          ## Logistic distribution
          logistic = list(
-           d = function(x,xi) dlogis(x,location=0,scale=xi), # density
-           p = function(x,xi) plogis(x,location=0,scale=xi), # distr
-           q = function(x,xi) qlogis(x,location=0,scale=xi), # quantile
-           r = function(x,xi) rlogis(x,location=0,scale=xi), # generation
+           d = function(x,xi) .dlogis2(x,s=xi), # density
+           p = function(x,xi) .plogis2(x,s=xi), # distr
+           q = function(x,xi) .qlogis2(x,s=xi), # quantile
+           r = function(x,xi) .rlogis2(x,s=xi), # generation
+#           d = function(x,xi) dlogis(x,location=0,scale=xi), # density
+#           p = function(x,xi) plogis(x,location=0,scale=xi), # distr
+#           q = function(x,xi) qlogis(x,location=0,scale=xi), # quantile
+#           r = function(x,xi) rlogis(x,location=0,scale=xi), # generation
            name = "logistic"
            ),
          all = list(dist.error("norm"),dist.error("t"),dist.error("cauchy"),dist.error("doubexp"),dist.error("logistic"))
