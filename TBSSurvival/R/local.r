@@ -306,6 +306,7 @@
   ii=1
   if(verbose) cat(method,': ',sep='')
   inimethod=method
+  wasnan=TRUE
   ## we also control the maximum amount of time this method can keep looking for better solutions
   inilooptime=.gettime()
   while(.gettime() < inilooptime + max.time) {
@@ -335,8 +336,17 @@
         }
         ## if a new best solution was found, update the current one
         if(is.na(est) || aux$value > est$value) {
-          est = aux
-          inimethod=method
+          options("warn" = -1)
+          aux1 <- try(sqrt(diag(solve(-(aux$hessian)))),silent=TRUE)
+          options("warn" = 0)
+          std.error <- rep(NaN,nparam)
+          if (class(aux1) != "try-error")
+            std.error <- aux1
+          if(wasnan || !is.nan(sum(std.error))) {
+            wasnan = is.nan(sum(std.error))
+            est = aux
+            inimethod=method
+          }
         }
         ## one more feasible point found
         i = i + 1
