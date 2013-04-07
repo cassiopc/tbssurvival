@@ -25,7 +25,7 @@
 ## functions
 qtbs <- function(p,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm")) {
   if(is.character(dist)) dist=dist.error(dist)
-  aux <- dist$test(lambda,xi,beta,x,type="q",p=p)
+  aux <- .test.tbs(lambda,xi,beta,x,type="q",p=p)
   return(.qtbs(p,lambda,xi,aux$beta,aux$x,dist))
 }
 ## this private version does not check the arguments, but assumes they are ok

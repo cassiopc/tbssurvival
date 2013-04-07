@@ -24,6 +24,7 @@
 tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead","BFGS","Rsolnp","SANN","CG"),
                             verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=FALSE) {
   if(is.character(dist)) dist <- dist.error(dist)
+  if(method=='all') method=c("Nelder-Mead","BFGS","Rsolnp","SANN","CG")
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.

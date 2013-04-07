@@ -433,14 +433,18 @@
   return(out)
 }
 
+.mylog <- function(t) log(t+1e-8)
+.invn <- function(t) (1.0/(t+1e-8))
+.pown <- function(a,b) exp(b*log(abs(a)+1e-8))
+
 ## \code{.g.lambda} gives the generalized power transformation function
 .g.lambda <- function(x,lambda) {
-  return(sign(x)*(abs(x)^lambda)/lambda)
+  return(sign(x)*(.pown(x,lambda)* .invn(lambda)))
 }
 
 ## \code{.g.lambda.inv} is the inverse of generalized power transformation function.
 .g.lambda.inv <- function(x,lambda) {
-  return(sign(x)*(abs(x*lambda)^(1/lambda)))
+  return(sign(x)*(.pown(x*lambda,.invn(lambda))))
 }
 
 .deriv.tbs <- function(x, xi, dist, type, var) {
@@ -487,10 +491,6 @@
         dens = exp(x/xi)/((xi^2)*(exp(x/xi)+1)^2)-2*exp(2*x/xi)/((xi^2)*(exp(x/xi)+1)^3),
         surv = -dlogis(x,location=0,scale=xi))))
 }
-
-.mylog <- function(t) log(t+1e-8)
-.invn <- function(t) (1.0/(t+1e-8))
-.pown <- function(a,b) exp(b*log(abs(a)+1e-8))
 
 .deriv.logL.tbs <- function(t, eta, lambda, xi, dist, type, var) {
   switch(type,

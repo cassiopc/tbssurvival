@@ -25,7 +25,7 @@
 ## functions
 rtbs <- function(n,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm")) {
   if(is.character(dist)) dist=dist.error(dist)
-  aux <- dist$test(lambda,xi,beta,x,type="r",n=n)
+  aux <- .test.tbs(lambda,xi,beta,x,type="r",n=n)
   return(.rtbs(n,lambda,xi,aux$beta,aux$x,dist))
 }
 ## this private version does not check the arguments, but assumes they are ok
