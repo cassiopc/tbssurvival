@@ -17,13 +17,13 @@
 
 ## Maximum likelihood estimation for TBS
 ## By default, try all optimization methods listed below and keep the best solution
-## max.time is the time limit in minutes for each method (<= 0 means no limit), nstart the number of feasible starting
-##   points to use, dist has to be one of the available distributions or one of your own (see dist.choice.r), currently
-##   available there are dist.choice(name), with name = "norm", "t", "cauchy", "doubexp", "logistic"
+## max.time is the time limit in minutes for each method (<= 0 means no limit), nstart the number of feasible starting points to use,
+## dist defines the error distribution by name ("norm", "doubexp", "t", "cauchy", "logistic") or using
+## a call from dist.error, or even created directly by the user (see dist.error.r for details)
 ## formula is a R formula with a Surv object on the left side
-tbs.survreg.mle <- function(formula,dist=dist.choice("all"),method=c("Nelder-Mead","BFGS","Rsolnp","SANN","CG"),
+tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead","BFGS","Rsolnp","SANN","CG"),
                             verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=FALSE) {
-  if(is.character(dist)) dist <- dist.choice(dist)
+  if(is.character(dist)) dist <- dist.error(dist)
   ## this meta-method only records the elapsed time and call the max likelihood estimation function
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.

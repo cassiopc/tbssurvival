@@ -21,10 +21,10 @@
 ## dist is a list, we assume the four functions of the dist are
 ## given as $d(x,xi) $p(x,xi) $r(x,xi) $q(x,xi) plus a test function to check if
 ## the list of parameters are in compliance with the functions. If dist is
-## a string, then dist.choice is called to try to transform it into the necessary
+## a string, then dist.error is called to try to transform it into the necessary
 ## functions
-dtbs <- function(time,lambda=1,xi=1,beta=1,x=NULL,dist=dist.choice("norm")) {
-  if(is.character(dist)) dist=dist.choice(dist)
+dtbs <- function(time,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm")) {
+  if(is.character(dist)) dist=dist.error(dist)
   aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
   return(.dtbs(time,lambda,xi,aux$beta,aux$x,dist))
 }

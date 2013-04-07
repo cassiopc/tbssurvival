@@ -56,8 +56,8 @@
   if (lambda > 0 && xi > 0) {
     beta <- par[3:length(par)]
     ## check if the arguments are all ok
-    aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
-    ## dist$test may eventually re-cast beta and x, so we update them here
+    aux <- .test.tbs(lambda,xi,beta,x,time=time,type="d")
+    ## .test.tbs may eventually re-cast beta and x, so we update them here
     beta <- aux$beta
     x <- aux$x
 
@@ -105,7 +105,7 @@
 ## distribution of the TBS model (has to be one of the available ones), x gives the information
 ## about the covariates, and notinf flags whether to turn -inf into a very negative number, which
 ## in some cases is useful for numerical reasons.
-.lik.tbs <- function(par,time,delta,dist=dist.choice("norm"),x=NULL,notinf=FALSE)
+.lik.tbs <- function(par,time,delta,dist=dist.error("norm"),x=NULL,notinf=FALSE)
 {
   ## split the info from par
   lambda <- par[1]
@@ -117,8 +117,8 @@
   if ((xi > 0) && (all(time > 0)) && (lambda > 0))
   {
     ## check if the arguments are all ok
-    aux <- dist$test(lambda,xi,beta,x,time=time,type="d")
-    ## dist$test may eventually re-cast beta and x, so we update them here
+    aux <- .test.tbs(lambda,xi,beta,x,time=time,type="d")
+    ## .test.tbs may eventually re-cast beta and x, so we update them here
     beta <- aux$beta
     x <- aux$x
 
@@ -159,11 +159,11 @@
 ## nstart is the number of (feasible!) initial points to use. The method will try many guesses to find feasible points
 ## max.time (in minutes) to run the optimization
 ## method has to be one of the available in the function optim or "Rsolnp"
-## dist has to be one of those available in the dist.choice function (see file tbs.r)
+## dist has to be one of those available in the dist.error function (see file tbs.r)
 ## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
-.tbs.survreg <- function(formula,dist=dist.choice("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,gradient=TRUE) {
+.tbs.survreg <- function(formula,dist=dist.error("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,gradient=TRUE) {
   initial.time <- .gettime()
   if(max.time <= 0) {
     ## user didn't define a timeout, so we set to a large number
@@ -262,7 +262,7 @@
         out$BIC  <- -2*out$log.lik+nparam*log(length(time))
         out$convergence <- TRUE
         ## evaluate the "error"
-        aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
+        aux <- .test.tbs(out$lambda,out$xi,out$beta,x,time,type="d")
 #        out$time  <- time[delta == 1]
 #        out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
         out$time  <- time
@@ -398,7 +398,7 @@
     out$BIC  <- -2*est$value+nparam*log(length(time))
     out$convergence <- TRUE
     ## evaluate the "error"
-    aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
+    aux <- .test.tbs(out$lambda,out$xi,out$beta,x,time,type="d")
 ##    out$time  <- time[delta == 1]
 ##    out$error <- c(.g.lambda(log(out$time),out$lambda)-.g.lambda(c(aux$x%*%aux$beta)[delta == 1],out$lambda))
     out$time  <- time
@@ -575,6 +575,94 @@
   return(out)
 }
 
+## this function has the sole purpose of checking whether the arguments respect the
+## needs of the other TBS functions' implementation. It also re-cast the arguments in
+## case it is needed, but does not really perform calculations.
+.test.tbs <- function(lambda, xi, beta, x=NULL, time=NULL, type=NULL, p=NULL, n=NULL) {
+  if (!is.numeric(xi))
+    stop("xi is not a number")
+  if (is.matrix(xi))
+    stop("xi is matrix")
+  if (xi <= 0)
+    stop("xi <= 0")
+  
+  out   <- NULL
+  out$x <- x
+  out$beta <- beta
 
+  if ((!is.numeric(lambda)) || (length(lambda) != 1))
+    stop("lambda is not a number or length != 1")
+  if (!is.numeric(beta))
+    stop("beta is not a (vector) number")
+  if (is.matrix(beta))
+    stop("beta is matrix")
+  if (!is.null(x)) {
+    if (is.matrix(x)) {
+      if (length(beta) != length(x[1,]))
+        stop(paste("size of beta != ",length(x[1,]),sep=""))
+    }
+    else {
+      if ((length(beta) != 1) && (length(beta) != length(x)))
+        stop("size of beta is not conform")
+    }
+  }
+  else {
+    if (length(beta) > 1)
+      stop("x is wrong or length(beta) > 1")  
+  }
+  if (lambda <= 0)
+    stop("lambda <= 0")
 
+  if (!is.null(type)) {
+    if ((type == "d") || (type == "p")) {
+      if (!is.numeric(time))
+        stop("time is not a (vector) number")
+      if (is.matrix(time))
+        stop("time is matrix")
+      if (any(time <= 0))
+        stop("time <= 0")
+      if (!is.null(x)) {
+        if (is.matrix(x)) {
+          if (length(time) != length(x[,1]))
+            stop("length of time is different of length of x")
+        }
+        else {
+          if (length(beta) == length(x)) {
+            out$x <- matrix(x,1,length(x))
+          } else {
+            if (length(time) != length(x))
+              stop("length of time is different of length of x")
+            out$x <- matrix(x,length(x),1)
+          }
+        }
+        out$beta <- matrix(beta,length(beta),1)
+      }
+      else {
+        out$x <- matrix(1,length(time),1)
+      }
+    } else {
+      if (type == "q") {
+        if (!is.numeric(p))
+          stop("p is not a (vector) number")
+        if (is.matrix(p))
+          stop("p is matrix")
+        if (min(p) < 0)
+          stop("p < 0")
+        if (max(p) > 1)
+          stop("p > 1")
+      } else if (type == "r") {
+          if (!is.numeric(n))
+            stop("n is not a number")
+          if (n %% 1 != 0)
+            stop("n is not a integer number")
+        }
+      if (is.null(x)) {
+        if (length(beta) > 1)
+          stop("If x is omitted then beta must have length 1")
+        out$x <- 1
+      }
+    }
+  }
 
+  return(out)
+}

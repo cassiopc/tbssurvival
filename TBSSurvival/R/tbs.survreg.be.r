@@ -19,7 +19,8 @@
 ## solution forces us to tackle the problem by MCMC.
 ## max.time is a time limit in minutes (<= 0 means no limit)
 ## formula is specification containing a Surv model with right-censored data as in the package survival.
-## dist defines the error distribution: "norm", "doubexp", "t", "cauchy", "logistic".
+## dist defines the error distribution by name ("norm", "doubexp", "t", "cauchy", "logistic") or using
+## a call from dist.error, or even created directly by the user (see dist.error.r for details)
 ## guess.beta, guess.lambda, guess.xi are initial value of the Markov Chain (beta has to have the same
 ## of elements as covariates, lambda and xi are scalars.
 ## burn-in is the number of firsts samples of posterior to not use, and jump is the number of jump
@@ -28,12 +29,12 @@
 ## controls the acceptance rate. prior.mean and prior.sd define the parameters of the normal prior for
 ## the MCMC (by default, they are equal to 5 and 5).
 ## accept: fraction of Metropolis proposals accepted.
-tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
+tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
                            guess.beta=NULL,guess.lambda=1,guess.xi=1,
                            burn=1000,jump=2,size=500,scale=0.1,
                            prior.mean=NULL,prior.sd=NULL,
                            seed=1234) {
-  if(is.character(dist)) dist=dist.choice(dist)
+  if(is.character(dist)) dist=dist.error(dist)
   initial.time <- .gettime()
   set.seed(seed)
   if(max.time <= 0) {
@@ -206,7 +207,7 @@ tbs.survreg.be <- function(formula,dist=dist.choice("norm"),max.time=-1,
 ##  out$error <- error[delta == 1]
   out$error.dist <- dist
 
-  aux <- dist$test(out$lambda,out$xi,out$beta,x,time,type="d")
+  aux <- .test.tbs(out$lambda,out$xi,out$beta,x,time,type="d")
   ## for the plot
   if (length(out$beta) == 1) {
     if (unique(aux$x[,1]) == 1) {

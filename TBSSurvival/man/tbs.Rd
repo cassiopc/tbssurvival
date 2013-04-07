@@ -15,15 +15,15 @@
 
 \title{The TBS Time Failure Distribution}
 \description{
-  Density, distribution function, quantile function, random
-  generation and hazard function for the Transform-Both-Sides (TBS) distribution.
+  Density function, distribution function, quantile function, random
+  generation function and hazard function for the Transform-Both-Sides (TBS) model.
 }
 \usage{
- dtbs(time,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
- ptbs(time,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
- qtbs(p,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
- rtbs(n,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
- htbs(time,lambda=1,xi=1,beta=1,x=NULL,dist="norm")
+ dtbs(time,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm"))
+ ptbs(time,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm"))
+ qtbs(p,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm"))
+ rtbs(n,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm"))
+ htbs(time,lambda=1,xi=1,beta=1,x=NULL,dist=dist.error("norm"))
 }
 \arguments{
   \item{time}{vector of quantiles.}
@@ -33,14 +33,14 @@
   \item{xi}{parameter of the error distribution.}
   \item{beta}{parameter of the linear regressor.}
   \item{x}{vector/matrix of co-variables, x=NULL if there are not co-variables.}
-  \item{dist}{Distribution of error, dist = "norm", "t", "doubexp", "cauchy" or "logistic". It can also be
-given as a list of functions (density, distribution, quantile, random generation, test function, name). Details below.}
+  \item{dist}{Distribution of error, it can be string such as dist = "norm", "t", "doubexp", "cauchy" or "logistic, or it can also be
+              given as a list of functions (density, distribution, quantile, random generation, name). Details below.}
 }
 \details{
-  The density, distribution function, quantile function, random
+  The density function, distribution function, quantile function, random
   generation and hazard function for the failure time of a TBS Model.
   The distribution of error can be chosen from Normal, t-Student, Cauchy, Logistic and Doub-Exponential (Laplace), or can
-  be given by the user (as long as it is unimodal and symmetric -- TBS does not check it). See the help of \link{dist.choice}
+  be given by the user (as long as it is zero-centered, unimodal and symmetric -- TBS does not check it). See the help of \link{dist.error}
   for examples.
 }
 \value{

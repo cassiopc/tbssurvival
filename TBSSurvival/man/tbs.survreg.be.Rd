@@ -23,7 +23,7 @@
 }
 \arguments{
   \item{formula}{A formula specification containing a \link{Surv} model with right-censored (or no censored) data as in the package survival.}
-  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}. The user can also provide one: see \link{dist.choice}}
+  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}. The user can also provide one: see \link{dist.error}}
   \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
   \item{guess.beta}{initial value of the Markov Chain for the vector `beta'. Default will fill it with zeros.}
   \item{guess.lambda}{initial value of the Markov Chain for the parameter `lambda'.}

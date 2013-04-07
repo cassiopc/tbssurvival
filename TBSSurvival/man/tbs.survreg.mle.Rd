@@ -1,7 +1,7 @@
 % File TBSSurvival/man/dweib.Rd
 % Part of the TBSSurvival package for R (http://www.R-project.org)
-% Copyright (C) 2012, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
-%                     Jianchang Lin and Stuart Lipsitz.
+% Copyright (C) 2012-2013, Adriano Polpo, Cassio de Campos, Debajyoti Sinha
+%                          Jianchang Lin and Stuart Lipsitz.
 % Distributed under GPL 3 or later
 
 \name{tbs.survreg.mle}
@@ -15,18 +15,19 @@
   The optimization is done by the function `optim' (or the package Rsolnp when available).
 }
 \usage{
- tbs.survreg.mle(formula,dist="norm",
+ tbs.survreg.mle(formula,dist=dist.error("all"),
                  method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
-                 verbose=FALSE,nstart=10,max.time=-1,gradient=FALSE)
+                 verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=FALSE)
 }
 \arguments{
   \item{formula}{A formula specification containing a Surv model with right-censored data as in the package survival.}
-  \item{dist}{error distribution; \code{dist} = \code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}.}
-  \item{method}{a vector of numerical methods to be used in the optimization. The function try all listed methods and returns the
+  \item{dist}{error distribution; \code{dist} can be given by name (\code{"norm"}, \code{"doubexp"}, \code{"t"}, \code{"cauchy"} or \code{"logistic"}) or by \code{dist.error}.}
+  \item{method}{a vector of numerical methods to be used in the optimization. The function try all listed methods and returns all results, together with an indication of the
                 solution with maximal likelihood among them.}
   \item{verbose}{Boolean to indicate the amount of output during the execution of the optimization.}
   \item{nstart}{Number of feasible initial points to guess when performing the optimization.}
   \item{max.time}{Maximum time (in minutes) to run the optimization (<= 0 means no limit).}
+  \item{seed}{The number that is used to initialize the seed for random number generation.}
   \item{gradient}{if TRUE, MLE tries to use the implemented gradient functions (usually the numerical ones are ok).}
 }
 \details{
@@ -36,7 +37,7 @@
   just as the standard specification of R formulas. The optimizers are going to do their 
   best to find high likelihood estimates, but as in most estimation methods that need 
   a numerical optimization procedure, the obtained estimate cannot be guaranteed to be a
-  global optimal solution, but instead is dependent on the initial points, and thus on 
+  global optimal solution, but instead is dependent on the initial guessing points, and thus on 
   the seed of the random number generation.
 }
 \value{

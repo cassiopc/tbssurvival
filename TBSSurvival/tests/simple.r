@@ -34,7 +34,7 @@ cat('Running MLE on colon (from survival package) without covariates\n')
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE,gradient=FALSE)
 plot.hist(s)
 
-b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist=dist.choice("norm"),burn=10000,jump=200,scale=0.05)
+b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist=dist.error("norm"),burn=10000,jump=200,scale=0.05)
 
 ## with covariate
 cat('Running MLE on colon (from survival package) with covariate=age60\n')
@@ -48,7 +48,7 @@ data(alloyT7987)
 method <- c("Rsolnp","BFGS","Nelder-Mead","CG","SANN")
 for (j in 1:length(method)) {
   for (i in 1:5) {
-    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist=dist.choice("logistic"),method=method[j])
+    tbs.mle.logistic <- tbs.survreg.mle(Surv(alloyT7987$time,alloyT7987$delta) ~ 1,dist=dist.error("logistic"),method=method[j])
     cat("i: ",i,"  - method: ",method[j],"  - log.lik: ",tbs.mle.logistic$log.lik,"\n")
   }
 }
