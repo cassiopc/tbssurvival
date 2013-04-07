@@ -29,13 +29,13 @@ tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead
   ## for each of the methods given until one of them converges. It is supposed that at least one method
   ## is given, and that dist is one of those implemented by tbs.survreg.
   initial.time <- .gettime()
-  
+  set.seed(seed)
+
   fn.aux <- function(formula,dist,method,verbose,nstart,max.time) {
     initial.time <- .gettime()
     bestout <- NULL
     for(i in 1:length(method)) {
       ## call the estimation function
-      set.seed(seed)
       out <- .tbs.survreg(formula,dist=dist,method=method[i],verbose=verbose,max.time=max.time,nstart=nstart,gradient=gradient)
       ## if converged, we are happy
       if(out$convergence) {
