@@ -289,66 +289,72 @@ summary.tbs.survreg.mle <- function(x, ...) {
   }
 }
 
-plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
+plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
+                                 main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+                                 lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error')))
     stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard, error.')
   if (x$convergence) {
     h <- 1000
-    if (!exists("xlim")) {
+    if (is.null(xlim)) {
       LB <- 0.0001
       UB <- max(x$time)*1.1
+      xlim <- c(LB,UB)
     } else {
       LB <- xlim[1]
       UB <- xlim[2]
     }
     axis.t <- seq(LB,UB,(UB-LB)/(h-1))
+    if (is.null(xlim)) {
+      ylim=c(0,1)
+    }
 
     k=0
     if(plot.type=='surv') {
       k = 1
-      if (!exists("xlab"))
+      if (is.null(xlab))
         xlab <- "time"
-      if (!exists("ylab"))
+      if (is.null(ylab))
         ylab <- "S(t)"
-      if (!exists("main"))
+      if (is.null(main)) {
         main <- "Survival function (MLE)"
+      }
     }
     if(plot.type=='hazard') {
       k = 2
-      if (!exists("xlab"))
+      if (is.null(xlab))
         xlab <- "time"
-      if (!exists("ylab"))
+      if (is.null(ylab))
         ylab <- "h(t)"
-      if (!exists("main"))
+      if (is.null(main))
         main <- "Hazard function (MLE)"
     }
-
 
     if(k > 0) {
       if (attr(x$x,"plot") == 1) {
         if (k == 1) { ### Survival plot
           axis.y <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
-          plot(axis.t,axis.y,type="l",xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+          plot(axis.t,axis.y,type="l",xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
         } else { ### Hazard plot
           axis.y <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
-          plot(axis.t,axis.y,type="l",xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k], ...)
+          plot(axis.t,axis.y,type="l",xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
         }
       } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
-        if (!exists("lty")) {
+        if (is.null(lty)) {
           lty <- seq(1,length(x$x),1)
         } else {
           if (length(lty) != length(x$x)) {
             stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
           }
         }
-        if (!is.numeric(col)) {
+        if (is.null(col)) {
           col <- rep(1,length(x$x))
         } else {
           if (length(col) != length(x$x)) {
             stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
           }
         }
-        if (!exists("lwd")) {
+        if (is.null(lwd)) {
           lwd <- rep(1,length(x$x))
         } else {
           if (length(lwd) != length(x$x)) {
@@ -374,11 +380,10 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
           }
           if (i == 1) {
             if (k == 1) { ### Survival plot
-              plot(axis.t,axis.y[,i],xlim=c(0,UB),ylim=c(0,1),ylab=ylab[k],xlab=xlab[k],main=main[k],
-                   type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+              plot(axis.t,axis.y[,i],xlim=xlim,ylim=ylim,ylab=ylab,main=main,
+                   lty=lty[i],lwd=lwd[i],col=col[i], ...)
             } else {
-              plot(axis.t,axis.y[,i],xlim=c(0,UB),ylab=ylab[k],xlab=xlab[k],main=main[k],
-                   type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+              plot(axis.t,axis.y[,i],type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
             }
           } else {
             lines(axis.t,axis.y[,i],lty=lty[i],lwd=lwd[i],col=col[i])
@@ -388,14 +393,14 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', ...) {
     }
     if(plot.type=='error') {
       ## Histogram for error distribution:
-      if (!exists("xlab"))
+      if (is.null(xlab))
         xlab <- "error"
-      if (!exists("ylab"))
+      if (is.null(ylab))
         ylab <- "Density"
-      if (!exists("main"))
+      if (is.null(main))
         main <- "Error Distribution (MLE)"
       bound <- max(abs(c(min(x$error),max(x$error))))
-      hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main[3],xlab=xlab[3],ylab=ylab[3])
+      hist(x$error,probability=TRUE,xlim=c(-bound,bound),main=main,xlab=xlab,ylab=ylab)
       lines(seq(-bound,bound,2*bound/(h-1)),
             x$error.dist$d(seq(-bound,bound,2*bound/(h-1)),xi=x$xi))
     }
