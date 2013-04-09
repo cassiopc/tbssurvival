@@ -25,6 +25,12 @@ library(ipred)
 data(GBSG2)
 cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
 s=tbs.survreg.mle(Surv(GBSG2$time,GBSG2$cens==1) ~ 1,verbose=TRUE) ## as optim method not given, it tries all methods
+plot(s)
+lines(s$cauchy,col=2)
+lines(s$t,col=3)
+lines(s$doubexp,col=4)
+lines(s$logistic,col=5)
+lines(s$logistic,col=5,lwd=4)
 
 ####################
 ## test with the colon data set from the survival package
