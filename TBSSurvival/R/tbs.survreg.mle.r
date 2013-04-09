@@ -94,6 +94,10 @@ tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead
   return(out)
 }
 
+print.tbs.survreg.mle.best <- function(x, ...) {
+  print(unclass(x), ...)
+}
+
 print.tbs.survreg.mle <- function(x, ...) {
   print(x$call)
   if (x$convergence) {
