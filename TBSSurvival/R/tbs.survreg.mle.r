@@ -81,6 +81,7 @@ tbs.survreg.mle <- function(formula,dist=dist.error("all"),method=c("Nelder-Mead
     if (exists("best")) {
       out$best <- best
       out$best.n <- bestn
+      class(out) <- "tbs.survreg.mle.best"
     } else {
       out$best <- "none"
       out$best.n <- 0
@@ -161,6 +162,10 @@ print.tbs.survreg.mle <- function(x, ...) {
   } else {
     cat("There was not obtained the convergence.\n",sep="")
   }
+}
+
+summary.tbs.survreg.mle.best <- function(x, ...) {
+  summary.tbs.survreg.mle(x[[x$best.n]], ...)
 }
 
 summary.tbs.survreg.mle <- function(x, ...) {
@@ -289,8 +294,16 @@ summary.tbs.survreg.mle <- function(x, ...) {
   }
 }
 
+plot.tbs.survreg.mle.best <- function(x, plot.type='surv', type="l", xlim=NULL, 
+                                      ylim=NULL, main=NULL, xlab=NULL, ylab=NULL,
+                                      lty=NULL, lwd=NULL, col=NULL, ...) {
+  plot.tbs.survreg.mle(x[[x$best.n]], plot.type=plot.type, type=type, xlim=xlim,
+                       ylim=ylim, main=main, xlab=xlab, ylab=ylab, lty=lty, lwd=lwd,
+                       col=col, ...)
+}
+
 plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim = NULL,
-                                 main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+                                 main = NULL, xlab = NULL, ylab = NULL,
                                  lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error')))
     stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard, error.')
@@ -329,18 +342,27 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim 
 
     if(k > 0) {
       if (attr(x$x,"plot") == 1) {
+        if (is.null(lty))
+          lty <- 1
+        if (is.null(lwd))
+          lwd <- 1
+        if (is.null(col))
+          col <- 1
+
         if (k == 1) { ### Survival plot
           if (is.null(ylim)) {
             ylim=c(0,1)
           }
           axis.y <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
-          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
+          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,
+               lwd=lwd,lty=lty,col=col,...)
         } else { ### Hazard plot
           axis.y <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
           if (is.null(ylim)) {
             ylim=c(0,1.1*max(axis.y,na.rm=TRUE))
           }
-          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
+          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,
+               lwd=lwd,lty=lty,col=col,...)
         }
       } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
         if (is.null(lty)) {
@@ -388,13 +410,14 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim 
               if (is.null(ylim)) {
                 ylim=c(0,1)
               }
-              plot(axis.t,axis.y[,i],type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,
+              plot(axis.t,axis.y[,i],type=type,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,
                    lty=lty[i],lwd=lwd[i],col=col[i], ...)
             } else {
               if (is.null(ylim)) {
                 ylim=c(0,1.1*max(axis.y,na.rm=TRUE))
               }
-              plot(axis.t,axis.y[,i],type=type,ylim=ylim,xlim=xlim,lty=lty[i],lwd=lwd[i],col=col[i], ...)
+              plot(axis.t,axis.y[,i],type=type,xlab=xlab,ylab=ylab,main=main,
+                   ylim=ylim,xlim=xlim,lty=lty[i],lwd=lwd[i],col=col[i], ...)
             }
           } else {
             lines(axis.t,axis.y[,i],lty=lty[i],lwd=lwd[i],col=col[i])
@@ -426,3 +449,82 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim 
     cat("Convergence has not been obtained for this tbs.survreg.mle.\n",sep="")
   }
 }
+
+
+lines.tbs.survreg.mle.best <- function(x, plot.type='surv', lty=NULL, lwd=NULL, col=NULL, ...) {
+  lines.tbs.survreg.mle(x[[x$best.n]], plot.type=plot.type, lty=lty, lwd=lwd, col=col, ...)
+}
+
+lines.tbs.survreg.mle <- function(x, plot.type="surv", lty=NULL, lwd=NULL, col=NULL, ...) {
+  if(! (plot.type %in% c('surv','hazard')))
+    stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard.')
+  if (x$convergence) {
+    h <- 1000
+
+    LB <- 0.0001
+    UB <- max(x$time)*1.1
+    axis.t <- seq(LB,UB,(UB-LB)/(h-1))
+
+    if (attr(x$x,"plot") == 1) {
+      if (is.null(lty))
+        lty <- 1
+      if (is.null(lwd))
+        lwd <- 1
+      if (is.null(col))
+        col <- 1
+
+      if (plot.type=='surv') { ### Survival plot
+        axis.y <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
+      } else { ### Hazard plot
+        axis.y <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
+      }
+      lines(axis.t,axis.y, lty=lty, lwd=lwd, col=col, ...)
+    } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
+      if (is.null(lty)) {
+        lty <- seq(1,length(x$x),1)
+      } else {
+        if (length(lty) != length(x$x)) {
+          stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (is.null(col)) {
+        col <- rep(1,length(x$x))
+      } else {
+        if (length(col) != length(x$x)) {
+          stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (is.null(lwd)) {
+        lwd <- rep(1,length(x$x))
+      } else {
+        if (length(lwd) != length(x$x)) {
+          stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      axis.y <- matrix(NA,length(axis.t),length(x$x))
+      for (i in 1:length(x$x)) {
+        if (attr(x$x,"plot") == 2) {
+          if (plot.type=='surv') { ### Survival plot
+            axis.y[,i] <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta*x$x[i],dist=x$error.dist)
+          } else { ### Hazard plot
+            axis.y[,i] <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta*x$x[i],dist=x$error.dist)
+          }
+        } else {
+          if (plot.type=='surv') { ### Survival plot
+            axis.y[,i] <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,
+                                 beta=(x$beta[1]+x$beta[2]*x$x[i]),dist=x$error.dist)
+          } else { ### Hazard plot
+            axis.y[,i] <- htbs(axis.t,lambda=x$lambda,xi=x$xi,
+                               beta=(x$beta[1]+x$beta[2]*x$x[i]),dist=x$error.dist)
+          }
+        }
+      }
+      for (i in 1:length(x$x)) {
+        lines(axis.t,axis.y[,i],lty=lty[i],lwd=lwd[i],col=col[i], ...)
+      }
+    }
+  } else {
+    cat("Convergence has not been obtained for this tbs.survreg.mle.\n",sep="")
+  }
+}
+
