@@ -289,7 +289,7 @@ summary.tbs.survreg.mle <- function(x, ...) {
   }
 }
 
-plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
+plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim = NULL,
                                  main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
                                  lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error')))
@@ -301,13 +301,10 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
       UB <- max(x$time)*1.1
       xlim <- c(LB,UB)
     } else {
-      LB <- xlim[1]
+      LB <- ifelse(xlim[1] <= 0,0.0001,xlim[1])
       UB <- xlim[2]
     }
     axis.t <- seq(LB,UB,(UB-LB)/(h-1))
-    if (is.null(xlim)) {
-      ylim=c(0,1)
-    }
 
     k=0
     if(plot.type=='surv') {
@@ -333,11 +330,17 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
     if(k > 0) {
       if (attr(x$x,"plot") == 1) {
         if (k == 1) { ### Survival plot
+          if (is.null(ylim)) {
+            ylim=c(0,1)
+          }
           axis.y <- 1-ptbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
-          plot(axis.t,axis.y,type="l",xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
+          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
         } else { ### Hazard plot
           axis.y <- htbs(axis.t,lambda=x$lambda,xi=x$xi,beta=x$beta,dist=x$error.dist)
-          plot(axis.t,axis.y,type="l",xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
+          if (is.null(ylim)) {
+            ylim=c(0,1.1*max(axis.y,na.rm=TRUE))
+          }
+          plot(axis.t,axis.y,type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,...)
         }
       } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
         if (is.null(lty)) {
@@ -378,12 +381,20 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
                                  beta=(x$beta[1]+x$beta[2]*x$x[i]),dist=x$error.dist)
             }
           }
+        }
+        for (i in 1:length(x$x)) {
           if (i == 1) {
             if (k == 1) { ### Survival plot
-              plot(axis.t,axis.y[,i],xlim=xlim,ylim=ylim,ylab=ylab,main=main,
+              if (is.null(ylim)) {
+                ylim=c(0,1)
+              }
+              plot(axis.t,axis.y[,i],type=type,xlim=xlim,ylim=ylim,ylab=ylab,main=main,
                    lty=lty[i],lwd=lwd[i],col=col[i], ...)
             } else {
-              plot(axis.t,axis.y[,i],type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+              if (is.null(ylim)) {
+                ylim=c(0,1.1*max(axis.y,na.rm=TRUE))
+              }
+              plot(axis.t,axis.y[,i],type=type,ylim=ylim,xlim=xlim,lty=lty[i],lwd=lwd[i],col=col[i], ...)
             }
           } else {
             lines(axis.t,axis.y[,i],lty=lty[i],lwd=lwd[i],col=col[i])
@@ -404,14 +415,12 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', xlim=NULL, ylim = NULL,
       lines(seq(-bound,bound,2*bound/(h-1)),
             x$error.dist$d(seq(-bound,bound,2*bound/(h-1)),xi=x$xi))
     }
-    if (FALSE) {
-      if(plot.type=='qqplot') {
-        ## Q-Q plot for error distribution:
-        qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,
-               main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
-        qqline(x$error, distribution = function(p) x$error.dist$q(p, xi=x$xi),
-               prob = c(0.25, 0.75), col = 2, lwd=2)
-      }
+    if(plot.type=='qqplot') {
+      ## Q-Q plot for error distribution:
+      qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,
+             main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
+      qqline(x$error, distribution = function(p) x$error.dist$q(p, xi=x$xi),
+             prob = c(0.25, 0.75), col = 2, lwd=2)
     }
   } else {
     cat("Convergence has not been obtained for this tbs.survreg.mle.\n",sep="")
