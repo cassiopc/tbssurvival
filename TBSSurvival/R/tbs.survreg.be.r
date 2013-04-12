@@ -380,82 +380,102 @@ summary.tbs.survreg.be <- function(x, ...) {
   cat("\n",sep="")
 }
 
-plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
+plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
+                                xlim=NULL, ylim = NULL, main = NULL, xlab = NULL,
+                                ylab = NULL, lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error','auto','ts')))
     stop('Invalid plot type for tbs.survreg.be. Options are surv, hazard, error, auto, ts.')
   h <- 1000
-  if (!exists("xlim")) {
+  if (is.null(xlim)) {
     LB <- 0.0001
     UB <- max(x$time)*1.1
+    xlim <- c(LB,UB)
   } else {
-    LB <- xlim[1]
+    LB <- ifelse(xlim[1] <= 0,0.0001,xlim[1])
     UB <- xlim[2]
   }
   axis.t <- seq(LB,UB,(UB-LB)/(h-1))
 
-  k = 0
+  k=0
   if(plot.type=='surv') {
     k = 1
-    if (!exists("xlab"))
+    if (is.null(xlab))
       xlab <- "time"
-    if (!exists("ylab"))
+    if (is.null(ylab))
       ylab <- "S(t)"
-    if (!exists("main"))
+    if (is.null(main)) {
       main <- "Survival function (BE)"
+    }
   }
   if(plot.type=='hazard') {
     k = 2
-    if (!exists("xlab"))
+    if (is.null(xlab))
       xlab <- "time"
-    if (!exists("ylab"))
+    if (is.null(ylab))
       ylab <- "h(t)"
-    if (!exists("main"))
+    if (is.null(main))
       main <- "Hazard function (BE)"
   }
+
   if(k > 0) {
     if (attr(x$x,"plot") == 1) {
+      if (is.null(lty))
+        lty <- 1
+      if (is.null(lwd))
+        lwd <- 1
+      if (is.null(col))
+        col <- 1
+
       axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
       if (k == 1) { ### Survival plot
+        if (is.null(ylim)) {
+          ylim=c(0,1)
+        }
+
         for (j in 1:length(x$post[,1])) {
           axis.y[,j] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
                                beta=x$post[j,3],dist=x$error.dist)
         }
-        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylim=c(0,1),
-             ylab=ylab,xlab=xlab,main=main, ...)
+        plot(axis.t,apply(axis.y,1,mean),type=type,xlim=xlim,ylim=ylim,xlab=xlab,
+             ylab=ylab,main=main,lwd=lwd,lty=lty,col=col,...)
       } else { ### Hazard plot
         for (j in 1:length(x$post[,1])) {
           axis.y[,j] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
                              beta=x$post[j,3],dist=x$error.dist)
         }
-        plot(axis.t,apply(axis.y,1,mean),type="l",xlim=c(0,UB),ylab=ylab,
-             xlab=xlab,main=main, ...)
+        if (is.null(ylim)) {
+          ylim=c(0,1.1*max(apply(axis.y,1,quantile,probs=0.975),na.rm=TRUE))
+        }
+        plot(axis.t,apply(axis.y,1,mean),type=type,xlim=xlim,ylim=ylim,xlab=xlab,
+             ylab=ylab,main=main,lwd=lwd,lty=lty,col=col,...)
       }
       if (HPD) {
         lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
         lines(axis.t,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
       }
     } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
-      if (!exists("lty")) {
+      if (is.null(lty)) {
         lty <- seq(1,length(x$x),1)
       } else {
         if (length(lty) != length(x$x)) {
           stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
         }
       }
-      if (!is.numeric(col)) {
+      if (is.null(col)) {
         col <- rep(1,length(x$x))
       } else {
         if (length(col) != length(x$x)) {
           stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
         }
       }
-      if (!exists("lwd")) {
+      if (is.null(lwd)) {
         lwd <- rep(1,length(x$x))
       } else {
         if (length(lwd) != length(x$x)) {
           stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
         }
       }
+
       axis.y <- array(NA,c(length(axis.t),length(x$post[,1]),length(x$x)))
       for (i in 1:length(x$x)) {
         if (attr(x$x,"plot") == 2) {
@@ -483,20 +503,32 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
             }
           }
         }
+      }
+      aux.HPD <- matrix(NA,length(axis.t),length(x$x))
+      for (i in 1:length(x$x)) {
+        aux.HPD[,i] <- apply(axis.y[,,i],1,quantile,probs=0.975)
+      }
+      for (i in 1:length(x$x)) {
         if (i == 1) {
           if (k == 1) { ### Survival plot
-            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylim=c(0,1),ylab=ylab,xlab=xlab,main=main,
-                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
-          } else {
-            plot(axis.t,apply(axis.y[,,i],1,mean),xlim=c(0,UB),ylab=ylab,xlab=xlab,main=main,
-                 type="l",lty=lty[i],lwd=lwd[i],col=col[i], ...)
+            if (is.null(ylim)) {
+              ylim=c(0,1)
+            }
+            plot(axis.t,apply(axis.y[,,i],1,mean),type=type,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,
+                 lty=lty[i],lwd=lwd[i],col=col[i], ...)
+          } else { ### Hazard plot
+            if (is.null(ylim)) {
+              ylim=c(0,1.1*max(aux.HPD,na.rm=TRUE))
+            }
+            plot(axis.t,apply(axis.y[,,i],1,mean),type=type,xlab=xlab,ylab=ylab,main=main,
+                 ylim=ylim,xlim=xlim,lty=lty[i],lwd=lwd[i],col=col[i], ...)
           }
         } else {
           lines(axis.t,apply(axis.y[,,i],1,mean),lty=lty[i],lwd=lwd[i],col=col[i])
         }
         if (HPD) {
           lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.025),type="l",col="gray50", ...)
-          lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.975),type="l",col="gray50", ...)
+          lines(axis.t,aux.HPD[,i],type="l",col="gray50", ...)
         }
       }
     }
@@ -571,3 +603,107 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', ...) {
     }
   }
 }
+
+lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', 
+                                 lty = NULL, lwd = NULL, col = NULL, ...) {
+  if(! (plot.type %in% c('surv','hazard')))
+    stop('Invalid plot type for tbs.survreg.be. Options are surv and hazard.')
+  h <- 1000
+
+  LB <- 0.0001
+  UB <- max(x$time)*1.1
+  axis.t <- seq(LB,UB,(UB-LB)/(h-1))
+
+  if (plot.type == "surv") {
+    k <- 1 
+  } else if (plot.type == "hazard") {
+    k <- 2
+  }
+
+  if (attr(x$x,"plot") == 1) {
+    if (is.null(lty))
+      lty <- 1
+    if (is.null(lwd))
+      lwd <- 1
+    if (is.null(col))
+      col <- 1
+
+    axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
+    if (k == 1) { ### Survival plot
+      for (j in 1:length(x$post[,1])) {
+        axis.y[,j] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                             beta=x$post[j,3],dist=x$error.dist)
+      }
+    } else { ### Hazard plot
+      for (j in 1:length(x$post[,1])) {
+        axis.y[,j] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                           beta=x$post[j,3],dist=x$error.dist)
+      }
+    }
+    lines(axis.t,apply(axis.y,1,mean),lwd=lwd,lty=lty,col=col,...)
+    if (HPD) {
+      lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
+      lines(axis.t,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+    }
+  } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
+    if (is.null(lty)) {
+      lty <- seq(1,length(x$x),1)
+    } else {
+      if (length(lty) != length(x$x)) {
+        stop(paste("The 'lty' length must be equal to ",length(x$x),sep=""))
+      }
+    }
+    if (is.null(col)) {
+      col <- rep(1,length(x$x))
+    } else {
+      if (length(col) != length(x$x)) {
+        stop(paste("The 'col' length must be equal to ",length(x$x),sep=""))
+      }
+    }
+    if (is.null(lwd)) {
+      lwd <- rep(1,length(x$x))
+    } else {
+      if (length(lwd) != length(x$x)) {
+        stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
+      }
+    }
+
+    axis.y <- array(NA,c(length(axis.t),length(x$post[,1]),length(x$x)))
+    for (i in 1:length(x$x)) {
+      if (attr(x$x,"plot") == 2) {
+        if (k == 1) { ### Survival plot
+          for (j in 1:length(x$post[,1])) {
+            axis.y[,j,i] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                 beta=x$post[j,3]*x$x[i],dist=x$error.dist)
+          }
+        } else { ### Hazard plot
+          for (j in 1:length(x$post[,1])) {
+            axis.y[,j,i] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                               beta=x$post[j,3]*x$x[i],dist=x$error.dist)
+          }
+        }
+      } else {
+        if (k == 1) { ### Survival plot
+          for (j in 1:length(x$post[,1])) {
+            axis.y[,j,i] <- 1-ptbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                   beta=(x$post[j,3]+x$post[j,4]*x$x[i]),dist=x$error.dist)
+          }
+        } else { ### Hazard plot
+          for (j in 1:length(x$post[,1])) {
+            axis.y[,j,i] <- htbs(axis.t,lambda=x$post[j,1],xi=x$post[j,2],
+                                 beta=(x$post[j,3]+x$post[j,4]*x$x[i]),dist=x$error.dist)
+          }
+        }
+      }
+    }
+    for (i in 1:length(x$x)) {
+      lines(axis.t,apply(axis.y[,,i],1,mean),lty=lty[i],lwd=lwd[i],col=col[i])
+      if (HPD) {
+        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.025),type="l",col="gray50", ...)
+        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.975),type="l",col="gray50", ...)
+      }
+    }
+  }
+}
+
+
