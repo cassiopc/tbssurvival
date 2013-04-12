@@ -41,11 +41,15 @@ s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFG
 plot(s)
 
 b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist=dist.error("norm"),burn=10000,jump=200,scale=0.05)
+b2=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ 1,dist=dist.error("doubexp"),burn=10000,jump=200,scale=0.05)
+plot(b)
+lines(b2,col=c(2,2))
 
 ## with covariate
 cat('Running MLE on colon (from survival package) with covariate=age60\n')
 colon$age60=as.numeric(colon$age>60) #threshold defined from medical papers
 s=tbs.survreg.mle(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE)
+b=tbs.survreg.be(Surv(colon$time,colon$status==1) ~ colon$age60,dist="norm",burn=10000,jump=200,scale=0.05)
 
 ## simple test with the Alloy T7987 data set (available in TBSSurvival)
 data(alloyT7987)
