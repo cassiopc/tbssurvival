@@ -400,6 +400,9 @@
     out$lambda.se <- std.error[1]
     out$xi.se <- std.error[2]
     out$beta.se <- std.error[3:length(std.error)]
+    if(is.nan(sum(std.error))) {
+      warning(paste('tbs.survreg.mle: optimization method',method,'failed to compute standard errors -- possibly it is not in a local optimum'))
+    }
     ## get the log.lik value
     out$log.lik <- est$value
     out$error.dist <- dist
