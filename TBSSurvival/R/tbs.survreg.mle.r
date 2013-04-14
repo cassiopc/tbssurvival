@@ -466,6 +466,9 @@ lines.tbs.survreg.mle.best <- function(x, plot.type='surv', lty=NULL, lwd=NULL, 
 lines.tbs.survreg.mle <- function(x, plot.type="surv", lty=NULL, lwd=NULL, col=NULL, ...) {
   if(! (plot.type %in% c('surv','hazard')))
     stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard.')
+  if (is.null(x$x))
+    stop('Invalid plot type for tbs.survreg.mle. It is not possible to draw a plot for the estimated model.')
+
   if (x$convergence) {
     h <- 1000
 
