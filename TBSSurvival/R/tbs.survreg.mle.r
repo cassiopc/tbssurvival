@@ -311,6 +311,10 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim 
                                  lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error')))
     stop('Invalid plot type for tbs.survreg.mle. Options are surv, hazard, error.')
+
+  if ((is.null(x$x)) && (! (plot.type %in% c('error'))))
+    stop('Invalid plot type for tbs.survreg.mle. It is only possible to use option \'error\' for the estimated model.')
+
   if (x$convergence) {
     h <- 1000
     if (is.null(xlim)) {
