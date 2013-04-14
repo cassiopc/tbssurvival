@@ -313,7 +313,7 @@ summary.tbs.survreg.be <- function(x, ...) {
   aux1  <- nchar(auxt1)
   auxt2 <- sprintf("%.4f",c(x$lambda.sd,x$xi.sd,x$beta.sd))
   aux2  <- nchar(auxt2)
-  if (length(x$beta)) {
+  if (length(x$beta) ==  1) {
     auxt3 <- sprintf("%.4f",c(x$lambda.HPD[1],x$xi.HPD[1],x$beta.HPD[1]))
     aux3  <- nchar(auxt3)
     auxt4 <- sprintf("%.4f",c(x$lambda.HPD[2],x$xi.HPD[2],x$beta.HPD[2]))
@@ -325,7 +325,7 @@ summary.tbs.survreg.be <- function(x, ...) {
     aux4  <- nchar(auxt4)
   }
 
-  text <- c("Estimates","Std. Error","95% HPD CI")
+  text <- c("     Mean"," Std. Dev.","95% HPD CI")
   text2 <- c("  lambda: ","      xi: ")
   if (length(x$beta) == 1) {
     text2 <- c(text2,"    beta: ")
