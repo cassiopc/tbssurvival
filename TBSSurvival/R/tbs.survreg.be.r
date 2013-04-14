@@ -385,6 +385,10 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
                                 ylab = NULL, lty = NULL, lwd = NULL, col = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error','auto','ts')))
     stop('Invalid plot type for tbs.survreg.be. Options are surv, hazard, error, auto, ts.')
+  if ((is.null(x$x)) && (! (plot.type %in% c('error','auto','ts'))))
+    stop('Invalid plot type for tbs.survreg.mle. It is only possible to use the options \'error\',\'auto\' or \'ts\' for the estimated model.')
+
+
   h <- 1000
   if (is.null(xlim)) {
     LB <- 0.0001
@@ -579,6 +583,7 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
 
   if(plot.type=='auto') {
     ## autocorrelation plot
+    par(ask=TRUE)
     acf(x$post[,1],main=expression(lambda))
     acf(x$post[,2],main=expression(xi))
     if (length(x$post[1,]) == 3) {
@@ -588,10 +593,12 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
         acf(x$post[,i],main=bquote(beta[.(i-3)]))
       }
     }
+    par(ask=FALSE)
   }
 
   if(plot.type=='ts') {
     ## time series plot of the MCMC
+    par(ask=TRUE)
     plot(ts(x$post[,1]),ylab=expression(lambda),xlab="i")
     plot(ts(x$post[,2]),ylab=expression(xi),xlab="i")
     if (length(x$post[1,]) == 3) {
@@ -601,6 +608,7 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
         plot(ts(x$post[,i]),ylab=bquote(beta[.(i-3)]),xlab="i")
       }
     }
+    par(ask=FALSE)
   }
 }
 
