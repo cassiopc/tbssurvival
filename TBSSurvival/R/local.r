@@ -335,14 +335,15 @@
           }
         }
         ## if a new best solution was found, update the current one
-        if(is.na(est) || aux$value > est$value) {
+        if(is.na(est) || aux$value > est$value || wasnan) {
           options("warn" = -1)
           aux1 <- try(sqrt(diag(solve(-(aux$hessian)))),silent=TRUE)
           options("warn" = 0)
           std.error <- rep(NaN,nparam)
           if (class(aux1) != "try-error")
             std.error <- aux1
-          if(wasnan || !is.nan(sum(std.error))) {
+          willnan <- is.nan(sum(std.error))
+          if(is.na(est) || (wasnan && !willnan) || (aux$value > est$value && wasnan==willnan)) {
             wasnan = is.nan(sum(std.error))
             est = aux
             inimethod=method
