@@ -65,14 +65,15 @@ tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
 
   out <- NULL
   out$call <- Call
-  if (is.matrix(x)) {
-    out$x <- x[order(time),]
-  } else {
-    out$x <- x[order(time)]
-  }
+### out$x is used for plot... it should not be returned here.
+#  if (is.matrix(x)) {
+#    out$x <- x[order(time),]
+#  } else {
+#    out$x <- x[order(time)]
+#  }
   out$delta <- delta[order(time)]
   out$time  <- time[order(time)]
-  x     <- out$x
+#  x     <- out$x
   delta <- out$delta
   time  <- out$time
 ##  out$time <- time[delta == 1]
@@ -380,14 +381,16 @@ summary.tbs.survreg.be <- function(x, ...) {
   cat("\n",sep="")
 }
 
-plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
+plot.tbs.survreg.be <- function(x, plot.type='surv', HPD=TRUE, HPD.alpha=0.95, type="l",
                                 xlim=NULL, ylim = NULL, main = NULL, xlab = NULL,
-                                ylab = NULL, lty = NULL, lwd = NULL, col = NULL, ...) {
+                                ylab = NULL, lty = NULL, lwd = NULL, col = NULL,
+                                lty.HPD = NULL, lwd.HPD = NULL, col.HPD = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard','error','auto','ts')))
     stop('Invalid plot type for tbs.survreg.be. Options are surv, hazard, error, auto, ts.')
   if ((is.null(x$x)) && (! (plot.type %in% c('error','auto','ts'))))
     stop('Invalid plot type for tbs.survreg.mle. It is only possible to use the options \'error\',\'auto\' or \'ts\' for the estimated model.')
-
+  if ((HPD.alpha >= 1) || (HPD.alpha <= 0))
+    stop('HPD.alpha must be between 0 and 1.')
 
   h <- 1000
   if (is.null(xlim)) {
@@ -448,14 +451,20 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
                              beta=x$post[j,3],dist=x$error.dist)
         }
         if (is.null(ylim)) {
-          ylim=c(0,1.1*max(apply(axis.y,1,quantile,probs=0.975),na.rm=TRUE))
+          ylim=c(0,1.1*max(apply(axis.y,1,quantile,probs=(1-(1-HPD.alpha)/2)),na.rm=TRUE))
         }
         plot(axis.t,apply(axis.y,1,mean),type=type,xlim=xlim,ylim=ylim,xlab=xlab,
              ylab=ylab,main=main,lwd=lwd,lty=lty,col=col,...)
       }
       if (HPD) {
-        lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
-        lines(axis.t,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+        if (is.null(lty.HPD))
+          lty.HPD <- 1
+        if (is.null(lwd.HPD))
+          lwd.HPD <- 1
+        if (is.null(col.HPD))
+          col.HPD <- "gray50"
+        lines(axis.t,apply(axis.y,1,quantile,probs=(1-HPD.alpha)/2),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
+        lines(axis.t,apply(axis.y,1,quantile,probs=1-(1-HPD.alpha)/2),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
       }
     } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
       if (is.null(lty)) {
@@ -510,7 +519,30 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
       }
       aux.HPD <- matrix(NA,length(axis.t),length(x$x))
       for (i in 1:length(x$x)) {
-        aux.HPD[,i] <- apply(axis.y[,,i],1,quantile,probs=0.975)
+        aux.HPD[,i] <- apply(axis.y[,,i],1,quantile,probs=(1-(1-HPD.alpha)/2))
+      }
+      if (HPD) {
+        if (is.null(lty.HPD)) {
+          lty.HPD <- seq(1,length(x$x),1)
+        } else {
+          if (length(lty.HPD) != length(x$x)) {
+            stop(paste("The 'lty.HPD' length must be equal to ",length(x$x),sep=""))
+          }
+        }
+        if (is.null(col.HPD)) {
+          col.HPD <- rep("gray50",length(x$x))
+        } else {
+          if (length(col.HPD) != length(x$x)) {
+            stop(paste("The 'col.HPD' length must be equal to ",length(x$x),sep=""))
+          }
+        }
+        if (is.null(lwd.HPD)) {
+          lwd.HPD <- rep(1,length(x$x))
+        } else {
+          if (length(lwd.HPD) != length(x$x)) {
+            stop(paste("The 'lwd.HPD' length must be equal to ",length(x$x),sep=""))
+          }
+        }
       }
       for (i in 1:length(x$x)) {
         if (i == 1) {
@@ -531,8 +563,8 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
           lines(axis.t,apply(axis.y[,,i],1,mean),lty=lty[i],lwd=lwd[i],col=col[i])
         }
         if (HPD) {
-          lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.025),type="l",col="gray50", ...)
-          lines(axis.t,aux.HPD[,i],type="l",col="gray50", ...)
+          lines(axis.t,apply(axis.y[,,i],1,quantile,probs=(1-HPD.alpha)/2),col=col.HPD[i],lty=lty.HPD[i],lwd=lwd.HPD[i], ...)
+          lines(axis.t,aux.HPD[,i],col=col.HPD[i],lty=lty.HPD[i],lwd=lwd.HPD[i], ...)
         }
       }
     }
@@ -553,10 +585,24 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
     for (j in 1:length(x$post[,1])) {
       axis.y[,j] <- x$error.dist$d(axis.x,xi=x$post[j,2])
     }
-    lines(axis.x,apply(axis.y,1,mean))
+
+    if (is.null(lty))
+      lty <- 1
+    if (is.null(lwd))
+      lwd <- 1
+    if (is.null(col))
+      col <- 1
+    lines(axis.x,apply(axis.y,1,mean),col=col,lty=lty,lwd=lwd, ...)
+
     if (HPD) {
-      lines(axis.x,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
-      lines(axis.x,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+      if (is.null(lty.HPD))
+        lty.HPD <- 1
+      if (is.null(lwd.HPD))
+        lwd.HPD <- 1
+      if (is.null(col.HPD))
+        col.HPD <- "gray50"
+      lines(axis.x,apply(axis.y,1,quantile,probs=(1-HPD.alpha)/2),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
+      lines(axis.x,apply(axis.y,1,quantile,probs=(1-(1-HPD.alpha)/2)),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
     }
   }
   if (FALSE) {
@@ -612,10 +658,16 @@ plot.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', type="l",
   }
 }
 
-lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv', 
-                                 lty = NULL, lwd = NULL, col = NULL, ...) {
+lines.tbs.survreg.be <- function(x, plot.type='surv', HPD=TRUE, HPD.alpha = 0.95,
+                                 lty = NULL, lwd = NULL, col = NULL,
+                                 lty.HPD = NULL, lwd.HPD = NULL, col.HPD = NULL, ...) {
   if(! (plot.type %in% c('surv','hazard')))
     stop('Invalid plot type for tbs.survreg.be. Options are surv and hazard.')
+  if (is.null(x$x))
+    stop('Invalid plot type for tbs.survreg.mle. It is not possible to draw a plot for the estimated model.')
+  if ((HPD.alpha >= 1) || (HPD.alpha <= 0))
+    stop('HPD.alpha must be between 0 and 1.')
+
   h <- 1000
 
   LB <- 0.0001
@@ -636,6 +688,15 @@ lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv',
     if (is.null(col))
       col <- 1
 
+    if (HPD) {
+      if (is.null(lty.HPD))
+        lty.HPD <- 1
+      if (is.null(lwd.HPD))
+        lwd.HPD <- 1
+      if (is.null(col.HPD))
+        col.HPD <- "gray50"
+    }
+
     axis.y <- matrix(NA,length(axis.t),length(x$post[,1]))
     if (k == 1) { ### Survival plot
       for (j in 1:length(x$post[,1])) {
@@ -650,8 +711,8 @@ lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv',
     }
     lines(axis.t,apply(axis.y,1,mean),lwd=lwd,lty=lty,col=col,...)
     if (HPD) {
-      lines(axis.t,apply(axis.y,1,quantile,probs=0.025),type="l",col="gray50", ...)
-      lines(axis.t,apply(axis.y,1,quantile,probs=0.975),type="l",col="gray50", ...)
+      lines(axis.t,apply(axis.y,1,quantile,probs=(1-HPD.alpha)/2),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
+      lines(axis.t,apply(axis.y,1,quantile,probs=(1-(1-HPD.alpha)/2)),col=col.HPD,lty=lty.HPD,lwd=lwd.HPD, ...)
     }
   } else if ((attr(x$x,"plot") == 2) || (attr(x$x,"plot") == 3)) {
     if (is.null(lty)) {
@@ -673,6 +734,30 @@ lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv',
     } else {
       if (length(lwd) != length(x$x)) {
         stop(paste("The 'lwd' length must be equal to ",length(x$x),sep=""))
+      }
+    }
+
+    if (HPD) {
+      if (is.null(lty.HPD)) {
+        lty.HPD <- seq(1,length(x$x),1)
+      } else {
+        if (length(lty.HPD) != length(x$x)) {
+          stop(paste("The 'lty.HPD' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (is.null(col.HPD)) {
+        col.HPD <- rep("gray50",length(x$x))
+      } else {
+        if (length(col.HPD) != length(x$x)) {
+          stop(paste("The 'col.HPD' length must be equal to ",length(x$x),sep=""))
+        }
+      }
+      if (is.null(lwd.HPD)) {
+        lwd.HPD <- rep(1,length(x$x))
+      } else {
+        if (length(lwd.HPD) != length(x$x)) {
+          stop(paste("The 'lwd.HPD' length must be equal to ",length(x$x),sep=""))
+        }
       }
     }
 
@@ -707,8 +792,8 @@ lines.tbs.survreg.be <- function(x, HPD=TRUE, plot.type='surv',
     for (i in 1:length(x$x)) {
       lines(axis.t,apply(axis.y[,,i],1,mean),lty=lty[i],lwd=lwd[i],col=col[i])
       if (HPD) {
-        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.025),type="l",col="gray50", ...)
-        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=0.975),type="l",col="gray50", ...)
+        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=(1-HPD.alpha)/2),col=col.HPD[i],lty=lty.HPD[i],lwd=lwd.HPD[i], ...)
+        lines(axis.t,apply(axis.y[,,i],1,quantile,probs=(1-(1-HPD.alpha)/2)),col=col.HPD[i],lty=lty.HPD[i],lwd=lwd.HPD[i], ...)
       }
     }
   }
