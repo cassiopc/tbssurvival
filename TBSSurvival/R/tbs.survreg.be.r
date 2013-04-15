@@ -65,12 +65,13 @@ tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
 
   out <- NULL
   out$call <- Call
-### out$x is used for plot... it should not be returned here.
-#  if (is.matrix(x)) {
+  if (is.matrix(x)) {
 #    out$x <- x[order(time),]
-#  } else {
+    x <- x[order(time),]
+  } else {
 #    out$x <- x[order(time)]
-#  }
+    x <- x[order(time)]
+  }
   out$delta <- delta[order(time)]
   out$time  <- time[order(time)]
 #  x     <- out$x
@@ -116,7 +117,7 @@ tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
   }
 
   if (is.null(prior.mean)) {
-    prior.mean <- 5
+    prior.mean <- 0
   } else {
     if (!is.vector(prior.mean))
       stop("mean is not a vector/scalar")
@@ -125,7 +126,7 @@ tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
     }
   }
   if (is.null(prior.sd)) {
-    prior.sd <- 5
+    prior.sd <- 100
   } else {
     if (!is.vector(prior.sd))
       stop("sd is not a vector/scalar")
