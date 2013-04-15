@@ -58,8 +58,8 @@
     ## check if the arguments are all ok
     aux <- .test.tbs(lambda,xi,beta,x,time=time,type="d")
     ## .test.tbs may eventually re-cast beta and x, so we update them here
-    beta <- aux$beta
-    x <- aux$x
+#    beta <- aux$beta
+#    x <- aux$x
 
     if (dist$name != "t") {
       ## for any dist not t-student, use a mixture of uniform-exponential with the flat prior
