@@ -82,38 +82,21 @@ alloyT7987$delta <- as.double(alloyT7987$delta)
 # Bayesian estimation with logistic error
 formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
 tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5,
-                         dist=dist.error("logistic"),burn=1000,jump=10,size=1000,scale=0.06)
-# evaluating the estimated survival and HPD
-axis.x <- seq(0.01,300,1)
-aux <- matrix(NA,length(axis.x),length(tbs.be$post[,1]))
-for (j in 1:length(tbs.be$post[,1])) {
-  aux[,j] <- 1-ptbs(axis.x,lambda=tbs.be$post[j,1],xi=tbs.be$post[j,2],
-                    beta=tbs.be$post[j,3],dist="logistic")
-}
-survival <- matrix(NA,length(axis.x),3)
-for (i in 1:length(axis.x)) {
-  survival[i,] <- c(mean(aux[i,]),HPDinterval(as.mcmc(aux[i,]),0.95))
-}
-rm(aux,i,j)
+                         dist=dist.error("logistic"),burn=1000,jump=10,size=500,scale=0.06)
 
 # Kapan-Meier estimator
 km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
 
-plot(km,ylab="",xlab="", xlim=c(min(alloyT7987$time),max(alloyT7987$time)),
-     conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
-t <- seq(min(alloyT7987$time),max(alloyT7987$time),
-         (max(alloyT7987$time)-min(alloyT7987$time)-0.01)/1000)
-title(ylab="R(t)", xlab="t: number of cycles (in thousands)",
-      sub="Alloy - T7987 (cf. Meeker and Escobar (1998), pp. 131)",
-      main="Reliability function (BE)",cex.lab=1.2)
-axis(1,at=c(93,100,150,200,250,300),lwd=2,lwd.ticks=2,pos=0)
-axis(2,lwd=2,lwd.ticks=2,pos=min(alloyT7987$time))
-legend(170,0.95,c("Kaplan-Meier",
-                  expression(textstyle(paste("TBS / ",sep="")) ~ epsilon
-                  ~ textstyle(paste("~",sep="")) ~ Logistic),
-                  "0.95 HPD Interval"),
-       col=c(1,2,2),lty=c(1,1,2),cex=1.1,lwd=c(1,2,2),bg="white")
-lines(axis.x,survival[,1],type="l",lwd=2,col=2,lty=1)
-lines(axis.x,survival[,2],type="l",lwd=2,col=2,lty=2)
-lines(axis.x,survival[,3],type="l",lwd=2,col=2,lty=2)
+# Plot survival function
+plot(tbs.be,lwd=2,HPD=TRUE,HPD.alpha=0.95,col.HPD=2,lty.HPD=1,lwd.HPD=2)
+lines(km)
+
+# Plot survival function
+plot(tbs.be,plot.type="hazard",lwd=2,HPD=TRUE,HPD.alpha=0.95,col.HPD=2,lty.HPD=1,lwd.HPD=2)
+
+# Plot auto-correlation of the posterior sample
+plot(tbs.be,plot.type="auto")
+
+# Plot "time-series" of the posterior sample
+plot(tbs.be,plot.type="ts")
 }
