@@ -5,7 +5,7 @@
 % Distributed under GPL 3 or later
 
 \name{dist.error}
-
+\alias{dist.error}
 %%%
 
 \title{The Wrapper for error distribution functions to use with TBS}

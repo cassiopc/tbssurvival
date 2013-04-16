@@ -16,7 +16,7 @@
 }
 \usage{
  tbs.survreg.mle(formula,dist=dist.error("all"),
-                 method=c("BFGS","Rsolnp","Nelder-Mead","CG","SANN"),
+                 method=c("Nelder-Mead", "BFGS", "Rsolnp", "SANN", "CG"),
                  verbose=FALSE,nstart=10,max.time=-1,seed=1234,gradient=FALSE)
 }
 \arguments{
@@ -67,7 +67,7 @@
   Meeker, W. and Escobar, L. (1998) \emph{Statistical Methods for Reliability Data}. Willey, ISBN 0-471-14328-6.
 }
 \seealso{
-  \code{\link{tbs.survreg.be},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
+  \code{\link{dist.error},\link{tbs.survreg.be},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
 # Alloy - T7987: data extracted from Meeker and Escobar (1998), pp. 131.

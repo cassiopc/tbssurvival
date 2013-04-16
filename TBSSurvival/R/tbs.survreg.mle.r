@@ -168,11 +168,12 @@ print.tbs.survreg.mle <- function(x, ...) {
   }
 }
 
-summary.tbs.survreg.mle.best <- function(x, ...) {
-  summary.tbs.survreg.mle(x[[x$best.n]], ...)
+summary.tbs.survreg.mle.best <- function(object, ...) {
+  summary.tbs.survreg.mle(object[[object$best.n]], ...)
 }
 
-summary.tbs.survreg.mle <- function(x, ...) {
+summary.tbs.survreg.mle <- function(object, ...) {
+  x=object
   if (x$convergence) {
     if (x$error.dist$name == "norm")
       text.dist <- "normal"
@@ -451,7 +452,7 @@ plot.tbs.survreg.mle <- function(x, plot.type='surv', type="l", xlim=NULL, ylim 
       qqplot(x$error.dist$q(ppoints(length(x$error)), xi=x$xi),x$error,
              main = expression("Q-Q plot for error"),xlab="Theoretical Quantiles",ylab="Sample Quantiles")
       qqline(x$error, distribution = function(p) x$error.dist$q(p, xi=x$xi),
-             prob = c(0.25, 0.75), col = 2, lwd=2)
+             probs = c(0.25, 0.75), col = 2, lwd=2)
     }
   } else {
     cat("Convergence has not been obtained for this tbs.survreg.mle.\n",sep="")

@@ -471,7 +471,7 @@
         surv = -x*exp(-(x^2)/(2*xi))/sqrt(((2*xi)^3)*pi)),
       x  = switch(type,
         dens = -x*exp(-(x^2)/(2*xi))/sqrt(2*pi*xi^3),
-        surv = -dnorm(x,0,sqrt(xi)))),
+        surv = -dist$d(x,xi))),
    t = switch(var,
       xi = switch(type,
         dens = ((((x^2)/xi+1)^((-xi-1)/2)*
@@ -483,21 +483,21 @@
                 -f21hyper(3/2,(xi+1)/2+1,5/2,-(x^2)/xi)*(x^3)*(xi+1)*gamma((xi+1)/2)/(6*sqrt(pi*xi^5)*gamma(xi/2)))),
       x  = switch(type,
         dens = x*(((x^2)/xi+1)^((-xi-1)/2-1))*(-xi-1)*gamma((xi+1)/2)/(sqrt(pi*xi^3)*gamma(xi/2)),
-        surv = -dt(x,df=xi))),
+        surv = -dist$d(x,xi))),
     cauchy = switch(var,
       xi = switch(type,
         dens = ((2*x^2)/(((x^2)/(xi^2)+1)*(xi^2))-1)/(pi*((x^2)/(xi^2)+1)*(xi^2)),
         surv = x/(pi*((x^2)/(xi^2)+1)*(xi^2))),
       x  = switch(type,
         dens = -2*x/(pi*(((x^2)/(xi^2)+1)^2)*xi^3),
-        surv = -dcauchy(x,location=0,scale=xi))),
+        surv = -dist$d(x,xi))),
     doubexp = switch(var,
       xi = switch(type,
         dens = (abs(x)/xi-1)*exp(-abs(x)/xi)/(2*xi^2),
         surv = (x/2)*exp(-abs(x)/xi)/(xi^2)),
       x  = switch(type,
         dens = -x*exp(-abs(x)/xi)/(2*abs(x)*xi^2),
-        surv = -ddoubexp(x,b=xi))),
+        surv = -dist$d(x,xi))),
     logistic = switch(var,
       xi = switch(type,
         dens = (2*x*exp(2*x/xi)/((xi^3)*(exp(x/xi)+1)^3)-exp(x/xi)/((xi^2)*(exp(x/xi)+1)^2)
@@ -505,7 +505,7 @@
         surv = -x*exp(-x/xi)/((xi^2)*(exp(-x/xi)+1)^2)),
       x  = switch(type,
         dens = exp(x/xi)/((xi^2)*(exp(x/xi)+1)^2)-2*exp(2*x/xi)/((xi^2)*(exp(x/xi)+1)^3),
-        surv = -dlogis(x,location=0,scale=xi))))
+        surv = -dist$d(x,xi))))
 }
 
 .deriv.logL.tbs <- function(t, eta, lambda, xi, dist, type, var) {

@@ -48,6 +48,9 @@
      function, `qtbs' gives the quantile function, `rtbs'
      generates random deviates, `htbs' gives the hazard function.
 }
+\seealso{
+\code{\link{dist.error}}
+}
 \examples{
   ptbs(1,lambda=2,xi=1,beta=1,dist=dist.error("norm"))
 }

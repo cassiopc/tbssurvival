@@ -295,7 +295,8 @@ print.tbs.survreg.be <- function(x, ...) {
   cat("\n",sep="")
 }
 
-summary.tbs.survreg.be <- function(x, ...) {
+summary.tbs.survreg.be <- function(object, ...) {
+  x=object
   if (x$error.dist$name == "norm")
     text.dist <- "normal"
   if (x$error.dist$name == "t")
@@ -625,7 +626,7 @@ plot.tbs.survreg.be <- function(x, plot.type='surv', HPD=TRUE, HPD.alpha=0.95, t
                                      aux <- Vectorize(fn.aux,"p")
                                      return(aux(p))
                                    },
-           prob = c(0.25, 0.75), col = 2, lwd=2)
+           probs = c(0.25, 0.75), col = 2, lwd=2)
   }
 
   if(plot.type=='auto') {

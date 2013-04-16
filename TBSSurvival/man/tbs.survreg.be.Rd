@@ -17,7 +17,7 @@
   done by Metropolis-Hasting (using the function `metrop' availible with the package `mcmc').
 }
 \usage{
-  tbs.survreg.be(formula, dist = "norm",  max.time = -1, guess.beta = NULL, guess.lambda = 1,
+  tbs.survreg.be(formula, dist=dist.error("norm"),max.time = -1, guess.beta = NULL, guess.lambda = 1,
                  guess.xi = 1, burn = 1000, jump = 2, size = 500, scale = 0.1, 
                  prior.mean = NULL, prior.sd = NULL, seed = 1234)
 }
@@ -68,7 +68,7 @@
   Meeker, W. and Escobar, L. (1998) \emph{Statistical Methods for Reliability Data}. Willey, ISBN 0-471-14328-6.
 }
 \seealso{
-  \code{\link{tbs.survreg.mle},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
+  \code{\link{dist.error},\link{tbs.survreg.mle},\link{dtbs},\link{ptbs},\link{qtbs},\link{rtbs}}.
 }
 \examples{
 # set.seed is used to produce the same results all times.

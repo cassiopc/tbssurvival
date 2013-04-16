@@ -147,7 +147,8 @@ you have not yet done so, the first thing to do before using the functions is to
 install and load the library.
 
 <<tbsinst,eval=FALSE>>=
-install.packages("TBSSurvival_VERSION.tar.gz",repos=NULL,type="source") ## from local file
+install.packages("TBSSurvival_VERSION.tar.gz",
+                 repos=NULL,type="source") ## from local file
 install.packages("TBSSurvival")  ## or from CRAN
 @ 
 <<<tbs>>=
@@ -362,8 +363,10 @@ the 95\% credible interval of High Posterior Density of the reliability function
 The result is presented in the Figure \ref{figtbsbe}.
 
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
-plot(tbs.be,ylab="R(t)",xlab="t: number of cycles (in thousands)",
-     main="Reliability function (BE)",lwd=2,lty=1,col=2,lwd.HPD=2,lty.HPD=2,col.HPD=2)
+plot(tbs.be,ylab="R(t)",
+     xlab="t: number of cycles (in thousands)",
+     main="Reliability function (BE)",
+     lwd=2,lty=1,col=2,lwd.HPD=2,lty.HPD=2,col.HPD=2)
 lines(km)
 @
 
