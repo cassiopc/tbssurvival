@@ -394,9 +394,9 @@ lines(tbs.be$time,tbs.be$survival[,8],type="l",lwd=2,col=2,
 
 \section{Remarks}
 
-This ``manual'' describes the basis of the TBSSurvival package, which is mainly
-centered around the estimation methods. We invite the user to the functions'
-help pages (available with the package) and the technical paper mentioned in the
-beginning of this document.
+This ``manual'' describes the basics of the TBSSurvival package, which is currently
+developed around the estimation methods. We invite the user to the functions'
+help pages (available with the package) and to the technical paper mentioned in the
+beginning of this document for further details.
 
 \end{document}
