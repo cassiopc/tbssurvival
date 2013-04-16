@@ -303,20 +303,10 @@ The result is presented in the Figure \ref{figtbsmle}.
 km <- survfit(formula)
 @
 <<label=mlekm,fig=TRUE,height=5,width=5,include=FALSE>>=
-plot(km,ylab="R(t)", xlab="t: number of cycles (in thousands)",
-     main="Reliability function (MLE)", conf.int=FALSE, lty=1, 
-     lwd=1, xlim=c(min(data[,1]),max(data[,1])))
-t <- seq(min(data[,1]),max(data[,1]),
-         (max(data[,1])-min(data[,1])-0.01)/1000)
-legend(2.6,0.2,
-   c("Kaplan-Meier",
-     expression(textstyle(paste("TBS / ",sep="")) ~ epsilon
-         ~ textstyle(paste("~",sep="")) ~ Norm)),
-   col=c(1,2),lty=c(1,1),cex=1.1,lwd=c(1,2),bg="white")
-lines(t,1-ptbs(t, lambda=tbs.mle$par[1], xi=tbs.mle$par[2],
-               beta=tbs.mle$par[3], 
-               dist=tbs.mle$error.dist), type="l",
-      lwd=2, col=2, lty=1)
+plot(tbs.mle,lwd=2,col="gray20",ylab="R(t)",
+     xlab="t: number of cycles (in thousands)",
+     main="Reliability function (MLE)",cex.lab=1.2)
+lines(km)
 @
 
 \begin{figure}[ht!]
@@ -374,40 +364,9 @@ the 95\% credible interval of High Posterior Density of the reliability function
 The result is presented in the Figure \ref{figtbsbe}.
 
 <<label=bekm,fig=TRUE,height=5,width=5,include=FALSE>>=
-aux.survival <- matrix(0,length(tbs.be$time),1000)
-for (j in 1:1000) {
-  aux.survival[,j] <- 
-    c(1-ptbs(tbs.be$time,
-             lambda=tbs.be$post[j,1],
-             xi=tbs.be$post[j,2],
-             beta=tbs.be$post[j,3:length(tbs.be$post[1,])],
-             x=tbs.be$x,dist="norm"))
-}
-survival <- matrix(0,length(tbs.be$time),8)
-for (i in 1:length(tbs.be$time)) {
-  survival[i,] <- 
-    c(summary(aux.survival[i,]),
-      HPDinterval(as.mcmc(aux.survival[i,]),0.95))
-}
-tbs.be$survival <- survival
-
-plot(km,ylab="R(t)", 
-     xlab="t: number of cycles (in thousands)",
-     main="Reliability function (BE)", conf.int=FALSE, 
-     lty=1, lwd=1, xlim=c(min(data[,1]),max(data[,1])))
-legend(2.6,0.3,
-  c("Kaplan-Meier",
-    expression(textstyle(paste("TBS / ",sep="")) ~ epsilon
-        ~ textstyle(paste("~",sep="")) ~ Logistic),
-    "95% HPD Interval"),
-  col=c(1,2,2),lty=c(1,1,2),cex=1.1,lwd=c(1,2,2),
-  bg="white")
-lines(tbs.be$time,tbs.be$survival[,3],type="l",lwd=2,col=2,
-      lty=1)
-lines(tbs.be$time,tbs.be$survival[,7],type="l",lwd=2,col=2,
-      lty=2)
-lines(tbs.be$time,tbs.be$survival[,8],type="l",lwd=2,col=2,
-      lty=2)
+plot(tbs.be,ylab="R(t)",xlab="t: number of cycles (in thousands)",
+     main="Reliability function (BE)",lwd=2,lty=1,col=2,lwd.HPD=2,lty.HPD=2,col.HPD=2)
+lines(km)
 @
 
 \begin{figure}[ht!]
