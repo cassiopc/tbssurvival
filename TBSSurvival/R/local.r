@@ -26,7 +26,7 @@
 ## on attach, just print the version number of the package
 .onAttach <- function(lib,pkg)
 {
-  packageStartupMessage("TBSSurvival 1.0 loaded\n")
+  packageStartupMessage("TBSSurvival 1.1 loaded\n")
 }
 
 ##  Density for mixture of uniform-exponential. This density is use as prior for TBS model, has between (a,b)

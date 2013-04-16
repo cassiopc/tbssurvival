@@ -298,11 +298,9 @@ tbs.mle
 Here, we compare the TBS model with the non-parametric Kaplan-Meier estimator.
 The result is presented in the Figure \ref{figtbsmle}.
 
-<<mlekm>>=
+<<label=mlekm,fig=TRUE,height=5,width=5,include=FALSE>>=
 # Kaplan-Meier estimation
 km <- survfit(formula)
-@
-<<label=mlekm,fig=TRUE,height=5,width=5,include=FALSE>>=
 plot(tbs.mle,lwd=2,col="gray20",ylab="R(t)",
      xlab="t: number of cycles (in thousands)",
      main="Reliability function (MLE)",cex.lab=1.2)
