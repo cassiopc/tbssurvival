@@ -1,1 +1,16 @@
+S3method(print, tbs.survreg.mle)
+S3method(plot, tbs.survreg.mle)
+S3method(summary, tbs.survreg.mle)
+S3method(lines, tbs.survreg.mle)
+
+S3method(print, tbs.survreg.mle.best)
+S3method(plot, tbs.survreg.mle.best)
+S3method(summary, tbs.survreg.mle.best)
+S3method(lines, tbs.survreg.mle.best)
+
+S3method(print, tbs.survreg.be)
+S3method(plot, tbs.survreg.be)
+S3method(summary, tbs.survreg.be)
+S3method(lines, tbs.survreg.be)
+
 export(dtbs,ptbs,qtbs,rtbs,htbs,dist.error,tbs.survreg.mle,tbs.survreg.be)
