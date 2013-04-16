@@ -82,22 +82,12 @@ tbs.mle <- tbs.survreg.mle(formula,dist=dist.error("logistic"),method="Nelder-Me
 # Kaplan-Meier estimation
 km <- survfit(formula)
 
-plot(km,ylab="",xlab="",xlim=c(min(alloyT7987$time),max(alloyT7987$time)),
-     conf.int=FALSE,axes=FALSE,lty=1,lwd=1)
-t <- seq(min(alloyT7987$time),max(alloyT7987$time),
-         (max(alloyT7987$time)-min(alloyT7987$time)-0.01)/1000)
-title(ylab="R(t)",xlab="t: number of cycles (in thousands)",
-      main="Reliability function (MLE)",
-      sub="Alloy - T7987 (cf. Meeker and Escobar (1998), pp. 131)",
-      cex.lab=1.2)
-axis(1,at=c(93,100,150,200,250,300),lwd=1,lwd.ticks=1,pos=0)
-axis(2,lwd=1,lwd.ticks=1,pos=min(alloyT7987$time))
-legend(200,0.95,c("Kaplan-Meier",
-                  expression(textstyle(paste("TBS / ",sep="")) ~ epsilon
-                             ~ textstyle(paste("~",sep="")) ~ Logistic)),
-       col=c(1,2),lty=c(1,1),cex=1.1,lwd=c(1,2),bg="white")
-lines(t,1-ptbs(t,lambda=tbs.mle$par[1],xi=tbs.mle$par[2],
-               beta=tbs.mle$par[3],dist=tbs.mle$error.dist),type="l",
-               lwd=2,col=2,lty=1)
+# Plot survival function
+plot(tbs.mle)
+lines(km)
+
+# Plot hazard function
+plot(tbs.mle, plot.type="hazard")
+
 }
 
