@@ -49,5 +49,5 @@
      generates random deviates, `htbs' gives the hazard function.
 }
 \examples{
-  ptbs(1,lambda=2,xi=1,beta=1,dist="norm")
+  ptbs(1,lambda=2,xi=1,beta=1,dist=dist.error("norm"))
 }

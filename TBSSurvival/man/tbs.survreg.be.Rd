@@ -9,7 +9,7 @@
 %%%
 \alias{tbs.survreg.be}
 
-\title{Bayesian Estimation of the TBS Model for Failure Data}
+\title{Bayesian Estimation of the TBS Model for Survival Data}
 \description{
   This function performs the Bayesian estimation of the Transform-Both-Sides (TBS) model. The priors for 
   the parameters `lambda' and `xi' are uniform-exponential mixtures and, if not 
