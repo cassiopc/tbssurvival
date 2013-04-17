@@ -99,7 +99,7 @@ print.tbs.survreg.mle.best <- function(x, ...) {
 }
 
 print.tbs.survreg.mle <- function(x, ...) {
-  print(x$call)
+#  print(x$call)
   if (x$convergence) {
     if (x$error.dist$name == "norm")
       text.dist <- "normal"
