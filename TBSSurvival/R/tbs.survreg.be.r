@@ -232,7 +232,7 @@ tbs.survreg.be <- function(formula,dist=dist.error("norm"),max.time=-1,
 }
 
 print.tbs.survreg.be <- function(x, ...) {
-  print(x$call)
+#  print(x$call)
   if (x$error.dist$name == "norm")
     text.dist <- "normal"
   if (x$error.dist$name == "t")
