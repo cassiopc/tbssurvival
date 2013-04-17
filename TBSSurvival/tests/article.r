@@ -26,7 +26,7 @@ library("TBSSurvival")
 ## AND INSTALL IT USING:
 ## R CMD install TBSSurvival_version.tar.gz
 ## OR INSIDE R:
-## install.packages(""TBSSurvival_version.tar.gz",repos=NULL,type="source")
+## install.packages("TBSSurvival_version.tar.gz",repos=NULL,type="source")
 ##
 
 ## To perform convergence analysis of BE set flag.convergence "TRUE".
