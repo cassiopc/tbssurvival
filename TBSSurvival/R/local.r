@@ -160,7 +160,7 @@
 ## max.time (in minutes) to run the optimization
 ## method has to be one of the available in the function optim or "Rsolnp"
 ## dist has to be one of those available in the dist.error function (see file tbs.r)
-## NOTICE: this function uses evalWithTimeout from the R.utils package. We have experienced some versions of R.utils
+## NOTICE: this function uses withTimeout from the R.utils package. We have experienced some versions of R.utils
 ##         which do not have this function (e.g. some versions installed with apt-get in ubuntu). In this case,
 ##         one has to install the CRAN version of R.utils
 .tbs.survreg <- function(formula,dist=dist.error("norm"),method="BFGS",guess=NULL,nstart=10,verbose=FALSE,max.time=-1,gradient=TRUE) {
@@ -225,7 +225,7 @@
       UB[2] = 1000
       if(verbose) cat('RSOLNP: ')
       for(itk in 1:3) {
-        ans = try(evalWithTimeout(gosolnp(pars = NULL, fixed = NULL,
+        ans = try(withTimeout(gosolnp(pars = NULL, fixed = NULL,
           fun = function(pars, n) { -.lik.tbs(pars,time=time,delta=delta,x=x,dist=dist,notinf=TRUE) },
         LB = LB, UB = UB, control = list(outer.iter = 200, trace = 0, tol=1e-4, delta=1e-6),
         distr = rep(1, length(LB)), distr.opt = list(), n.restarts = nstart, n.sim=3000, rseed = runif(n=1,min=1,max=10000000), n = nparam),
@@ -314,13 +314,13 @@
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
-      aux <- try(evalWithTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
+      aux <- try(withTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
                                        method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
 ##        print(paste('aux$value',aux$value))
         if((inimethod=="SANN") || (aux$convergence != 0)) {
           for(itx in 1:10) {
-            aux1 <- try(evalWithTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
+            aux1 <- try(withTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
                                               method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
             ##              print(paste('aux1$value',aux1$value))
             if (class(aux1) != "try-error") {
