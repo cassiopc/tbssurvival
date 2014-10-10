@@ -17,9 +17,9 @@
   done by Metropolis-Hasting (using the function `metrop' availible with the package `mcmc').
 }
 \usage{
-  tbs.survreg.be(formula, dist=dist.error("norm"),max.time = -1, guess.beta = NULL, guess.lambda = 1,
-                 guess.xi = 1, burn = 1000, jump = 2, size = 500, scale = 0.1, 
-                 prior.mean = NULL, prior.sd = NULL, seed = 1234)
+  tbs.survreg.be(formula, dist=dist.error("norm"),max.time = -1, guess.beta = NULL, 
+                 guess.lambda = 1, guess.xi = 1, burn = 1000, jump = 2, size = 500, 
+                 scale = 0.1, prior.mean = NULL, prior.sd = NULL, seed = 1234)
 }
 \arguments{
   \item{formula}{A formula specification containing a \link{Surv} model with right-censored (or no censored) data as in the package survival.}
