@@ -26,7 +26,7 @@
 ## on attach, just print the version number of the package
 .onAttach <- function(lib,pkg)
 {
-  packageStartupMessage("TBSSurvival 1.1 loaded\n")
+  packageStartupMessage("TBSSurvival 1.2 loaded\n")
 }
 
 ##  Density for mixture of uniform-exponential. This density is use as prior for TBS model, has between (a,b)
@@ -209,11 +209,6 @@
     stop("Number of parameters in the formula and length of the initial guess do not match")
 
   if(method=="Rsolnp") {
-    if(require("Rsolnp",quietly=TRUE)==FALSE) {
-      out$method <- "Rsolnp: not installed"
-      out$convergence <- FALSE
-      return(out)
-    } else {
       out$method <- method
       ## Rsolnp needs some bounds for the unknowns. We arbitrarily define them to be between -100 and 100.
       LB = rep(-100,nparam)
@@ -295,7 +290,6 @@
         cat(paste(method,": It was not possible to find a feasible solution\n"))
       }
       return(out)
-    }
   }
 
   ## i will count the number of feasible guesses already used
@@ -310,19 +304,19 @@
   ## we also control the maximum amount of time this method can keep looking for better solutions
   inilooptime=.gettime()
   while(.gettime() < inilooptime + max.time) {
-    valik=.lik.tbs(guess,time=time,delta=delta,x=x,dist=dist)
+      valik=.lik.tbs(guess,time=time,delta=delta,x=x,dist=dist)
     ## check if the guess evaluates to -inf, in this case it is not worth to spend time in the optim, unless
     ## we have not found any feasible point yet. In this case, better try it...
     if(!is.na(valik) && (valik>-Inf || is.na(est))) {
       aux <- try(withTimeout(optim(guess, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
-                                       method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+                                   method=inimethod, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
       if (class(aux) != "try-error") {
-##        print(paste('aux$value',aux$value))
+##              print(paste('aux$value',aux$value))
         if((inimethod=="SANN") || (aux$convergence != 0)) {
           for(itx in 1:10) {
             aux1 <- try(withTimeout(optim(aux$par, fn=.lik.tbs, gr=grad, time=time, delta=delta, dist=dist, x=x, notinf=FALSE,
-                                              method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
-            ##              print(paste('aux1$value',aux1$value))
+                                          method=method, control=list(fnscale=-1), hessian=TRUE),timeout=max.time*60,onTimeout="error"),silent=TRUE)
+##                print(paste('aux1$value',aux1$value))
             if (class(aux1) != "try-error") {
               if (aux1$value < aux$value + 0.0001) {
                 ## 0.0001 is only for numerical reasons. Note that 0.0001 in the log value is anyway very very small...

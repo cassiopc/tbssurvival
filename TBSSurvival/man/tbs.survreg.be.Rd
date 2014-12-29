@@ -80,12 +80,12 @@ alloyT7987$time  <- as.double(alloyT7987$time)
 alloyT7987$delta <- as.double(alloyT7987$delta)
 
 # Bayesian estimation with logistic error
-formula <- Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
+formula <- survival::Surv(alloyT7987$time,alloyT7987$delta == 1) ~ 1
 tbs.be <- tbs.survreg.be(formula,guess.lambda=1,guess.xi=1,guess.beta=5,
                          dist=dist.error("logistic"),burn=1000,jump=10,size=500,scale=0.06)
 
 # Kapan-Meier estimator
-km <- survfit(formula = Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
+km <- survival::survfit(formula = survival::Surv(alloyT7987$time, alloyT7987$delta == 1) ~ 1)
 
 # Plot survival function
 plot(tbs.be,lwd=2,HPD=TRUE,HPD.alpha=0.95,col.HPD=2,lty.HPD=1,lwd.HPD=2)
