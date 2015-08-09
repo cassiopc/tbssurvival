@@ -1,0 +1,1 @@
+This R package implements a median regression model based in a transformation in both sides of the model. Its main aim is the survival analysis with right-censored data and covariates.
