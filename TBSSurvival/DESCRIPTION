@@ -1,6 +1,6 @@
 Package: TBSSurvival
 Version: 1.3
-Date: 2016-12-31
+Date: 2017-01-05
 Title: Survival Analysis using a Transform-Both-Sides Model
 Author: Adriano Polpo <polpo@ufscar.br>, Cassio de Campos <cassiopc@acm.org>, D. Sinha <sinhad@stat.fsu.edu>, Stuart Lipsitz <slipsitz@partners.org>, Jianchang Lin <jlin@stat.fsu.edu>
 Maintainer: Cassio de Campos <cassiopc@acm.org>
