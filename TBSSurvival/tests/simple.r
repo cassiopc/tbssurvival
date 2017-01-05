@@ -85,10 +85,10 @@ set.seed(1)
 ####################
 ## simple test with the GBSG2 (German Breast Cancer Group 2) data set from the ipred package
 ## SLOW ON CRAN
-library(ipred)
-data(GBSG2)
-cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
-s=tbs.survreg.mle(survival::Surv(GBSG2$time,GBSG2$cens==1) ~ 1,verbose=TRUE) ## as optim method not given, it tries all methods
+## library(ipred)
+## data(GBSG2)
+## cat('Running MLE on GBSG2 (from ipred package) without covariates\n')
+## s=tbs.survreg.mle(survival::Surv(GBSG2$time,GBSG2$cens==1) ~ 1,verbose=TRUE) ## as optim method not given, it tries all methods
 ## plot(s)
 ## lines(s$cauchy,col=2)
 ## lines(s$t,col=3)
@@ -99,10 +99,10 @@ s=tbs.survreg.mle(survival::Surv(GBSG2$time,GBSG2$cens==1) ~ 1,verbose=TRUE) ## 
 ## ####################
 ## test with the colon data set from the survival package
 ## SLOW ON CRAN
-## library(survival)
-## data(colon)
-## cat('Running MLE on colon (from survival package) without covariates\n')
-## s=tbs.survreg.mle(survival::Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE,gradient=FALSE)
+library(survival)
+data(colon)
+cat('Running MLE on colon (from survival package) without covariates\n')
+s=tbs.survreg.mle(survival::Surv(colon$time,colon$status==1) ~ 1,dist="norm",method=c("BFGS","Nelder-Mead"),verbose=TRUE,gradient=FALSE)
 ## plot(s)
 
 ## b=tbs.survreg.be(survival::Surv(colon$time,colon$status==1) ~ 1,dist=dist.error("norm"),burn=10000,jump=200,scale=0.05)
